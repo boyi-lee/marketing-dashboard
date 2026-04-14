@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emers — Ad & Revenue Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --ink:#1a1a18;--ink2:#56564f;--ink3:#96968e;--ink4:#c4c4ba;
+  --paper:#faf9f6;--paper2:#f3f2ee;--paper3:#eceae3;
+  --rule:#e4e2da;--rule2:#ceccc4;
+  --accent:#1e4d35;--accent2:#2d6b4a;--accent-l:#eef4f0;--accent-m:#4a9068;
+  --ok:#1b6040;--ok-bg:#e7f4ed;
+  --warn:#7a4d00;--warn-bg:#fdf2df;
+  --red:#9b2412;--red-bg:#fcecea;
+  --r:6px;--r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;min-height:100vh}
+
+/* ── Tooltip ── */
+[data-tip]{position:relative;cursor:help}
+[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:11px;font-weight:400;padding:5px 9px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;max-width:220px;white-space:normal;text-align:center;line-height:1.4}
+[data-tip]:hover::after{opacity:1}
+
+header{background:var(--paper);border-bottom:1px solid var(--rule);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;gap:12px}
+.wm{display:flex;align-items:baseline;gap:9px}
+.wm-n{font-size:16px;font-weight:500;letter-spacing:-.4px}
+.wm-d{color:var(--rule2);font-weight:300}
+.wm-s{font-size:11px;color:var(--ink3);font-style:italic;font-weight:300}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--accent-m);animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.2}}
+.sts{font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace}
+.btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 14px;border-radius:var(--r);border:1px solid var(--rule2);background:transparent;color:var(--ink2);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--paper2);color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:var(--accent2)}
+
+#sbar{display:none;padding:7px 28px;font-size:12px;align-items:center;gap:8px}
+#sbar.loading{display:flex;background:var(--accent-l);color:var(--accent)}
+#sbar.error{display:flex;background:var(--red-bg);color:var(--red)}
+#sbar.ok{display:flex;background:var(--ok-bg);color:var(--ok)}
+
+.ctrlbar{background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cl{font-size:10px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.chip{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--rule);background:transparent;color:var(--ink3);cursor:pointer;transition:all .12s;white-space:nowrap}
+.chip:hover{color:var(--ink2);border-color:var(--rule2)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.cdiv{width:1px;height:20px;background:var(--rule);flex-shrink:0}
+.custom-range{display:none;align-items:center;gap:6px}
+.custom-range.show{display:flex}
+.custom-range input{font-family:'DM Sans',sans-serif;font-size:12px;background:var(--paper2);border:1px solid var(--rule2);color:var(--ink);border-radius:var(--r);padding:4px 9px;outline:none}
+.custom-range input:focus{border-color:var(--accent)}
+.cnote{font-size:10px;color:var(--ink4);font-style:italic}
+
+main{padding:24px 28px;max-width:1480px}
+.sec{display:flex;align-items:center;gap:14px;margin:24px 0 12px}
+.sec:first-child{margin-top:0}
+.sec-n{font-size:10px;font-weight:500;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.sec-r{flex:1;height:1px;background:var(--rule)}
+
+/* ROI HERO */
+.roi-hero{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r2);padding:20px 28px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.roi-hero-left{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.roi-big{font-size:52px;font-weight:300;letter-spacing:-2px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.roi-big.warn{color:var(--warn)}
+.roi-big.bad{color:var(--red)}
+.roi-label{font-size:11px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);align-self:flex-end;padding-bottom:8px}
+.roi-meta{display:flex;flex-direction:column;gap:4px;align-self:flex-end;padding-bottom:6px}
+.roi-meta span{font-size:12px;color:var(--ink2)}
+.roi-meta strong{color:var(--ink);font-weight:500}
+.roi-right{display:flex;gap:16px;flex-wrap:wrap}
+.roi-mini{display:flex;flex-direction:column;gap:3px;min-width:100px}
+.roi-mini-label{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--ink3)}
+.roi-mini-val{font-size:20px;font-weight:300;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+
+/* KPI TIERS */
+.tier1{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden;margin-bottom:1px}
+.tier2{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden;margin-bottom:1px}
+.tier3{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden}
+.kcard{background:var(--paper);padding:16px 18px;transition:background .12s}
+.kcard:hover{background:var(--paper2)}
+.kl{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.kv{font-size:22px;font-weight:300;letter-spacing:-.8px;line-height:1;margin-bottom:5px;font-variant-numeric:tabular-nums}
+.kv.ac{color:var(--accent);font-weight:400}
+.kv.rd{color:var(--red)}
+.ks{font-size:11px;color:var(--ink3)}
+.ks .up{color:var(--ok)}.ks .dn{color:var(--red)}
+
+/* CHART GRID */
+.row2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.row2b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r2);padding:18px 20px}
+.ct{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ct-n{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3)}
+.ct-b{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+.ct-b.g{background:var(--ok-bg);color:var(--ok)}
+.ct-b.n{background:var(--paper3);color:var(--ink2)}
+.cw{position:relative;width:100%}
+.legr{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ROI BARS */
+.roi-list{display:flex;flex-direction:column;gap:7px}
+.roi-row{display:grid;grid-template-columns:72px 1fr 52px;align-items:center;gap:8px}
+.roi-b{font-size:11px;color:var(--ink3);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roi-track{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.roi-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.roi-v{font-size:12px;font-weight:500;text-align:right;font-family:'DM Mono',monospace}
+
+/* SUMMARY ROW */
+.sum-row{display:flex;gap:16px;padding:10px 0 4px;border-top:1px solid var(--rule);margin-top:10px;flex-wrap:wrap}
+.sum-item{font-size:11px;color:var(--ink3)}
+.sum-item strong{color:var(--ink);font-weight:500}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--ink3);padding:7px 8px;border-bottom:1px solid var(--rule);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--ink)}
+thead th.sa::after{content:' ↑';color:var(--accent)}
+thead th.sd::after{content:' ↓';color:var(--accent)}
+tbody td{padding:8px 8px;border-bottom:1px solid var(--rule);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--paper2)}
+.tag{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;display:inline-block}
+.tm{background:var(--accent-l);color:var(--accent)}
+.tg{background:var(--paper3);color:var(--ink2)}
+.tok{background:var(--ok-bg);color:var(--ok)}
+.twarn{background:var(--warn-bg);color:var(--warn)}
+.tbad{background:var(--red-bg);color:var(--red)}
+.num{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* TABLE DIMENSION TOGGLE */
+.dim-toggle{display:flex;gap:6px;margin-bottom:12px}
+.dim-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--rule2);background:transparent;color:var(--ink3);cursor:pointer;transition:all .12s}
+.dim-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+
+footer{margin-top:36px;padding:18px 28px 28px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-c{font-size:11px;color:var(--ink3);font-style:italic}
+.ft-t{font-size:11px;font-family:'DM Mono',monospace;color:var(--ink4);text-align:right}
+
+@media(max-width:1024px){.tier1,.tier2{grid-template-columns:repeat(2,minmax(0,1fr))}.tier3{grid-template-columns:repeat(3,minmax(0,1fr))}.row2,.row3,.row2b{grid-template-columns:1fr}}
+@media(max-width:640px){.tier1,.tier2,.tier3{grid-template-columns:repeat(2,minmax(0,1fr))}main,header,.ctrlbar{padding-left:16px;padding-right:16px}.roi-big{font-size:36px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wm">
+    <span class="wm-n">Emers</span>
+    <span class="wm-d">/</span>
+    <span class="wm-s">Ad &amp; Revenue Report</span>
+  </div>
+  <div class="hdr-r">
+    <div class="sdot"></div>
+    <span class="sts" id="last-upd">—</span>
+    <button class="btn pri" onclick="loadData()">Sync</button>
+  </div>
+</header>
+
+<div id="sbar"></div>
+
+<div class="ctrlbar">
+  <div class="cg">
+    <span class="cl">Period</span>
+    <button class="chip" data-t="1"      onclick="setTime('1',this)">Yesterday</button>
+    <button class="chip on" data-t="7"   onclick="setTime('7',this)">7 days</button>
+    <button class="chip" data-t="30"     onclick="setTime('30',this)">30 days</button>
+    <button class="chip" data-t="90"     onclick="setTime('90',this)">90 days</button>
+    <button class="chip" data-t="custom" onclick="setTime('custom',this)">Custom</button>
+    <div class="custom-range" id="cr">
+      <input type="date" id="df" onchange="applyCustom()">
+      <span style="color:var(--ink3);font-size:11px">–</span>
+      <input type="date" id="dt" onchange="applyCustom()">
+    </div>
+  </div>
+  <div class="cdiv"></div>
+  <div class="cg">
+    <span class="cl">Market</span>
+    <button class="chip on" data-c="all" onclick="setC('all',this)">All</button>
+    <button class="chip" data-c="TW"     onclick="setC('TW',this)">TW</button>
+    <button class="chip" data-c="HK"     onclick="setC('HK',this)">HK</button>
+    <button class="chip" data-c="SG"     onclick="setC('SG',this)">SG</button>
+    <button class="chip" data-c="MY"     onclick="setC('MY',this)">MY</button>
+    <span class="cnote">* Ads only · Sales = all markets</span>
+  </div>
+  <div class="cdiv"></div>
+  <div class="cg">
+    <span class="cl">Brand</span>
+    <button class="chip on" data-b="all"        onclick="setB('all',this)">All</button>
+    <button class="chip" data-b="Descente"      onclick="setB('Descente',this)">Descente</button>
+    <button class="chip" data-b="ASH GOLF"      onclick="setB('ASH GOLF',this)">ASH Golf</button>
+    <button class="chip" data-b="G/FORE"        onclick="setB('G/FORE',this)">G/FORE</button>
+    <button class="chip" data-b="Callaway"      onclick="setB('Callaway',this)">Callaway</button>
+    <button class="chip" data-b="2XU TW"        onclick="setB('2XU TW',this)">2XU TW</button>
+    <button class="chip" data-b="2XU HK"        onclick="setB('2XU HK',this)">2XU HK</button>
+    <button class="chip" data-b="K-SWISS"       onclick="setB('K-SWISS',this)">K-SWISS</button>
+    <button class="chip" data-b="Palladium"     onclick="setB('Palladium',this)">Palladium</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ROI HERO -->
+<div class="sec" style="margin-top:0"><span class="sec-n">ROI Overview</span><div class="sec-r"></div></div>
+<div class="roi-hero">
+  <div class="roi-hero-left">
+    <div>
+      <div class="roi-label" data-tip="Net Revenue ÷ Total Ad Spend. &gt;5 = Good, 2–5 = Review, &lt;2 = Stop">ROI</div>
+      <div class="roi-big" id="roi-big">—</div>
+    </div>
+    <div class="roi-meta">
+      <span>Net Revenue <strong id="roi-net">—</strong></span>
+      <span>Ad Spend <strong id="roi-sp">—</strong></span>
+      <span id="roi-status-text" style="font-weight:500"></span>
+    </div>
+  </div>
+  <div class="roi-right">
+    <div class="roi-mini">
+      <div class="roi-mini-label" data-tip="Ad Revenue ÷ Ad Spend (attributed purchases only)">ROAS</div>
+      <div class="roi-mini-val" id="roas-mini">—</div>
+    </div>
+    <div class="roi-mini">
+      <div class="roi-mini-label" data-tip="Purchases ÷ Link Clicks × 100%">CVR%</div>
+      <div class="roi-mini-val" id="cvr-mini">—</div>
+    </div>
+    <div class="roi-mini">
+      <div class="roi-mini-label" data-tip="Returns ÷ Gross Sales × 100%">Return Rate</div>
+      <div class="roi-mini-val" id="ret-mini">—</div>
+    </div>
+    <div class="roi-mini">
+      <div class="roi-mini-label" data-tip="Discounts ÷ Gross Sales × 100%">Disc Rate</div>
+      <div class="roi-mini-val" id="disc-mini">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- BUSINESS PERFORMANCE -->
+<div class="sec"><span class="sec-n">Business Performance</span><div class="sec-r"></div></div>
+<div class="tier1">
+  <div class="kcard">
+    <div class="kl" data-tip="Net sales after all discounts and returns (Shopify E column)">Net Revenue (E)</div>
+    <div class="kv ac" id="k-net">—</div>
+    <div class="ks">After discounts &amp; returns</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total gross sales before any deductions (Shopify B column)">Gross Sales (B)</div>
+    <div class="kv" id="k-gross">—</div>
+    <div class="ks" id="k-gross-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total discounts applied (Shopify C column). Shown as positive absolute value.">Discounts (C)</div>
+    <div class="kv" id="k-disc">—</div>
+    <div class="ks" id="k-disc-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total returned amount (Shopify D column). Shown as positive absolute value.">Returns (D)</div>
+    <div class="kv" id="k-ret">—</div>
+    <div class="ks" id="k-ret-s"></div>
+  </div>
+</div>
+
+<!-- AD PERFORMANCE -->
+<div class="sec"><span class="sec-n">Ad Performance</span><div class="sec-r"></div></div>
+<div class="tier3">
+  <div class="kcard">
+    <div class="kl" data-tip="Total Meta + Google ad spend in TWD">Total Spend</div>
+    <div class="kv" id="k-sp">—</div>
+    <div class="ks" id="k-sp-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Ad-attributed revenue ÷ Ad spend. Meta uses purchase conversion value; Google uses purchase value.">ROAS</div>
+    <div class="kv" id="k-roas">—</div>
+    <div class="ks">Ad revenue ÷ Ad spend</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total purchase conversions counted by Meta + Google pixels">Purchases</div>
+    <div class="kv" id="k-purch">—</div>
+    <div class="ks">Meta + Google conversions</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total link clicks tracked by Meta + Google">Link Clicks</div>
+    <div class="kv" id="k-clk">—</div>
+    <div class="ks" id="k-clk-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Purchases ÷ Link Clicks × 100%. How many clicks convert to a purchase.">CVR%</div>
+    <div class="kv" id="k-cvr">—</div>
+    <div class="ks" id="k-cvr-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Meta: CTR = Link Clicks ÷ Impressions × 100%. Google: CTR = Clicks ÷ Impressions × 100%. Weighted average across both platforms.">CTR% (Meta+Google)</div>
+    <div class="kv" id="k-ctr">—</div>
+    <div class="ks">Clicks ÷ Impressions</div>
+  </div>
+</div>
+<div class="tier3" style="margin-top:1px">
+  <div class="kcard">
+    <div class="kl" data-tip="Average cost per click = Total Spend ÷ Total Clicks (Meta + Google combined)">CPC (avg)</div>
+    <div class="kv" id="k-cpc">—</div>
+    <div class="ks">Spend ÷ Clicks</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Total ad impressions served across Meta + Google">Impressions</div>
+    <div class="kv" id="k-impr">—</div>
+    <div class="ks">Meta + Google</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Meta spend as % of total ad spend">Meta Spend</div>
+    <div class="kv" id="k-ms">—</div>
+    <div class="ks" id="k-ms-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Google spend as % of total ad spend">Google Spend</div>
+    <div class="kv" id="k-gs">—</div>
+    <div class="ks" id="k-gs-s"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Add to Cart events tracked by Meta pixel">Add to Cart</div>
+    <div class="kv" id="k-atc">—</div>
+    <div class="ks">Meta tracked</div>
+  </div>
+  <div class="kcard">
+    <div class="kl" data-tip="Meta spend ÷ Total spend vs Google spend ÷ Total spend">Channel Split</div>
+    <div class="kv" id="k-split">—</div>
+    <div class="ks">Meta / Google</div>
+  </div>
+</div>
+
+<!-- CHARTS ROW 1 -->
+<div class="sec"><span class="sec-n">Trends</span><div class="sec-r"></div></div>
+<div class="row2">
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n" data-tip="ROI = Net Revenue ÷ Ad Spend. Bar = daily/weekly spend. Line = ROI. X-axis adjusts to selected period.">Spend &amp; ROI Trend</span>
+      <span class="ct-b g" id="trend-badge">7 days</span>
+    </div>
+    <div class="legr">
+      <div class="leg"><div class="leg-sq" style="background:rgba(74,144,104,.4)"></div>Spend (TWD)</div>
+      <div class="leg"><div class="leg-sq" style="background:var(--accent);border-radius:50%"></div>ROI</div>
+    </div>
+    <div class="cw" style="height:200px"><canvas id="trendC" role="img" aria-label="Spend and ROI trend"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n" data-tip="ROI = Net Revenue ÷ Ad Spend for each brand in the selected period. Sorted highest to lowest.">ROI by Brand</span>
+      <span class="ct-b g" id="roi-brand-badge">7 days</span>
+    </div>
+    <div class="roi-list" id="roi-bars"></div>
+    <div class="sum-row" id="roi-sum"></div>
+  </div>
+</div>
+
+<!-- CHARTS ROW 2 -->
+<div class="row3">
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n" data-tip="Net Revenue (after discounts &amp; returns) stacked by brand. X-axis = monthly or daily depending on period selected.">Net Revenue by Brand</span>
+      <span class="ct-b n" id="rev-period-badge">monthly</span>
+    </div>
+    <div class="cw" style="height:200px"><canvas id="stackC" role="img" aria-label="Net revenue by brand"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n" data-tip="Meta vs Google ad spend. X-axis adapts to selected period.">Ad Spend by Channel</span>
+      <span class="ct-b n" id="spend-period-badge">monthly</span>
+    </div>
+    <div class="legr">
+      <div class="leg"><div class="leg-sq" style="background:var(--accent)"></div>Meta</div>
+      <div class="leg"><div class="leg-sq" style="background:var(--accent-m)"></div>Google</div>
+    </div>
+    <div class="cw" style="height:200px"><canvas id="spendC" role="img" aria-label="Ad spend by channel"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n" data-tip="ROI (Net Revenue ÷ Ad Spend) for each brand by month. Color intensity = ROI level. Green = good (&gt;5×), amber = review (2–5×), red = stop (&lt;2×).">ROI Heatmap</span>
+      <span class="ct-b n">brand × month</span>
+    </div>
+    <div id="heat-table"></div>
+    <div class="sum-row" id="heat-sum"></div>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="sec"><span class="sec-n">Brand Breakdown</span><div class="sec-r"></div></div>
+<div class="card">
+  <div class="ct">
+    <span class="ct-n">Full KPI Table — click header to sort</span>
+    <span class="ct-b g" id="tbl-badge">7 days</span>
+  </div>
+  <div class="dim-toggle">
+    <button class="dim-btn on" onclick="setDim('brand',this)">By Brand</button>
+    <button class="dim-btn" onclick="setDim('day',this)">By Day</button>
+  </div>
+  <div class="sum-row" id="tbl-sum" style="margin-top:0;margin-bottom:10px;padding-top:0;border-top:none;border-bottom:1px solid var(--rule);padding-bottom:10px"></div>
+  <div class="tbl-wrap">
+    <table id="main-table">
+      <thead id="tbl-head"></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <span class="ft-c">© Emers Group · Ad &amp; Revenue Report</span>
+  <span class="ft-t" id="footer-ts">—</span>
+</footer>
+
+<script>
+const BRAND_DAILY = {"Descente":{"2026-01-01":{"ms":12710,"gs":4708,"sp":17418,"mr":56942,"gr":0,"net":125676,"gross":140720,"disc":-15044,"ret":0,"clicks":3508,"purch":25,"impr":162387},"2026-01-02":{"ms":12196,"gs":3886,"sp":16082,"mr":35133,"gr":0,"net":204611,"gross":257500,"disc":-35105,"ret":-17784,"clicks":2833,"purch":24,"impr":138670},"2026-01-03":{"ms":12432,"gs":3307,"sp":15739,"mr":138146,"gr":0,"net":192725,"gross":226820,"disc":-34095,"ret":0,"clicks":2935,"purch":36,"impr":139520},"2026-01-04":{"ms":14962,"gs":3534,"sp":18496,"mr":71287,"gr":11365,"net":95192,"gross":104230,"disc":-9038,"ret":0,"clicks":3457,"purch":32,"impr":182438},"2026-01-05":{"ms":13536,"gs":3492,"sp":17028,"mr":35580,"gr":1,"net":56770,"gross":69380,"disc":-7365,"ret":-5245,"clicks":3108,"purch":13,"impr":157045},"2026-01-06":{"ms":14752,"gs":3505,"sp":18257,"mr":82906,"gr":14991,"net":115653,"gross":186280,"disc":-21737,"ret":-48890,"clicks":3094,"purch":36,"impr":147755},"2026-01-07":{"ms":15291,"gs":3374,"sp":18665,"mr":79927,"gr":0,"net":132805,"gross":158720,"disc":-19284,"ret":-6631,"clicks":3340,"purch":35,"impr":149929},"2026-01-08":{"ms":16158,"gs":3280,"sp":19438,"mr":232104,"gr":11,"net":305566,"gross":389440,"disc":-78466,"ret":-5408,"clicks":3288,"purch":32,"impr":138108},"2026-01-09":{"ms":16244,"gs":3381,"sp":19625,"mr":60899,"gr":5,"net":88924,"gross":110040,"disc":-9876,"ret":-11240,"clicks":3025,"purch":24,"impr":119852},"2026-01-10":{"ms":15923,"gs":3046,"sp":18969,"mr":72345,"gr":920,"net":86169,"gross":97580,"disc":-11411,"ret":0,"clicks":3113,"purch":32,"impr":127014},"2026-01-11":{"ms":19680,"gs":3689,"sp":23369,"mr":113192,"gr":11,"net":193316,"gross":214780,"disc":-21464,"ret":0,"clicks":4070,"purch":42,"impr":164473},"2026-01-12":{"ms":19060,"gs":2704,"sp":21764,"mr":129479,"gr":0,"net":181191,"gross":197400,"disc":-16209,"ret":0,"clicks":3502,"purch":44,"impr":169055},"2026-01-13":{"ms":19818,"gs":3753,"sp":23571,"mr":53685,"gr":0,"net":130004,"gross":139240,"disc":-9236,"ret":0,"clicks":3579,"purch":30,"impr":177516},"2026-01-14":{"ms":19661,"gs":3969,"sp":23630,"mr":92137,"gr":4582,"net":107874,"gross":118980,"disc":-7346,"ret":-3760,"clicks":3082,"purch":34,"impr":136930},"2026-01-15":{"ms":17009,"gs":4065,"sp":21074,"mr":47246,"gr":194,"net":87545,"gross":104220,"disc":-8107,"ret":-8568,"clicks":2932,"purch":31,"impr":114526},"2026-01-16":{"ms":16512,"gs":4567,"sp":21079,"mr":41314,"gr":9,"net":80567,"gross":113260,"disc":-8837,"ret":-23856,"clicks":2718,"purch":22,"impr":101136},"2026-01-17":{"ms":17861,"gs":10572,"sp":28433,"mr":29985,"gr":434,"net":42905,"gross":44980,"disc":-2075,"ret":0,"clicks":3636,"purch":17,"impr":121350},"2026-01-18":{"ms":21273,"gs":6682,"sp":27955,"mr":37802,"gr":0,"net":56719,"gross":59500,"disc":-2781,"ret":0,"clicks":3972,"purch":24,"impr":150587},"2026-01-19":{"ms":14689,"gs":6056,"sp":20745,"mr":47054,"gr":15044,"net":26028,"gross":97120,"disc":-12465,"ret":-58627,"clicks":2975,"purch":30,"impr":117056},"2026-01-20":{"ms":14048,"gs":2736,"sp":16784,"mr":50259,"gr":0,"net":33257,"gross":55562,"disc":-3015,"ret":-19290,"clicks":2762,"purch":20,"impr":110876},"2026-01-21":{"ms":16638,"gs":2154,"sp":18792,"mr":39890,"gr":40892,"net":49126,"gross":110900,"disc":-12720,"ret":-49054,"clicks":4328,"purch":34,"impr":130220},"2026-01-22":{"ms":16207,"gs":2509,"sp":18716,"mr":95136,"gr":14895,"net":166973,"gross":185220,"disc":-12343,"ret":-5904,"clicks":4171,"purch":33,"impr":110858},"2026-01-23":{"ms":14029,"gs":3454,"sp":17483,"mr":44715,"gr":532,"net":63676,"gross":87760,"disc":-15686,"ret":-8398,"clicks":3408,"purch":17,"impr":93700},"2026-01-24":{"ms":13649,"gs":6185,"sp":19834,"mr":16800,"gr":41631,"net":122004,"gross":130060,"disc":-8056,"ret":0,"clicks":3690,"purch":13,"impr":87918},"2026-01-25":{"ms":11731,"gs":4007,"sp":15738,"mr":111919,"gr":61326,"net":157101,"gross":174840,"disc":-17739,"ret":0,"clicks":3044,"purch":29,"impr":82893},"2026-01-26":{"ms":12217,"gs":1468,"sp":13685,"mr":49940,"gr":36251,"net":80598,"gross":95840,"disc":-5134,"ret":-10108,"clicks":2852,"purch":15,"impr":81914},"2026-01-27":{"ms":13825,"gs":1094,"sp":14919,"mr":67235,"gr":24441,"net":76635,"gross":86370,"disc":-9735,"ret":0,"clicks":3054,"purch":33,"impr":87639},"2026-01-28":{"ms":14481,"gs":1191,"sp":15672,"mr":33705,"gr":11022,"net":89483,"gross":103060,"disc":-13577,"ret":0,"clicks":3030,"purch":26,"impr":93830},"2026-01-29":{"ms":14103,"gs":1357,"sp":15460,"mr":68989,"gr":61380,"net":120132,"gross":136980,"disc":-16848,"ret":0,"clicks":2906,"purch":20,"impr":89079},"2026-01-30":{"ms":14504,"gs":1229,"sp":15733,"mr":56186,"gr":59027,"net":193236,"gross":222820,"disc":-17270,"ret":-12314,"clicks":3038,"purch":31,"impr":100673},"2026-01-31":{"ms":15374,"gs":1056,"sp":16430,"mr":51527,"gr":26786,"net":68358,"gross":77020,"disc":-8662,"ret":0,"clicks":3295,"purch":21,"impr":93932},"2026-02-01":{"ms":17936,"gs":1370,"sp":19306,"mr":34858,"gr":25736,"net":88640,"gross":105440,"disc":-16800,"ret":0,"clicks":3890,"purch":22,"impr":113979},"2026-02-02":{"ms":14901,"gs":1361,"sp":16262,"mr":63745,"gr":39219,"net":105855,"gross":137880,"disc":-32025,"ret":0,"clicks":3235,"purch":30,"impr":88021},"2026-02-03":{"ms":15229,"gs":1254,"sp":16483,"mr":117248,"gr":17591,"net":212337,"gross":255380,"disc":-43043,"ret":0,"clicks":3385,"purch":37,"impr":89520},"2026-02-04":{"ms":14489,"gs":3431,"sp":17920,"mr":18396,"gr":5803,"net":43384,"gross":75480,"disc":-12062,"ret":-20034,"clicks":2917,"purch":13,"impr":85699},"2026-02-05":{"ms":14895,"gs":3331,"sp":18226,"mr":45915,"gr":9070,"net":76799,"gross":95070,"disc":-18271,"ret":0,"clicks":2706,"purch":20,"impr":80949},"2026-02-06":{"ms":13424,"gs":6482,"sp":19906,"mr":46450,"gr":44243,"net":-54360,"gross":115120,"disc":-23954,"ret":-145526,"clicks":2669,"purch":20,"impr":81171},"2026-02-07":{"ms":12775,"gs":4531,"sp":17306,"mr":53145,"gr":37469,"net":112087,"gross":138650,"disc":-26563,"ret":0,"clicks":2788,"purch":30,"impr":76579},"2026-02-08":{"ms":16982,"gs":4787,"sp":21769,"mr":94670,"gr":39233,"net":158537,"gross":187850,"disc":-29313,"ret":0,"clicks":3446,"purch":39,"impr":93139},"2026-02-09":{"ms":18225,"gs":6750,"sp":24975,"mr":152839,"gr":88966,"net":202154,"gross":241370,"disc":-39216,"ret":0,"clicks":3618,"purch":55,"impr":113666},"2026-02-10":{"ms":18098,"gs":4222,"sp":22320,"mr":92198,"gr":42460,"net":161259,"gross":211500,"disc":-28109,"ret":-22132,"clicks":3072,"purch":42,"impr":112998},"2026-02-11":{"ms":10759,"gs":2918,"sp":13677,"mr":86513,"gr":16578,"net":142653,"gross":173400,"disc":-28866,"ret":-1881,"clicks":2400,"purch":32,"impr":71463},"2026-02-12":{"ms":6284,"gs":1743,"sp":8027,"mr":33681,"gr":8700,"net":68552,"gross":88040,"disc":-19488,"ret":0,"clicks":1923,"purch":19,"impr":41386},"2026-02-13":{"ms":6994,"gs":1650,"sp":8644,"mr":19252,"gr":0,"net":44456,"gross":49580,"disc":-5124,"ret":0,"clicks":1997,"purch":12,"impr":55311},"2026-02-14":{"ms":5024,"gs":1338,"sp":6362,"mr":37624,"gr":88,"net":53413,"gross":59480,"disc":-6067,"ret":0,"clicks":1731,"purch":16,"impr":42968},"2026-02-15":{"ms":4937,"gs":1313,"sp":6250,"mr":26849,"gr":1770,"net":43779,"gross":48570,"disc":-4791,"ret":0,"clicks":1913,"purch":14,"impr":45370},"2026-02-16":{"ms":4799,"gs":1320,"sp":6119,"mr":18790,"gr":1881,"net":26352,"gross":33620,"disc":-7268,"ret":0,"clicks":1920,"purch":8,"impr":51519},"2026-02-17":{"ms":5161,"gs":1646,"sp":6807,"mr":4161,"gr":0,"net":8895,"gross":9640,"disc":-745,"ret":0,"clicks":2300,"purch":6,"impr":55260},"2026-02-18":{"ms":5352,"gs":1223,"sp":6575,"mr":41858,"gr":325,"net":60434,"gross":69680,"disc":-9246,"ret":0,"clicks":2161,"purch":12,"impr":52762},"2026-02-19":{"ms":5182,"gs":1651,"sp":6833,"mr":67136,"gr":12910,"net":80303,"gross":91920,"disc":-11617,"ret":0,"clicks":2081,"purch":23,"impr":47211},"2026-02-20":{"ms":5708,"gs":1465,"sp":7173,"mr":40810,"gr":85203,"net":101226,"gross":127860,"disc":-26634,"ret":0,"clicks":2035,"purch":32,"impr":48698},"2026-02-21":{"ms":6984,"gs":1855,"sp":8839,"mr":34776,"gr":14192,"net":63622,"gross":76380,"disc":-12758,"ret":0,"clicks":2427,"purch":17,"impr":67400},"2026-02-22":{"ms":7702,"gs":2113,"sp":9815,"mr":97282,"gr":13198,"net":146910,"gross":177520,"disc":-30610,"ret":0,"clicks":2318,"purch":40,"impr":67442},"2026-02-23":{"ms":8382,"gs":3827,"sp":12209,"mr":70910,"gr":11884,"net":107812,"gross":128180,"disc":-20368,"ret":0,"clicks":2405,"purch":31,"impr":87033},"2026-02-24":{"ms":9915,"gs":3083,"sp":12998,"mr":18806,"gr":5552,"net":-49747,"gross":28170,"disc":-1370,"ret":-76547,"clicks":2539,"purch":11,"impr":83434},"2026-02-25":{"ms":10226,"gs":2124,"sp":12350,"mr":86634,"gr":8777,"net":104537,"gross":117760,"disc":-13223,"ret":0,"clicks":2569,"purch":29,"impr":85471},"2026-02-26":{"ms":7968,"gs":2799,"sp":10767,"mr":32968,"gr":28008,"net":70553,"gross":76760,"disc":-6207,"ret":0,"clicks":2121,"purch":26,"impr":59884},"2026-02-27":{"ms":6825,"gs":2836,"sp":9661,"mr":29559,"gr":27927,"net":91885,"gross":116840,"disc":-24955,"ret":0,"clicks":1978,"purch":18,"impr":51562},"2026-02-28":{"ms":6047,"gs":2007,"sp":8054,"mr":73248,"gr":54101,"net":100973,"gross":114620,"disc":-13647,"ret":0,"clicks":1898,"purch":32,"impr":45438},"2026-03-01":{"ms":7681,"gs":2525,"sp":10206,"mr":61012,"gr":53567,"net":99349,"gross":121620,"disc":-22271,"ret":0,"clicks":2064,"purch":19,"impr":60996},"2026-03-02":{"ms":6825,"gs":1872,"sp":8697,"mr":35473,"gr":5092,"net":6520,"gross":58640,"disc":-6577,"ret":-45543,"clicks":1751,"purch":17,"impr":56860},"2026-03-03":{"ms":15201,"gs":2475,"sp":17676,"mr":79486,"gr":6346,"net":113196,"gross":130120,"disc":-16924,"ret":0,"clicks":3205,"purch":31,"impr":132970},"2026-03-04":{"ms":15243,"gs":3423,"sp":18666,"mr":103768,"gr":16429,"net":125058,"gross":162980,"disc":-22351,"ret":-15571,"clicks":2436,"purch":47,"impr":107914},"2026-03-05":{"ms":11958,"gs":2928,"sp":14886,"mr":66666,"gr":1192,"net":51247,"gross":91560,"disc":-10079,"ret":-30234,"clicks":2120,"purch":36,"impr":89547},"2026-03-06":{"ms":14439,"gs":2510,"sp":16949,"mr":128300,"gr":42902,"net":118916,"gross":140580,"disc":-18255,"ret":-3409,"clicks":2668,"purch":46,"impr":121813},"2026-03-07":{"ms":20423,"gs":4379,"sp":24802,"mr":40646,"gr":12886,"net":63786,"gross":81480,"disc":-17694,"ret":0,"clicks":3264,"purch":33,"impr":138405},"2026-03-08":{"ms":20962,"gs":4038,"sp":25000,"mr":116713,"gr":67941,"net":130943,"gross":173660,"disc":-42717,"ret":0,"clicks":3463,"purch":45,"impr":148512},"2026-03-09":{"ms":19812,"gs":3237,"sp":23049,"mr":59520,"gr":10327,"net":38796,"gross":94696,"disc":-14011,"ret":-41890,"clicks":3138,"purch":29,"impr":145148},"2026-03-10":{"ms":14458,"gs":2149,"sp":16607,"mr":35440,"gr":2724,"net":87400,"gross":122820,"disc":-25998,"ret":-9422,"clicks":2224,"purch":23,"impr":91911},"2026-03-11":{"ms":12017,"gs":2300,"sp":14317,"mr":47685,"gr":36183,"net":88647,"gross":120140,"disc":-21138,"ret":-10355,"clicks":1902,"purch":25,"impr":89059},"2026-03-12":{"ms":11096,"gs":3095,"sp":14191,"mr":117551,"gr":19677,"net":232641,"gross":283400,"disc":-47843,"ret":-2916,"clicks":2806,"purch":39,"impr":95704},"2026-03-13":{"ms":13399,"gs":1710,"sp":15109,"mr":76802,"gr":12901,"net":127871,"gross":164260,"disc":-36389,"ret":0,"clicks":3318,"purch":43,"impr":107785},"2026-03-14":{"ms":12673,"gs":2890,"sp":15563,"mr":98172,"gr":29765,"net":154860,"gross":190380,"disc":-35520,"ret":0,"clicks":3668,"purch":49,"impr":101706},"2026-03-15":{"ms":15204,"gs":2463,"sp":17667,"mr":73873,"gr":8886,"net":154743,"gross":179800,"disc":-25057,"ret":0,"clicks":3720,"purch":46,"impr":114231},"2026-03-16":{"ms":17316,"gs":2010,"sp":19326,"mr":74241,"gr":36780,"net":130342,"gross":162940,"disc":-30717,"ret":-1881,"clicks":3701,"purch":46,"impr":126946},"2026-03-17":{"ms":20748,"gs":3124,"sp":23872,"mr":78792,"gr":27569,"net":161123,"gross":285560,"disc":-65428,"ret":-59009,"clicks":4801,"purch":49,"impr":131348},"2026-03-18":{"ms":18308,"gs":3011,"sp":21319,"mr":70231,"gr":23024,"net":133604,"gross":182020,"disc":-34972,"ret":-13444,"clicks":4129,"purch":39,"impr":132908},"2026-03-19":{"ms":21211,"gs":3729,"sp":24940,"mr":105917,"gr":2126,"net":167279,"gross":208960,"disc":-34159,"ret":-7522,"clicks":4336,"purch":57,"impr":149714},"2026-03-20":{"ms":21626,"gs":3312,"sp":24938,"mr":50860,"gr":12409,"net":69428,"gross":115520,"disc":-20633,"ret":-25459,"clicks":4809,"purch":41,"impr":157854},"2026-03-21":{"ms":20699,"gs":3895,"sp":24594,"mr":83995,"gr":4564,"net":120048,"gross":144080,"disc":-24032,"ret":0,"clicks":4678,"purch":48,"impr":148955},"2026-03-22":{"ms":23960,"gs":3827,"sp":27787,"mr":102437,"gr":23157,"net":187134,"gross":221520,"disc":-34386,"ret":0,"clicks":5379,"purch":49,"impr":180494},"2026-03-23":{"ms":12017,"gs":2909,"sp":14926,"mr":55379,"gr":8832,"net":68137,"gross":97500,"disc":-10934,"ret":-18429,"clicks":2505,"purch":38,"impr":83097},"2026-03-24":{"ms":0,"gs":8769,"sp":8769,"mr":42800,"gr":4574,"net":51335,"gross":117100,"disc":-25514,"ret":-40251,"clicks":768,"purch":18,"impr":0},"2026-03-25":{"ms":0,"gs":10335,"sp":10335,"mr":45652,"gr":11853,"net":108200,"gross":126620,"disc":-18420,"ret":0,"clicks":975,"purch":10,"impr":0},"2026-03-26":{"ms":7331,"gs":10701,"sp":18032,"mr":4332,"gr":15230,"net":36263,"gross":40140,"disc":-3877,"ret":0,"clicks":2315,"purch":8,"impr":55568},"2026-03-27":{"ms":30171,"gs":4652,"sp":34823,"mr":140425,"gr":15739,"net":187620,"gross":224180,"disc":-36560,"ret":0,"clicks":5691,"purch":72,"impr":211682},"2026-03-28":{"ms":27859,"gs":4087,"sp":31946,"mr":130362,"gr":38057,"net":150671,"gross":184450,"disc":-33779,"ret":0,"clicks":5248,"purch":44,"impr":185038},"2026-03-29":{"ms":22906,"gs":4220,"sp":27126,"mr":110655,"gr":36917,"net":143030,"gross":170710,"disc":-27680,"ret":0,"clicks":4712,"purch":51,"impr":158329},"2026-03-30":{"ms":22246,"gs":2634,"sp":24880,"mr":117249,"gr":65141,"net":179477,"gross":235100,"disc":-38352,"ret":-17271,"clicks":4549,"purch":58,"impr":170174},"2026-03-31":{"ms":20637,"gs":1951,"sp":22588,"mr":39451,"gr":9106,"net":64056,"gross":84300,"disc":-12262,"ret":-7982,"clicks":4303,"purch":28,"impr":158630},"2026-04-01":{"ms":17495,"gs":3294,"sp":20789,"mr":106649,"gr":9702,"net":92125,"gross":156800,"disc":-29794,"ret":-34881,"clicks":3599,"purch":40,"impr":125045},"2026-04-02":{"ms":14349,"gs":4427,"sp":18776,"mr":74238,"gr":23213,"net":58384,"gross":121760,"disc":-13148,"ret":-50228,"clicks":2969,"purch":34,"impr":91077},"2026-04-03":{"ms":14804,"gs":4433,"sp":19237,"mr":82667,"gr":31260,"net":130414,"gross":144730,"disc":-14316,"ret":0,"clicks":3327,"purch":49,"impr":88848},"2026-04-04":{"ms":14024,"gs":4117,"sp":18141,"mr":77969,"gr":14999,"net":103143,"gross":123000,"disc":-19857,"ret":0,"clicks":3518,"purch":37,"impr":95807},"2026-04-05":{"ms":19304,"gs":4223,"sp":23527,"mr":79058,"gr":19343,"net":132301,"gross":152420,"disc":-20119,"ret":0,"clicks":4331,"purch":41,"impr":136141},"2026-04-06":{"ms":19494,"gs":4657,"sp":24151,"mr":90053,"gr":18355,"net":136343,"gross":161380,"disc":-25037,"ret":0,"clicks":4424,"purch":46,"impr":136390},"2026-04-07":{"ms":17072,"gs":3799,"sp":20871,"mr":83088,"gr":46116,"net":99209,"gross":152080,"disc":-25233,"ret":-27638,"clicks":3751,"purch":39,"impr":125336},"2026-04-08":{"ms":16678,"gs":5566,"sp":22244,"mr":78933,"gr":57368,"net":129288,"gross":182140,"disc":-30915,"ret":-21937,"clicks":3531,"purch":30,"impr":117021},"2026-04-09":{"ms":21393,"gs":3489,"sp":24882,"mr":122902,"gr":26746,"net":161179,"gross":184280,"disc":-23101,"ret":0,"clicks":3520,"purch":60,"impr":147885},"2026-04-10":{"ms":17970,"gs":3873,"sp":21843,"mr":134284,"gr":37689,"net":178838,"gross":210840,"disc":-32002,"ret":0,"clicks":2942,"purch":59,"impr":120750},"2026-04-11":{"ms":11608,"gs":4099,"sp":15707,"mr":36843,"gr":16872,"net":65352,"gross":74420,"disc":-9068,"ret":0,"clicks":2537,"purch":19,"impr":71573},"2026-04-12":{"ms":15320,"gs":4204,"sp":19524,"mr":62118,"gr":19867,"net":142137,"gross":163450,"disc":-21313,"ret":0,"clicks":3496,"purch":40,"impr":109077},"2026-04-13":{"ms":0,"gs":4489,"sp":4489,"mr":0,"gr":17956,"net":102978,"gross":122150,"disc":-15509,"ret":-3663,"clicks":941,"purch":4,"impr":0}},"ASH GOLF":{"2026-01-01":{"ms":2734,"gs":2145,"sp":4879,"mr":8352,"gr":0,"net":15912,"gross":20780,"disc":-4868,"ret":0,"clicks":669,"purch":3,"impr":25327},"2026-01-02":{"ms":2819,"gs":2700,"sp":5519,"mr":48204,"gr":79220,"net":75296,"gross":119520,"disc":-44224,"ret":0,"clicks":629,"purch":9,"impr":22906},"2026-01-03":{"ms":2758,"gs":2265,"sp":5023,"mr":12500,"gr":66150,"net":43374,"gross":80744,"disc":-37370,"ret":0,"clicks":605,"purch":8,"impr":18503},"2026-01-04":{"ms":3339,"gs":2287,"sp":5626,"mr":14260,"gr":41956,"net":69591,"gross":125992,"disc":-56401,"ret":0,"clicks":601,"purch":18,"impr":23465},"2026-01-05":{"ms":2918,"gs":2660,"sp":5578,"mr":36950,"gr":49832,"net":48646,"gross":76712,"disc":-28066,"ret":0,"clicks":511,"purch":14,"impr":19614},"2026-01-06":{"ms":3057,"gs":1652,"sp":4709,"mr":6782,"gr":7616,"net":17594,"gross":25348,"disc":-7754,"ret":0,"clicks":388,"purch":7,"impr":15683},"2026-01-07":{"ms":2913,"gs":2881,"sp":5794,"mr":6180,"gr":9645,"net":8890,"gross":11648,"disc":-2758,"ret":0,"clicks":548,"purch":8,"impr":19425},"2026-01-08":{"ms":2666,"gs":2246,"sp":4912,"mr":0,"gr":67742,"net":17710,"gross":30778,"disc":-7490,"ret":-5578,"clicks":502,"purch":7,"impr":17935},"2026-01-09":{"ms":2656,"gs":2269,"sp":4925,"mr":10113,"gr":106414,"net":54066,"gross":106702,"disc":-50639,"ret":-1997,"clicks":538,"purch":14,"impr":15925},"2026-01-10":{"ms":2737,"gs":2156,"sp":4893,"mr":39529,"gr":0,"net":81213,"gross":113366,"disc":-32153,"ret":0,"clicks":506,"purch":7,"impr":14422},"2026-01-11":{"ms":3176,"gs":2877,"sp":6053,"mr":8348,"gr":38360,"net":8349,"gross":12608,"disc":-4259,"ret":0,"clicks":605,"purch":6,"impr":16986},"2026-01-12":{"ms":3617,"gs":2165,"sp":5782,"mr":69204,"gr":4559,"net":39007,"gross":158284,"disc":-52850,"ret":-66427,"clicks":1314,"purch":17,"impr":26215},"2026-01-13":{"ms":3753,"gs":1895,"sp":5648,"mr":71140,"gr":44763,"net":84448,"gross":90000,"disc":-3200,"ret":-2352,"clicks":1184,"purch":13,"impr":31083},"2026-01-14":{"ms":4010,"gs":2778,"sp":6788,"mr":44636,"gr":0,"net":46326,"gross":58000,"disc":-5752,"ret":-5922,"clicks":1022,"purch":13,"impr":33823},"2026-01-15":{"ms":3919,"gs":2078,"sp":5997,"mr":6583,"gr":20824,"net":6328,"gross":37420,"disc":-13552,"ret":-17540,"clicks":791,"purch":7,"impr":29407},"2026-01-16":{"ms":3689,"gs":2427,"sp":6116,"mr":10864,"gr":20548,"net":7209,"gross":11940,"disc":-1076,"ret":-3655,"clicks":781,"purch":11,"impr":31433},"2026-01-17":{"ms":3705,"gs":2400,"sp":6105,"mr":6404,"gr":5828,"net":11166,"gross":12120,"disc":-954,"ret":0,"clicks":770,"purch":6,"impr":33306},"2026-01-18":{"ms":4521,"gs":1955,"sp":6476,"mr":22500,"gr":8926,"net":50627,"gross":80946,"disc":-30319,"ret":0,"clicks":793,"purch":12,"impr":39592},"2026-01-19":{"ms":5106,"gs":2353,"sp":7459,"mr":15404,"gr":25803,"net":40500,"gross":52512,"disc":-12012,"ret":0,"clicks":658,"purch":9,"impr":114069},"2026-01-20":{"ms":7419,"gs":2689,"sp":10108,"mr":22233,"gr":12384,"net":15221,"gross":44894,"disc":-11331,"ret":-18342,"clicks":880,"purch":9,"impr":165193},"2026-01-21":{"ms":8145,"gs":2537,"sp":10682,"mr":16409,"gr":47167,"net":33221,"gross":73562,"disc":-33941,"ret":-6400,"clicks":1093,"purch":11,"impr":156090},"2026-01-22":{"ms":7665,"gs":2618,"sp":10283,"mr":45640,"gr":0,"net":19652,"gross":51751,"disc":-15340,"ret":-16758,"clicks":1160,"purch":15,"impr":164042},"2026-01-23":{"ms":5390,"gs":2372,"sp":7762,"mr":74328,"gr":7330,"net":77456,"gross":160918,"disc":-76602,"ret":-6860,"clicks":682,"purch":16,"impr":135438},"2026-01-24":{"ms":5455,"gs":2464,"sp":7919,"mr":31207,"gr":27132,"net":33208,"gross":62175,"disc":-28968,"ret":0,"clicks":677,"purch":15,"impr":135517},"2026-01-25":{"ms":6256,"gs":2969,"sp":9225,"mr":62726,"gr":5699,"net":82562,"gross":154060,"disc":-71498,"ret":0,"clicks":796,"purch":16,"impr":164713},"2026-01-26":{"ms":4999,"gs":2614,"sp":7613,"mr":8160,"gr":5793,"net":43449,"gross":67028,"disc":-21499,"ret":-2080,"clicks":668,"purch":11,"impr":143713},"2026-01-27":{"ms":5036,"gs":1989,"sp":7025,"mr":22260,"gr":61732,"net":62840,"gross":100714,"disc":-33026,"ret":-4848,"clicks":608,"purch":10,"impr":140101},"2026-01-28":{"ms":5138,"gs":2304,"sp":7442,"mr":57781,"gr":21542,"net":97637,"gross":160918,"disc":-63281,"ret":0,"clicks":620,"purch":12,"impr":139507},"2026-01-29":{"ms":6364,"gs":2260,"sp":8624,"mr":23288,"gr":33521,"net":26851,"gross":77440,"disc":-32211,"ret":-18378,"clicks":748,"purch":12,"impr":147509},"2026-01-30":{"ms":6722,"gs":2199,"sp":8921,"mr":17702,"gr":0,"net":7787,"gross":45242,"disc":-20563,"ret":-16892,"clicks":733,"purch":12,"impr":136950},"2026-01-31":{"ms":6993,"gs":1721,"sp":8714,"mr":24976,"gr":3357,"net":41664,"gross":78430,"disc":-36766,"ret":0,"clicks":857,"purch":8,"impr":148526},"2026-02-01":{"ms":7949,"gs":2601,"sp":10550,"mr":35586,"gr":3076,"net":42062,"gross":61346,"disc":-19284,"ret":0,"clicks":1020,"purch":13,"impr":176470},"2026-02-02":{"ms":6767,"gs":2326,"sp":9093,"mr":9397,"gr":10248,"net":15886,"gross":26958,"disc":-11072,"ret":0,"clicks":776,"purch":9,"impr":156843},"2026-02-03":{"ms":6333,"gs":1980,"sp":8313,"mr":101043,"gr":55710,"net":161169,"gross":264760,"disc":-98606,"ret":-4985,"clicks":703,"purch":23,"impr":140713},"2026-02-04":{"ms":6549,"gs":2884,"sp":9433,"mr":24906,"gr":99588,"net":17289,"gross":49955,"disc":-19100,"ret":-13566,"clicks":738,"purch":16,"impr":140477},"2026-02-05":{"ms":6842,"gs":2909,"sp":9751,"mr":19123,"gr":55720,"net":46678,"gross":70563,"disc":-16586,"ret":-7300,"clicks":665,"purch":8,"impr":143539},"2026-02-06":{"ms":5365,"gs":2618,"sp":7983,"mr":98438,"gr":19162,"net":120420,"gross":200226,"disc":-71030,"ret":-8776,"clicks":689,"purch":14,"impr":97108},"2026-02-07":{"ms":4388,"gs":2507,"sp":6895,"mr":43924,"gr":0,"net":53425,"gross":103128,"disc":-49703,"ret":0,"clicks":756,"purch":12,"impr":56571},"2026-02-08":{"ms":5696,"gs":2820,"sp":8516,"mr":47207,"gr":32966,"net":80490,"gross":138947,"disc":-58458,"ret":0,"clicks":810,"purch":12,"impr":94923},"2026-02-09":{"ms":4623,"gs":2064,"sp":6687,"mr":18425,"gr":136836,"net":24661,"gross":68082,"disc":-34041,"ret":-9380,"clicks":624,"purch":7,"impr":53654},"2026-02-10":{"ms":3566,"gs":1819,"sp":5385,"mr":4856,"gr":0,"net":87056,"gross":136816,"disc":-49760,"ret":0,"clicks":425,"purch":5,"impr":18064},"2026-02-11":{"ms":2738,"gs":2181,"sp":4919,"mr":10752,"gr":18220,"net":38947,"gross":81390,"disc":-39699,"ret":-2744,"clicks":474,"purch":6,"impr":17703},"2026-02-12":{"ms":1271,"gs":1412,"sp":2683,"mr":7120,"gr":0,"net":-5629,"gross":13304,"disc":-3982,"ret":-14951,"clicks":338,"purch":2,"impr":6801},"2026-02-13":{"ms":1240,"gs":1243,"sp":2483,"mr":13180,"gr":0,"net":19175,"gross":41942,"disc":-16091,"ret":-6676,"clicks":270,"purch":4,"impr":6988},"2026-02-14":{"ms":924,"gs":1088,"sp":2012,"mr":6776,"gr":4560,"net":9056,"gross":15832,"disc":-6776,"ret":0,"clicks":223,"purch":5,"impr":5378},"2026-02-15":{"ms":1108,"gs":1067,"sp":2175,"mr":11235,"gr":4064,"net":19739,"gross":31904,"disc":-12165,"ret":0,"clicks":288,"purch":6,"impr":6422},"2026-02-16":{"ms":999,"gs":1091,"sp":2090,"mr":33604,"gr":0,"net":70720,"gross":117760,"disc":-47040,"ret":0,"clicks":228,"purch":7,"impr":6456},"2026-02-17":{"ms":999,"gs":1248,"sp":2247,"mr":12680,"gr":549,"net":58780,"gross":117560,"disc":-58780,"ret":0,"clicks":254,"purch":5,"impr":5602},"2026-02-18":{"ms":941,"gs":972,"sp":1913,"mr":3152,"gr":0,"net":14953,"gross":28408,"disc":-13455,"ret":0,"clicks":233,"purch":3,"impr":5738},"2026-02-19":{"ms":877,"gs":1271,"sp":2148,"mr":9753,"gr":1036,"net":23926,"gross":39532,"disc":-15606,"ret":0,"clicks":222,"purch":2,"impr":5347},"2026-02-20":{"ms":964,"gs":1373,"sp":2337,"mr":15600,"gr":1581,"net":68310,"gross":123684,"disc":-55374,"ret":0,"clicks":237,"purch":5,"impr":5757},"2026-02-21":{"ms":2762,"gs":1316,"sp":4078,"mr":13390,"gr":1431,"net":24893,"gross":32384,"disc":-7491,"ret":0,"clicks":772,"purch":2,"impr":24143},"2026-02-22":{"ms":2870,"gs":1856,"sp":4726,"mr":13782,"gr":35305,"net":68253,"gross":120630,"disc":-52377,"ret":0,"clicks":808,"purch":11,"impr":21771},"2026-02-23":{"ms":2839,"gs":1845,"sp":4684,"mr":11474,"gr":0,"net":14068,"gross":43984,"disc":-11284,"ret":-18632,"clicks":675,"purch":5,"impr":22599},"2026-02-24":{"ms":3300,"gs":2206,"sp":5506,"mr":14860,"gr":0,"net":34198,"gross":55655,"disc":-21458,"ret":0,"clicks":763,"purch":5,"impr":22560},"2026-02-25":{"ms":3047,"gs":2090,"sp":5137,"mr":9026,"gr":2446,"net":8946,"gross":12780,"disc":-3834,"ret":0,"clicks":728,"purch":5,"impr":21208},"2026-02-26":{"ms":3126,"gs":1753,"sp":4879,"mr":8504,"gr":203,"net":13238,"gross":21132,"disc":-7894,"ret":0,"clicks":663,"purch":4,"impr":20839},"2026-02-27":{"ms":2933,"gs":2267,"sp":5200,"mr":75330,"gr":1546,"net":96556,"gross":174046,"disc":-77490,"ret":0,"clicks":761,"purch":11,"impr":18705},"2026-02-28":{"ms":2526,"gs":1261,"sp":3787,"mr":11766,"gr":1632,"net":31631,"gross":52180,"disc":-20549,"ret":0,"clicks":656,"purch":9,"impr":18459},"2026-03-01":{"ms":3240,"gs":2203,"sp":5443,"mr":16675,"gr":152,"net":23853,"gross":37182,"disc":-13329,"ret":0,"clicks":731,"purch":8,"impr":22191},"2026-03-02":{"ms":2675,"gs":1719,"sp":4394,"mr":40915,"gr":0,"net":26852,"gross":68783,"disc":-19999,"ret":-21932,"clicks":610,"purch":11,"impr":19702},"2026-03-03":{"ms":3656,"gs":1989,"sp":5645,"mr":36556,"gr":7566,"net":32362,"gross":49684,"disc":-13207,"ret":-4115,"clicks":658,"purch":3,"impr":22463},"2026-03-04":{"ms":4465,"gs":2240,"sp":6705,"mr":5616,"gr":0,"net":35222,"gross":54212,"disc":-18990,"ret":0,"clicks":691,"purch":2,"impr":23016},"2026-03-05":{"ms":4203,"gs":1842,"sp":6045,"mr":74381,"gr":821,"net":47101,"gross":116722,"disc":-49929,"ret":-19692,"clicks":665,"purch":9,"impr":24633},"2026-03-06":{"ms":4363,"gs":1918,"sp":6281,"mr":16290,"gr":1328,"net":27917,"gross":66780,"disc":-28513,"ret":-10350,"clicks":714,"purch":5,"impr":22695},"2026-03-07":{"ms":4199,"gs":2377,"sp":6576,"mr":44269,"gr":0,"net":50350,"gross":70472,"disc":-20122,"ret":0,"clicks":711,"purch":9,"impr":21442},"2026-03-08":{"ms":4892,"gs":2141,"sp":7033,"mr":13051,"gr":3771,"net":39912,"gross":53370,"disc":-13458,"ret":0,"clicks":832,"purch":5,"impr":27371},"2026-03-09":{"ms":3791,"gs":1512,"sp":5303,"mr":0,"gr":0,"net":4942,"gross":39528,"disc":-15442,"ret":-19144,"clicks":651,"purch":0,"impr":23644},"2026-03-10":{"ms":4362,"gs":2409,"sp":6771,"mr":24461,"gr":380,"net":30477,"gross":44106,"disc":-13629,"ret":0,"clicks":794,"purch":7,"impr":25540},"2026-03-11":{"ms":3629,"gs":1952,"sp":5581,"mr":22756,"gr":8348,"net":12528,"gross":58972,"disc":-22748,"ret":-23696,"clicks":652,"purch":7,"impr":21546},"2026-03-12":{"ms":3861,"gs":1931,"sp":5792,"mr":6949,"gr":0,"net":10818,"gross":18525,"disc":-7707,"ret":0,"clicks":624,"purch":3,"impr":22372},"2026-03-13":{"ms":3329,"gs":1183,"sp":4512,"mr":0,"gr":1041,"net":-15164,"gross":8460,"disc":-846,"ret":-22778,"clicks":605,"purch":0,"impr":19300},"2026-03-14":{"ms":4597,"gs":1922,"sp":6519,"mr":42914,"gr":3905,"net":102706,"gross":153204,"disc":-50498,"ret":0,"clicks":763,"purch":8,"impr":21644},"2026-03-15":{"ms":5218,"gs":1342,"sp":6560,"mr":9131,"gr":0,"net":52927,"gross":69106,"disc":-16179,"ret":0,"clicks":710,"purch":4,"impr":21376},"2026-03-16":{"ms":4042,"gs":1553,"sp":5595,"mr":8672,"gr":0,"net":36281,"gross":123396,"disc":-54648,"ret":-32467,"clicks":580,"purch":4,"impr":18067},"2026-03-17":{"ms":3794,"gs":1532,"sp":5326,"mr":0,"gr":607,"net":16586,"gross":44212,"disc":-16886,"ret":-10740,"clicks":447,"purch":0,"impr":14516},"2026-03-18":{"ms":3256,"gs":1013,"sp":4269,"mr":93189,"gr":12832,"net":103557,"gross":155756,"disc":-46863,"ret":-5336,"clicks":477,"purch":8,"impr":17349},"2026-03-19":{"ms":3750,"gs":1835,"sp":5585,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":548,"purch":0,"impr":19014},"2026-03-20":{"ms":3876,"gs":1177,"sp":5053,"mr":42084,"gr":4436,"net":6150,"gross":55368,"disc":-13284,"ret":-35934,"clicks":651,"purch":4,"impr":20925},"2026-03-21":{"ms":2246,"gs":1760,"sp":4006,"mr":28753,"gr":17237,"net":42864,"gross":55030,"disc":-12166,"ret":0,"clicks":537,"purch":8,"impr":11903},"2026-03-22":{"ms":3406,"gs":1448,"sp":4854,"mr":4400,"gr":0,"net":28320,"gross":32400,"disc":-4080,"ret":0,"clicks":730,"purch":2,"impr":17762},"2026-03-23":{"ms":1571,"gs":1385,"sp":2956,"mr":2160,"gr":91,"net":5264,"gross":13232,"disc":-5576,"ret":-2392,"clicks":338,"purch":3,"impr":7756},"2026-03-24":{"ms":0,"gs":1541,"sp":1541,"mr":0,"gr":0,"net":33122,"gross":62324,"disc":-29202,"ret":0,"clicks":208,"purch":1,"impr":0},"2026-03-25":{"ms":0,"gs":2307,"sp":2307,"mr":0,"gr":0,"net":9680,"gross":12100,"disc":-2420,"ret":0,"clicks":236,"purch":1,"impr":0},"2026-03-26":{"ms":880,"gs":3620,"sp":4500,"mr":0,"gr":14161,"net":34667,"gross":38950,"disc":-4283,"ret":0,"clicks":446,"purch":4,"impr":4906},"2026-03-27":{"ms":5023,"gs":4167,"sp":9190,"mr":2700,"gr":0,"net":3014,"gross":10508,"disc":-2594,"ret":-4900,"clicks":1297,"purch":3,"impr":27955},"2026-03-28":{"ms":4966,"gs":3854,"sp":8820,"mr":14040,"gr":0,"net":16661,"gross":19344,"disc":-2683,"ret":0,"clicks":1131,"purch":2,"impr":25982},"2026-03-29":{"ms":3547,"gs":3677,"sp":7224,"mr":39218,"gr":0,"net":51098,"gross":63220,"disc":-12122,"ret":0,"clicks":1026,"purch":4,"impr":18247},"2026-03-30":{"ms":2666,"gs":3205,"sp":5871,"mr":15258,"gr":0,"net":18989,"gross":28720,"disc":-9731,"ret":0,"clicks":655,"purch":5,"impr":13158},"2026-03-31":{"ms":2284,"gs":3121,"sp":5405,"mr":0,"gr":0,"net":1631,"gross":7968,"disc":-3187,"ret":-3150,"clicks":505,"purch":2,"impr":10585},"2026-04-01":{"ms":2850,"gs":2827,"sp":5677,"mr":9360,"gr":0,"net":50421,"gross":74364,"disc":-23943,"ret":0,"clicks":600,"purch":3,"impr":12584},"2026-04-02":{"ms":2589,"gs":4083,"sp":6672,"mr":24288,"gr":7730,"net":78129,"gross":100140,"disc":-22011,"ret":0,"clicks":620,"purch":6,"impr":11083},"2026-04-03":{"ms":3326,"gs":3453,"sp":6779,"mr":14560,"gr":0,"net":72867,"gross":92158,"disc":-19291,"ret":0,"clicks":595,"purch":3,"impr":9651},"2026-04-04":{"ms":2544,"gs":4497,"sp":7041,"mr":15270,"gr":0,"net":15270,"gross":27060,"disc":-11790,"ret":0,"clicks":554,"purch":2,"impr":6080},"2026-04-05":{"ms":3154,"gs":3685,"sp":6839,"mr":27340,"gr":13947,"net":36483,"gross":41164,"disc":-4681,"ret":0,"clicks":679,"purch":8,"impr":11691},"2026-04-06":{"ms":3026,"gs":3387,"sp":6413,"mr":31282,"gr":0,"net":31282,"gross":34500,"disc":-3218,"ret":0,"clicks":670,"purch":5,"impr":10904},"2026-04-07":{"ms":3381,"gs":3619,"sp":7000,"mr":46986,"gr":22678,"net":55536,"gross":75072,"disc":-19536,"ret":0,"clicks":711,"purch":10,"impr":16938},"2026-04-08":{"ms":3105,"gs":3556,"sp":6661,"mr":0,"gr":0,"net":31468,"gross":44696,"disc":-13228,"ret":0,"clicks":552,"purch":1,"impr":16039},"2026-04-09":{"ms":3082,"gs":3966,"sp":7048,"mr":11454,"gr":0,"net":11454,"gross":14060,"disc":-2606,"ret":0,"clicks":552,"purch":3,"impr":15156},"2026-04-10":{"ms":2829,"gs":2959,"sp":5788,"mr":0,"gr":0,"net":-26038,"gross":8504,"disc":-4252,"ret":-30290,"clicks":513,"purch":0,"impr":14253},"2026-04-11":{"ms":3209,"gs":4278,"sp":7487,"mr":2952,"gr":6631,"net":10541,"gross":14288,"disc":-3747,"ret":0,"clicks":578,"purch":4,"impr":12590},"2026-04-12":{"ms":3166,"gs":3393,"sp":6559,"mr":6120,"gr":10309,"net":31476,"gross":50036,"disc":-18560,"ret":0,"clicks":584,"purch":5,"impr":12620},"2026-04-13":{"ms":0,"gs":4668,"sp":4668,"mr":0,"gr":7704,"net":3852,"gross":4280,"disc":-428,"ret":0,"clicks":365,"purch":2,"impr":0}},"G/FORE":{"2026-01-01":{"ms":3748,"gs":1631,"sp":5379,"mr":6115,"gr":0,"net":23539,"gross":50950,"disc":-27411,"ret":0,"clicks":601,"purch":5,"impr":38072},"2026-01-02":{"ms":3251,"gs":1015,"sp":4266,"mr":26825,"gr":0,"net":67392,"gross":142140,"disc":-65358,"ret":-9390,"clicks":382,"purch":10,"impr":28660},"2026-01-03":{"ms":2742,"gs":912,"sp":3654,"mr":138522,"gr":0,"net":211817,"gross":411525,"disc":-199708,"ret":0,"clicks":375,"purch":39,"impr":21697},"2026-01-04":{"ms":1696,"gs":763,"sp":2459,"mr":42505,"gr":0,"net":94402,"gross":186710,"disc":-92308,"ret":0,"clicks":313,"purch":14,"impr":15530},"2026-01-05":{"ms":1532,"gs":1374,"sp":2906,"mr":9479,"gr":0,"net":21624,"gross":46710,"disc":-21186,"ret":-3900,"clicks":264,"purch":6,"impr":12562},"2026-01-06":{"ms":1589,"gs":880,"sp":2469,"mr":0,"gr":0,"net":34025,"gross":80050,"disc":-38525,"ret":-7500,"clicks":293,"purch":5,"impr":14768},"2026-01-07":{"ms":1729,"gs":982,"sp":2711,"mr":12890,"gr":0,"net":71855,"gross":163850,"disc":-80925,"ret":-11070,"clicks":261,"purch":2,"impr":14853},"2026-01-08":{"ms":1584,"gs":965,"sp":2549,"mr":28665,"gr":193,"net":39980,"gross":95580,"disc":-47790,"ret":-7810,"clicks":251,"purch":11,"impr":13780},"2026-01-09":{"ms":1489,"gs":800,"sp":2289,"mr":5750,"gr":0,"net":59016,"gross":101500,"disc":-42484,"ret":0,"clicks":233,"purch":4,"impr":12947},"2026-01-10":{"ms":1473,"gs":982,"sp":2455,"mr":21465,"gr":0,"net":45395,"gross":90790,"disc":-45395,"ret":0,"clicks":214,"purch":5,"impr":12543},"2026-01-11":{"ms":1772,"gs":995,"sp":2767,"mr":24065,"gr":0,"net":55535,"gross":110330,"disc":-54795,"ret":0,"clicks":333,"purch":10,"impr":14962},"2026-01-12":{"ms":1622,"gs":999,"sp":2621,"mr":12710,"gr":0,"net":5175,"gross":87310,"disc":-42608,"ret":-39527,"clicks":293,"purch":7,"impr":15265},"2026-01-13":{"ms":1632,"gs":1017,"sp":2649,"mr":13400,"gr":0,"net":7701,"gross":86680,"disc":-37910,"ret":-41069,"clicks":310,"purch":4,"impr":14005},"2026-01-14":{"ms":1587,"gs":972,"sp":2559,"mr":10200,"gr":0,"net":23515,"gross":73510,"disc":-35755,"ret":-14240,"clicks":325,"purch":5,"impr":12883},"2026-01-15":{"ms":1495,"gs":1047,"sp":2542,"mr":7750,"gr":0,"net":38350,"gross":76700,"disc":-38350,"ret":0,"clicks":271,"purch":2,"impr":12518},"2026-01-16":{"ms":1575,"gs":805,"sp":2380,"mr":22725,"gr":0,"net":-2490,"gross":43450,"disc":-20725,"ret":-25214,"clicks":279,"purch":8,"impr":14106},"2026-01-17":{"ms":1517,"gs":1370,"sp":2887,"mr":13945,"gr":0,"net":42315,"gross":84630,"disc":-42315,"ret":0,"clicks":335,"purch":5,"impr":12702},"2026-01-18":{"ms":1818,"gs":857,"sp":2675,"mr":14945,"gr":0,"net":97562,"gross":176465,"disc":-78902,"ret":0,"clicks":298,"purch":8,"impr":16428},"2026-01-19":{"ms":1643,"gs":879,"sp":2522,"mr":19180,"gr":0,"net":59905,"gross":108580,"disc":-48675,"ret":0,"clicks":258,"purch":4,"impr":16357},"2026-01-20":{"ms":1540,"gs":945,"sp":2485,"mr":25650,"gr":0,"net":15100,"gross":71650,"disc":-34825,"ret":-21725,"clicks":223,"purch":7,"impr":12752},"2026-01-21":{"ms":1711,"gs":978,"sp":2689,"mr":27211,"gr":0,"net":46591,"gross":82950,"disc":-36359,"ret":0,"clicks":388,"purch":8,"impr":14999},"2026-01-22":{"ms":1787,"gs":1023,"sp":2810,"mr":101334,"gr":0,"net":106624,"gross":177510,"disc":-70886,"ret":0,"clicks":397,"purch":20,"impr":15708},"2026-01-23":{"ms":1515,"gs":793,"sp":2308,"mr":66561,"gr":0,"net":91505,"gross":113461,"disc":-21956,"ret":0,"clicks":334,"purch":11,"impr":11685},"2026-01-24":{"ms":1398,"gs":765,"sp":2163,"mr":15241,"gr":0,"net":16377,"gross":20580,"disc":-4203,"ret":0,"clicks":323,"purch":8,"impr":10960},"2026-01-25":{"ms":1721,"gs":1288,"sp":3009,"mr":38579,"gr":0,"net":63999,"gross":85298,"disc":-21299,"ret":0,"clicks":474,"purch":12,"impr":14642},"2026-01-26":{"ms":1704,"gs":992,"sp":2696,"mr":32112,"gr":0,"net":58426,"gross":69911,"disc":-8258,"ret":-3228,"clicks":363,"purch":12,"impr":14946},"2026-01-27":{"ms":1647,"gs":1016,"sp":2663,"mr":40423,"gr":0,"net":49163,"gross":57660,"disc":-8497,"ret":0,"clicks":374,"purch":10,"impr":15162},"2026-01-28":{"ms":1473,"gs":910,"sp":2383,"mr":41240,"gr":0,"net":50861,"gross":56940,"disc":-6079,"ret":0,"clicks":311,"purch":8,"impr":12712},"2026-01-29":{"ms":1537,"gs":897,"sp":2434,"mr":8972,"gr":0,"net":5021,"gross":17502,"disc":-2773,"ret":-9708,"clicks":356,"purch":9,"impr":12484},"2026-01-30":{"ms":1516,"gs":817,"sp":2333,"mr":34638,"gr":0,"net":48107,"gross":69985,"disc":-17468,"ret":-4410,"clicks":334,"purch":9,"impr":13384},"2026-01-31":{"ms":1597,"gs":761,"sp":2358,"mr":12080,"gr":0,"net":29410,"gross":29410,"disc":0,"ret":0,"clicks":500,"purch":9,"impr":13538},"2026-02-01":{"ms":1795,"gs":1006,"sp":2801,"mr":16214,"gr":0,"net":21664,"gross":24160,"disc":-2496,"ret":0,"clicks":494,"purch":8,"impr":14383},"2026-02-02":{"ms":1292,"gs":931,"sp":2223,"mr":8582,"gr":0,"net":14442,"gross":18930,"disc":-1548,"ret":-2940,"clicks":311,"purch":4,"impr":13706},"2026-02-03":{"ms":834,"gs":959,"sp":1793,"mr":10224,"gr":0,"net":21808,"gross":27456,"disc":-5648,"ret":0,"clicks":221,"purch":6,"impr":6774},"2026-02-04":{"ms":902,"gs":982,"sp":1884,"mr":15620,"gr":0,"net":15216,"gross":35087,"disc":-2773,"ret":-17098,"clicks":356,"purch":9,"impr":8110},"2026-02-05":{"ms":890,"gs":929,"sp":1819,"mr":27774,"gr":0,"net":24674,"gross":31660,"disc":-4046,"ret":-2940,"clicks":273,"purch":8,"impr":7896},"2026-02-06":{"ms":815,"gs":701,"sp":1516,"mr":8250,"gr":0,"net":29982,"gross":34770,"disc":-4788,"ret":0,"clicks":261,"purch":6,"impr":7472},"2026-02-07":{"ms":788,"gs":1272,"sp":2060,"mr":15074,"gr":0,"net":40362,"gross":44520,"disc":-4158,"ret":0,"clicks":353,"purch":4,"impr":6423},"2026-02-08":{"ms":910,"gs":900,"sp":1810,"mr":12530,"gr":0,"net":40879,"gross":50232,"disc":-9353,"ret":0,"clicks":439,"purch":7,"impr":7241},"2026-02-09":{"ms":799,"gs":1199,"sp":1998,"mr":32467,"gr":0,"net":-6309,"gross":36746,"disc":-553,"ret":-42502,"clicks":369,"purch":14,"impr":7184},"2026-02-10":{"ms":849,"gs":780,"sp":1629,"mr":23905,"gr":0,"net":44042,"gross":65117,"disc":-10305,"ret":-10770,"clicks":367,"purch":10,"impr":7519},"2026-02-11":{"ms":899,"gs":1074,"sp":1973,"mr":14720,"gr":0,"net":61332,"gross":103520,"disc":-37973,"ret":-4215,"clicks":532,"purch":5,"impr":11244},"2026-02-12":{"ms":815,"gs":500,"sp":1315,"mr":8900,"gr":187,"net":-6150,"gross":11760,"disc":0,"ret":-17910,"clicks":483,"purch":6,"impr":9910},"2026-02-13":{"ms":836,"gs":426,"sp":1262,"mr":0,"gr":0,"net":-5610,"gross":0,"disc":0,"ret":-5610,"clicks":453,"purch":0,"impr":10319},"2026-02-14":{"ms":813,"gs":541,"sp":1354,"mr":0,"gr":2080,"net":2660,"gross":2660,"disc":0,"ret":0,"clicks":466,"purch":1,"impr":9942},"2026-02-15":{"ms":853,"gs":591,"sp":1444,"mr":37191,"gr":11151,"net":57154,"gross":78500,"disc":-21346,"ret":0,"clicks":504,"purch":15,"impr":10346},"2026-02-16":{"ms":765,"gs":504,"sp":1269,"mr":7440,"gr":0,"net":16556,"gross":24206,"disc":-7650,"ret":0,"clicks":369,"purch":3,"impr":9908},"2026-02-17":{"ms":785,"gs":362,"sp":1147,"mr":29406,"gr":0,"net":49742,"gross":77106,"disc":-27364,"ret":0,"clicks":449,"purch":4,"impr":10172},"2026-02-18":{"ms":793,"gs":676,"sp":1469,"mr":8600,"gr":0,"net":14560,"gross":20900,"disc":-6340,"ret":0,"clicks":445,"purch":4,"impr":10724},"2026-02-19":{"ms":775,"gs":162,"sp":937,"mr":1940,"gr":24886,"net":18220,"gross":18520,"disc":-300,"ret":0,"clicks":324,"purch":5,"impr":8997},"2026-02-20":{"ms":945,"gs":800,"sp":1745,"mr":37142,"gr":5094,"net":43922,"gross":46626,"disc":-2704,"ret":0,"clicks":561,"purch":10,"impr":10766},"2026-02-21":{"ms":906,"gs":672,"sp":1578,"mr":38442,"gr":91,"net":41222,"gross":54220,"disc":-12998,"ret":0,"clicks":491,"purch":12,"impr":11754},"2026-02-22":{"ms":906,"gs":1265,"sp":2171,"mr":4560,"gr":0,"net":26540,"gross":31880,"disc":-5340,"ret":0,"clicks":539,"purch":5,"impr":11644},"2026-02-23":{"ms":804,"gs":1106,"sp":1910,"mr":6040,"gr":17249,"net":21202,"gross":55840,"disc":-19620,"ret":-15018,"clicks":465,"purch":6,"impr":9359},"2026-02-24":{"ms":834,"gs":870,"sp":1704,"mr":16460,"gr":0,"net":23240,"gross":27860,"disc":-4620,"ret":0,"clicks":519,"purch":8,"impr":9477},"2026-02-25":{"ms":1023,"gs":644,"sp":1667,"mr":65002,"gr":27195,"net":72356,"gross":100736,"disc":-28380,"ret":0,"clicks":626,"purch":26,"impr":11001},"2026-02-26":{"ms":875,"gs":701,"sp":1576,"mr":0,"gr":2039,"net":16520,"gross":16520,"disc":0,"ret":0,"clicks":497,"purch":5,"impr":9794},"2026-02-27":{"ms":738,"gs":584,"sp":1322,"mr":11230,"gr":3915,"net":22536,"gross":23910,"disc":-1374,"ret":0,"clicks":477,"purch":8,"impr":8862},"2026-02-28":{"ms":761,"gs":766,"sp":1527,"mr":77792,"gr":467,"net":61686,"gross":87932,"disc":-26246,"ret":0,"clicks":562,"purch":16,"impr":8582},"2026-03-01":{"ms":836,"gs":725,"sp":1561,"mr":4320,"gr":8871,"net":44510,"gross":86080,"disc":-41570,"ret":0,"clicks":565,"purch":6,"impr":8773},"2026-03-02":{"ms":1000,"gs":703,"sp":1703,"mr":32110,"gr":16600,"net":70405,"gross":140810,"disc":-70405,"ret":0,"clicks":604,"purch":8,"impr":14061},"2026-03-03":{"ms":863,"gs":637,"sp":1500,"mr":10840,"gr":6850,"net":-15566,"gross":77980,"disc":-38990,"ret":-54556,"clicks":569,"purch":4,"impr":9983},"2026-03-04":{"ms":807,"gs":732,"sp":1539,"mr":12985,"gr":0,"net":12985,"gross":25970,"disc":-12985,"ret":0,"clicks":455,"purch":3,"impr":9484},"2026-03-05":{"ms":740,"gs":762,"sp":1502,"mr":21265,"gr":5805,"net":51435,"gross":126330,"disc":-63165,"ret":-11730,"clicks":454,"purch":8,"impr":8818},"2026-03-06":{"ms":894,"gs":344,"sp":1238,"mr":5330,"gr":10660,"net":4020,"gross":23630,"disc":-7640,"ret":-11970,"clicks":416,"purch":9,"impr":9571},"2026-03-07":{"ms":800,"gs":946,"sp":1746,"mr":3375,"gr":16710,"net":3375,"gross":6750,"disc":-3375,"ret":0,"clicks":429,"purch":4,"impr":9204},"2026-03-08":{"ms":869,"gs":697,"sp":1566,"mr":50810,"gr":62828,"net":128338,"gross":256675,"disc":-128338,"ret":0,"clicks":463,"purch":10,"impr":10944},"2026-03-09":{"ms":768,"gs":923,"sp":1691,"mr":41525,"gr":0,"net":34810,"gross":69620,"disc":-34810,"ret":0,"clicks":479,"purch":13,"impr":10798},"2026-03-10":{"ms":791,"gs":851,"sp":1642,"mr":0,"gr":0,"net":-4940,"gross":15380,"disc":-7690,"ret":-12630,"clicks":450,"purch":0,"impr":10312},"2026-03-11":{"ms":763,"gs":631,"sp":1394,"mr":23550,"gr":0,"net":43717,"gross":107770,"disc":-53213,"ret":-10840,"clicks":384,"purch":3,"impr":9972},"2026-03-12":{"ms":786,"gs":363,"sp":1149,"mr":25835,"gr":0,"net":23315,"gross":51670,"disc":-25835,"ret":-2520,"clicks":358,"purch":6,"impr":10544},"2026-03-13":{"ms":813,"gs":1003,"sp":1816,"mr":9320,"gr":21085,"net":47605,"gross":95210,"disc":-47605,"ret":0,"clicks":397,"purch":5,"impr":11623},"2026-03-14":{"ms":803,"gs":743,"sp":1546,"mr":11725,"gr":0,"net":33040,"gross":66080,"disc":-33040,"ret":0,"clicks":372,"purch":4,"impr":10496},"2026-03-15":{"ms":884,"gs":395,"sp":1279,"mr":2225,"gr":11150,"net":28325,"gross":55660,"disc":-27335,"ret":0,"clicks":503,"purch":4,"impr":11355},"2026-03-16":{"ms":747,"gs":828,"sp":1575,"mr":9800,"gr":0,"net":-8692,"gross":9800,"disc":0,"ret":-18492,"clicks":399,"purch":3,"impr":9368},"2026-03-17":{"ms":841,"gs":606,"sp":1447,"mr":10738,"gr":0,"net":-75220,"gross":19000,"disc":-8342,"ret":-85878,"clicks":410,"purch":6,"impr":11343},"2026-03-18":{"ms":751,"gs":776,"sp":1527,"mr":14280,"gr":399,"net":3150,"gross":28560,"disc":-14280,"ret":-11130,"clicks":393,"purch":4,"impr":10539},"2026-03-19":{"ms":693,"gs":747,"sp":1440,"mr":0,"gr":21376,"net":7155,"gross":14310,"disc":-7155,"ret":0,"clicks":372,"purch":2,"impr":9729},"2026-03-20":{"ms":793,"gs":570,"sp":1363,"mr":23250,"gr":0,"net":47285,"gross":90650,"disc":-43365,"ret":0,"clicks":391,"purch":8,"impr":10675},"2026-03-21":{"ms":828,"gs":701,"sp":1529,"mr":20595,"gr":0,"net":14065,"gross":28130,"disc":-14065,"ret":0,"clicks":413,"purch":3,"impr":10274},"2026-03-22":{"ms":931,"gs":672,"sp":1603,"mr":43914,"gr":4965,"net":49720,"gross":95955,"disc":-46236,"ret":0,"clicks":501,"purch":14,"impr":12461},"2026-03-23":{"ms":418,"gs":591,"sp":1009,"mr":10475,"gr":1681,"net":20570,"gross":39870,"disc":-19300,"ret":0,"clicks":249,"purch":4,"impr":5331},"2026-03-24":{"ms":0,"gs":634,"sp":634,"mr":0,"gr":0,"net":-3250,"gross":13100,"disc":-6550,"ret":-9800,"clicks":73,"purch":0,"impr":0},"2026-03-25":{"ms":0,"gs":898,"sp":898,"mr":0,"gr":0,"net":6245,"gross":11950,"disc":-5705,"ret":0,"clicks":62,"purch":0,"impr":0},"2026-03-26":{"ms":311,"gs":538,"sp":849,"mr":0,"gr":0,"net":35045,"gross":66170,"disc":-31125,"ret":0,"clicks":196,"purch":0,"impr":4445},"2026-03-27":{"ms":1124,"gs":984,"sp":2108,"mr":22985,"gr":0,"net":37550,"gross":74560,"disc":-37010,"ret":0,"clicks":535,"purch":5,"impr":16395},"2026-03-28":{"ms":1131,"gs":294,"sp":1425,"mr":19525,"gr":33060,"net":48665,"gross":97330,"disc":-48665,"ret":0,"clicks":549,"purch":9,"impr":18907},"2026-03-29":{"ms":926,"gs":832,"sp":1758,"mr":64025,"gr":605,"net":70795,"gross":141590,"disc":-70795,"ret":0,"clicks":532,"purch":4,"impr":13535},"2026-03-30":{"ms":793,"gs":631,"sp":1424,"mr":2105,"gr":10651,"net":21366,"gross":61450,"disc":-30725,"ret":-9360,"clicks":467,"purch":5,"impr":12506},"2026-03-31":{"ms":756,"gs":676,"sp":1432,"mr":24115,"gr":70,"net":34104,"gross":67245,"disc":-32466,"ret":-675,"clicks":409,"purch":5,"impr":11138},"2026-04-01":{"ms":668,"gs":473,"sp":1141,"mr":9790,"gr":91,"net":8760,"gross":37250,"disc":-18625,"ret":-9865,"clicks":357,"purch":3,"impr":11164},"2026-04-02":{"ms":801,"gs":1132,"sp":1933,"mr":0,"gr":0,"net":82514,"gross":149515,"disc":-67000,"ret":0,"clicks":413,"purch":1,"impr":12088},"2026-04-03":{"ms":867,"gs":591,"sp":1458,"mr":38085,"gr":0,"net":44945,"gross":85970,"disc":-41025,"ret":0,"clicks":451,"purch":9,"impr":13298},"2026-04-04":{"ms":774,"gs":982,"sp":1756,"mr":47730,"gr":7405,"net":88880,"gross":177760,"disc":-88880,"ret":0,"clicks":423,"purch":7,"impr":12286},"2026-04-05":{"ms":864,"gs":392,"sp":1256,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":445,"purch":0,"impr":13446},"2026-04-06":{"ms":808,"gs":820,"sp":1628,"mr":36125,"gr":23195,"net":28410,"gross":52900,"disc":-24490,"ret":0,"clicks":500,"purch":11,"impr":12347},"2026-04-07":{"ms":693,"gs":635,"sp":1328,"mr":0,"gr":17860,"net":32055,"gross":60190,"disc":-28135,"ret":0,"clicks":350,"purch":2,"impr":10662},"2026-04-08":{"ms":756,"gs":655,"sp":1411,"mr":0,"gr":0,"net":-25910,"gross":0,"disc":0,"ret":-25910,"clicks":399,"purch":0,"impr":10650},"2026-04-09":{"ms":763,"gs":956,"sp":1719,"mr":15220,"gr":0,"net":35455,"gross":70910,"disc":-35455,"ret":0,"clicks":322,"purch":2,"impr":9457},"2026-04-10":{"ms":747,"gs":716,"sp":1463,"mr":28445,"gr":6380,"net":62260,"gross":156310,"disc":-75790,"ret":-18260,"clicks":314,"purch":7,"impr":8646},"2026-04-11":{"ms":722,"gs":684,"sp":1406,"mr":4110,"gr":12985,"net":17095,"gross":34190,"disc":-17095,"ret":0,"clicks":361,"purch":3,"impr":8638},"2026-04-12":{"ms":860,"gs":767,"sp":1627,"mr":17370,"gr":6010,"net":17370,"gross":25970,"disc":-8600,"ret":0,"clicks":403,"purch":5,"impr":10000},"2026-04-13":{"ms":0,"gs":772,"sp":772,"mr":0,"gr":0,"net":19065,"gross":38130,"disc":-19065,"ret":0,"clicks":64,"purch":0,"impr":0}},"Callaway":{"2026-01-01":{"ms":1923,"gs":506,"sp":2429,"mr":31302,"gr":11088,"net":45945,"gross":51050,"disc":-5105,"ret":0,"clicks":459,"purch":5,"impr":39135},"2026-01-02":{"ms":1720,"gs":493,"sp":2213,"mr":12879,"gr":10584,"net":23463,"gross":26070,"disc":-2607,"ret":0,"clicks":391,"purch":4,"impr":41823},"2026-01-03":{"ms":1948,"gs":522,"sp":2470,"mr":45297,"gr":12643,"net":57940,"gross":64378,"disc":-6438,"ret":0,"clicks":364,"purch":5,"impr":42876},"2026-01-04":{"ms":2154,"gs":450,"sp":2604,"mr":11529,"gr":0,"net":11450,"gross":12722,"disc":-1272,"ret":0,"clicks":386,"purch":4,"impr":51164},"2026-01-05":{"ms":2020,"gs":590,"sp":2610,"mr":836,"gr":756,"net":28710,"gross":31900,"disc":-3190,"ret":0,"clicks":360,"purch":3,"impr":43047},"2026-01-06":{"ms":2055,"gs":520,"sp":2575,"mr":18755,"gr":4293,"net":39978,"gross":44420,"disc":-4442,"ret":0,"clicks":301,"purch":4,"impr":43685},"2026-01-07":{"ms":2030,"gs":438,"sp":2468,"mr":0,"gr":0,"net":0,"gross":14310,"disc":-1431,"ret":-12879,"clicks":294,"purch":1,"impr":44424},"2026-01-08":{"ms":2089,"gs":576,"sp":2665,"mr":17624,"gr":0,"net":25033,"gross":27814,"disc":-2781,"ret":0,"clicks":290,"purch":4,"impr":45155},"2026-01-09":{"ms":1767,"gs":537,"sp":2304,"mr":0,"gr":0,"net":480,"gross":980,"disc":-500,"ret":0,"clicks":308,"purch":0,"impr":32372},"2026-01-10":{"ms":1874,"gs":457,"sp":2331,"mr":36640,"gr":150,"net":36910,"gross":46100,"disc":-9190,"ret":0,"clicks":254,"purch":2,"impr":31761},"2026-01-11":{"ms":2172,"gs":546,"sp":2718,"mr":32913,"gr":0,"net":32913,"gross":36570,"disc":-3657,"ret":0,"clicks":266,"purch":5,"impr":38461},"2026-01-12":{"ms":2055,"gs":365,"sp":2420,"mr":7614,"gr":0,"net":7614,"gross":8460,"disc":-846,"ret":0,"clicks":262,"purch":2,"impr":36837},"2026-01-13":{"ms":2023,"gs":582,"sp":2605,"mr":0,"gr":11369,"net":22541,"gross":26508,"disc":-3967,"ret":0,"clicks":311,"purch":3,"impr":35227},"2026-01-14":{"ms":1972,"gs":590,"sp":2562,"mr":0,"gr":8900,"net":1575,"gross":1750,"disc":-175,"ret":0,"clicks":298,"purch":1,"impr":29472},"2026-01-15":{"ms":1983,"gs":540,"sp":2523,"mr":12130,"gr":10149,"net":19052,"gross":20180,"disc":-1128,"ret":0,"clicks":267,"purch":9,"impr":33947},"2026-01-16":{"ms":1857,"gs":464,"sp":2321,"mr":7614,"gr":44000,"net":51614,"gross":119260,"disc":-67646,"ret":0,"clicks":271,"purch":3,"impr":34186},"2026-01-17":{"ms":1934,"gs":420,"sp":2354,"mr":7520,"gr":0,"net":7520,"gross":9400,"disc":-1880,"ret":0,"clicks":254,"purch":2,"impr":32465},"2026-01-18":{"ms":2237,"gs":542,"sp":2779,"mr":0,"gr":0,"net":756,"gross":840,"disc":-84,"ret":0,"clicks":357,"purch":1,"impr":34391},"2026-01-19":{"ms":1957,"gs":486,"sp":2444,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":267,"purch":0,"impr":34972},"2026-01-20":{"ms":2016,"gs":484,"sp":2500,"mr":0,"gr":26631,"net":-51747,"gross":3090,"disc":-309,"ret":-54528,"clicks":271,"purch":3,"impr":32519},"2026-01-21":{"ms":1983,"gs":446,"sp":2429,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":251,"purch":0,"impr":34552},"2026-01-22":{"ms":1938,"gs":578,"sp":2516,"mr":0,"gr":0,"net":2511,"gross":2790,"disc":-279,"ret":0,"clicks":267,"purch":0,"impr":35046},"2026-01-23":{"ms":2029,"gs":720,"sp":2749,"mr":47700,"gr":0,"net":124950,"gross":124950,"disc":0,"ret":0,"clicks":509,"purch":6,"impr":24759},"2026-01-24":{"ms":1815,"gs":2107,"sp":3922,"mr":0,"gr":40113,"net":0,"gross":0,"disc":0,"ret":0,"clicks":702,"purch":2,"impr":15196},"2026-01-25":{"ms":2076,"gs":1461,"sp":3537,"mr":0,"gr":0,"net":12320,"gross":12320,"disc":0,"ret":0,"clicks":559,"purch":1,"impr":21480},"2026-01-26":{"ms":1927,"gs":1414,"sp":3341,"mr":0,"gr":0,"net":0,"gross":14900,"disc":-14900,"ret":0,"clicks":481,"purch":0,"impr":18419},"2026-01-27":{"ms":2075,"gs":1517,"sp":3592,"mr":0,"gr":0,"net":48410,"gross":48410,"disc":0,"ret":0,"clicks":458,"purch":0,"impr":18286},"2026-01-28":{"ms":2006,"gs":1323,"sp":3329,"mr":72260,"gr":1180,"net":77170,"gross":86110,"disc":-8940,"ret":0,"clicks":440,"purch":3,"impr":17699},"2026-01-29":{"ms":1955,"gs":1778,"sp":3733,"mr":8900,"gr":0,"net":8330,"gross":8900,"disc":0,"ret":-570,"clicks":413,"purch":1,"impr":17486},"2026-01-30":{"ms":2558,"gs":1629,"sp":4187,"mr":17820,"gr":25820,"net":17820,"gross":17820,"disc":0,"ret":0,"clicks":472,"purch":3,"impr":23592},"2026-01-31":{"ms":2957,"gs":1949,"sp":4906,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":498,"purch":0,"impr":25515},"2026-02-01":{"ms":3539,"gs":1573,"sp":5112,"mr":3536,"gr":11456,"net":27306,"gross":27306,"disc":0,"ret":0,"clicks":564,"purch":3,"impr":33345},"2026-02-02":{"ms":3532,"gs":1484,"sp":5016,"mr":9360,"gr":0,"net":9360,"gross":9360,"disc":0,"ret":0,"clicks":494,"purch":2,"impr":31372},"2026-02-03":{"ms":3381,"gs":1844,"sp":5225,"mr":0,"gr":0,"net":1728,"gross":1728,"disc":0,"ret":0,"clicks":520,"purch":0,"impr":30401},"2026-02-04":{"ms":3484,"gs":1929,"sp":5413,"mr":29700,"gr":65870,"net":29700,"gross":29700,"disc":0,"ret":0,"clicks":455,"purch":4,"impr":30357},"2026-02-05":{"ms":3269,"gs":1866,"sp":5135,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":413,"purch":0,"impr":27616},"2026-02-06":{"ms":2446,"gs":1731,"sp":4177,"mr":0,"gr":36661,"net":20736,"gross":25920,"disc":-5184,"ret":0,"clicks":473,"purch":2,"impr":20159},"2026-02-07":{"ms":1583,"gs":1768,"sp":3351,"mr":24600,"gr":37204,"net":73650,"gross":73650,"disc":0,"ret":0,"clicks":570,"purch":4,"impr":13893},"2026-02-08":{"ms":2040,"gs":1779,"sp":3819,"mr":20670,"gr":53986,"net":45990,"gross":45990,"disc":0,"ret":0,"clicks":494,"purch":6,"impr":17428},"2026-02-09":{"ms":2065,"gs":1800,"sp":3865,"mr":8460,"gr":0,"net":8460,"gross":8460,"disc":0,"ret":0,"clicks":528,"purch":2,"impr":19013},"2026-02-10":{"ms":2050,"gs":1834,"sp":3884,"mr":0,"gr":36145,"net":0,"gross":0,"disc":0,"ret":0,"clicks":475,"purch":2,"impr":18861},"2026-02-11":{"ms":1959,"gs":2094,"sp":4053,"mr":16020,"gr":0,"net":15940,"gross":15940,"disc":0,"ret":0,"clicks":460,"purch":3,"impr":19148},"2026-02-12":{"ms":1404,"gs":895,"sp":2299,"mr":23850,"gr":17265,"net":47700,"gross":47700,"disc":0,"ret":0,"clicks":287,"purch":4,"impr":13749},"2026-02-13":{"ms":1219,"gs":656,"sp":1875,"mr":23850,"gr":0,"net":23850,"gross":23850,"disc":0,"ret":0,"clicks":264,"purch":3,"impr":12403},"2026-02-14":{"ms":1063,"gs":780,"sp":1843,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":310,"purch":0,"impr":11274},"2026-02-15":{"ms":1221,"gs":969,"sp":2190,"mr":0,"gr":39229,"net":39440,"gross":39440,"disc":0,"ret":0,"clicks":352,"purch":4,"impr":13734},"2026-02-16":{"ms":1199,"gs":753,"sp":1952,"mr":13100,"gr":36300,"net":36300,"gross":39300,"disc":-3000,"ret":0,"clicks":335,"purch":5,"impr":14559},"2026-02-17":{"ms":1200,"gs":698,"sp":1898,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":286,"purch":0,"impr":15396},"2026-02-18":{"ms":1216,"gs":1056,"sp":2272,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":325,"purch":0,"impr":15740},"2026-02-19":{"ms":1173,"gs":1009,"sp":2182,"mr":0,"gr":0,"net":26530,"gross":26530,"disc":0,"ret":0,"clicks":275,"purch":0,"impr":15179},"2026-02-20":{"ms":1237,"gs":801,"sp":2038,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":329,"purch":0,"impr":15870},"2026-02-21":{"ms":1431,"gs":1148,"sp":2579,"mr":920,"gr":0,"net":840,"gross":840,"disc":0,"ret":0,"clicks":388,"purch":2,"impr":16823},"2026-02-22":{"ms":1554,"gs":1246,"sp":2800,"mr":0,"gr":1970,"net":1970,"gross":1970,"disc":0,"ret":0,"clicks":402,"purch":1,"impr":19628},"2026-02-23":{"ms":1862,"gs":2134,"sp":3996,"mr":0,"gr":24600,"net":24600,"gross":24600,"disc":0,"ret":0,"clicks":498,"purch":1,"impr":24093},"2026-02-24":{"ms":2540,"gs":2194,"sp":4734,"mr":0,"gr":0,"net":46270,"gross":46270,"disc":0,"ret":0,"clicks":469,"purch":0,"impr":26055},"2026-02-25":{"ms":2570,"gs":2092,"sp":4662,"mr":0,"gr":44,"net":0,"gross":0,"disc":0,"ret":0,"clicks":492,"purch":0,"impr":25996},"2026-02-26":{"ms":2547,"gs":1369,"sp":3916,"mr":39360,"gr":39511,"net":39280,"gross":39280,"disc":0,"ret":0,"clicks":428,"purch":6,"impr":24912},"2026-02-27":{"ms":2543,"gs":2503,"sp":5046,"mr":22140,"gr":35138,"net":31040,"gross":33500,"disc":-2460,"ret":0,"clicks":529,"purch":5,"impr":25586},"2026-02-28":{"ms":2111,"gs":2109,"sp":4220,"mr":20670,"gr":23040,"net":38730,"gross":38730,"disc":0,"ret":0,"clicks":481,"purch":9,"impr":20781},"2026-03-01":{"ms":2610,"gs":2568,"sp":5178,"mr":0,"gr":0,"net":2940,"gross":2940,"disc":0,"ret":0,"clicks":493,"purch":0,"impr":27275},"2026-03-02":{"ms":2516,"gs":2568,"sp":5084,"mr":1830,"gr":0,"net":1750,"gross":1750,"disc":0,"ret":0,"clicks":438,"purch":2,"impr":25068},"2026-03-03":{"ms":2599,"gs":2298,"sp":4897,"mr":0,"gr":0,"net":26070,"gross":27070,"disc":-1000,"ret":0,"clicks":429,"purch":0,"impr":28177},"2026-03-04":{"ms":2044,"gs":1879,"sp":3923,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":459,"purch":0,"impr":16663},"2026-03-05":{"ms":1648,"gs":1665,"sp":3313,"mr":11625,"gr":19625,"net":11625,"gross":11625,"disc":0,"ret":0,"clicks":436,"purch":4,"impr":12744},"2026-03-06":{"ms":1611,"gs":740,"sp":2351,"mr":23850,"gr":23850,"net":45660,"gross":45660,"disc":0,"ret":0,"clicks":301,"purch":4,"impr":13542},"2026-03-07":{"ms":1639,"gs":1100,"sp":2739,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":271,"purch":0,"impr":12514},"2026-03-08":{"ms":1965,"gs":831,"sp":2796,"mr":0,"gr":0,"net":40350,"gross":40350,"disc":0,"ret":0,"clicks":296,"purch":1,"impr":15531},"2026-03-09":{"ms":1852,"gs":596,"sp":2448,"mr":0,"gr":9683,"net":11600,"gross":12600,"disc":-1000,"ret":0,"clicks":293,"purch":1,"impr":15734},"2026-03-10":{"ms":1849,"gs":503,"sp":2352,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":262,"purch":0,"impr":14230},"2026-03-11":{"ms":1756,"gs":555,"sp":2311,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":274,"purch":0,"impr":13411},"2026-03-12":{"ms":1755,"gs":498,"sp":2252,"mr":9360,"gr":0,"net":9360,"gross":9360,"disc":0,"ret":0,"clicks":285,"purch":2,"impr":13812},"2026-03-13":{"ms":1684,"gs":581,"sp":2265,"mr":0,"gr":24600,"net":0,"gross":0,"disc":0,"ret":0,"clicks":287,"purch":1,"impr":15151},"2026-03-14":{"ms":1735,"gs":541,"sp":2276,"mr":14270,"gr":0,"net":38870,"gross":38870,"disc":0,"ret":0,"clicks":289,"purch":3,"impr":14668},"2026-03-15":{"ms":2305,"gs":544,"sp":2849,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":333,"purch":1,"impr":16463},"2026-03-16":{"ms":1618,"gs":558,"sp":2176,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":273,"purch":0,"impr":14651},"2026-03-17":{"ms":2256,"gs":598,"sp":2854,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":136,"purch":0,"impr":4331},"2026-03-18":{"ms":1020,"gs":446,"sp":1466,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":296,"purch":0,"impr":9313},"2026-03-19":{"ms":2255,"gs":560,"sp":2815,"mr":21900,"gr":0,"net":43800,"gross":83600,"disc":-39800,"ret":0,"clicks":517,"purch":2,"impr":21023},"2026-03-20":{"ms":3199,"gs":599,"sp":3798,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":516,"purch":0,"impr":30297},"2026-03-21":{"ms":3628,"gs":424,"sp":4052,"mr":24600,"gr":0,"net":24600,"gross":24600,"disc":0,"ret":0,"clicks":595,"purch":1,"impr":30264},"2026-03-22":{"ms":3772,"gs":545,"sp":4317,"mr":43860,"gr":0,"net":45990,"gross":65890,"disc":-19900,"ret":0,"clicks":606,"purch":4,"impr":35582},"2026-03-23":{"ms":1922,"gs":486,"sp":2408,"mr":0,"gr":0,"net":-24600,"gross":0,"disc":0,"ret":-24600,"clicks":312,"purch":0,"impr":19077},"2026-03-24":{"ms":0,"gs":582,"sp":582,"mr":0,"gr":5810,"net":5810,"gross":5810,"disc":0,"ret":0,"clicks":108,"purch":1,"impr":0},"2026-03-25":{"ms":0,"gs":529,"sp":529,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":76,"purch":0,"impr":0},"2026-03-26":{"ms":4730,"gs":1201,"sp":5931,"mr":0,"gr":0,"net":12600,"gross":12600,"disc":0,"ret":0,"clicks":644,"purch":0,"impr":39692},"2026-03-27":{"ms":5145,"gs":2676,"sp":7821,"mr":0,"gr":0,"net":5229,"gross":5810,"disc":-581,"ret":0,"clicks":825,"purch":2,"impr":45401},"2026-03-28":{"ms":5164,"gs":2392,"sp":7556,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":743,"purch":0,"impr":48607},"2026-03-29":{"ms":3585,"gs":3556,"sp":7141,"mr":0,"gr":8900,"net":23750,"gross":23750,"disc":0,"ret":0,"clicks":621,"purch":1,"impr":33310},"2026-03-30":{"ms":2100,"gs":1581,"sp":3681,"mr":0,"gr":0,"net":17720,"gross":17720,"disc":0,"ret":0,"clicks":331,"purch":0,"impr":21180},"2026-03-31":{"ms":1618,"gs":633,"sp":2251,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":235,"purch":1,"impr":19860},"2026-04-01":{"ms":1555,"gs":747,"sp":2302,"mr":0,"gr":0,"net":9360,"gross":9360,"disc":0,"ret":0,"clicks":225,"purch":0,"impr":19837},"2026-04-02":{"ms":2212,"gs":683,"sp":2895,"mr":21900,"gr":0,"net":21900,"gross":41800,"disc":-19900,"ret":0,"clicks":335,"purch":9,"impr":28254},"2026-04-03":{"ms":2715,"gs":881,"sp":3596,"mr":13850,"gr":6260,"net":13850,"gross":14850,"disc":-1000,"ret":0,"clicks":316,"purch":6,"impr":29274},"2026-04-04":{"ms":2589,"gs":768,"sp":3357,"mr":0,"gr":22130,"net":28400,"gross":58000,"disc":-29600,"ret":0,"clicks":293,"purch":2,"impr":31876},"2026-04-05":{"ms":2537,"gs":800,"sp":3337,"mr":11620,"gr":0,"net":11620,"gross":11620,"disc":0,"ret":0,"clicks":340,"purch":2,"impr":29391},"2026-04-06":{"ms":2654,"gs":761,"sp":3415,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":319,"purch":0,"impr":31313},"2026-04-07":{"ms":2522,"gs":671,"sp":3193,"mr":36450,"gr":0,"net":17450,"gross":36450,"disc":0,"ret":-19000,"clicks":288,"purch":2,"impr":32972},"2026-04-08":{"ms":2577,"gs":700,"sp":3277,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":305,"purch":1,"impr":34321},"2026-04-09":{"ms":2274,"gs":688,"sp":2962,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":267,"purch":0,"impr":31771},"2026-04-10":{"ms":1931,"gs":531,"sp":2462,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":284,"purch":0,"impr":25605},"2026-04-11":{"ms":2986,"gs":853,"sp":3839,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":342,"purch":0,"impr":39847},"2026-04-12":{"ms":2780,"gs":767,"sp":3547,"mr":0,"gr":1442,"net":59360,"gross":96550,"disc":-37190,"ret":0,"clicks":327,"purch":1,"impr":28850},"2026-04-13":{"ms":0,"gs":1109,"sp":1109,"mr":0,"gr":23448,"net":75560,"gross":142360,"disc":-66800,"ret":0,"clicks":119,"purch":1,"impr":0}},"2XU HK":{"2026-01-01":{"ms":971,"gs":1370,"sp":2341,"mr":4200,"gr":0,"net":3939,"gross":5627,"disc":-1688,"ret":0,"clicks":232,"purch":1,"impr":6488},"2026-01-02":{"ms":897,"gs":1720,"sp":2617,"mr":4360,"gr":0,"net":9171,"gross":12071,"disc":-2900,"ret":0,"clicks":238,"purch":1,"impr":6054},"2026-01-03":{"ms":873,"gs":1159,"sp":2032,"mr":6038,"gr":0,"net":6016,"gross":10081,"disc":-4065,"ret":0,"clicks":213,"purch":1,"impr":5677},"2026-01-04":{"ms":1039,"gs":1216,"sp":2255,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":225,"purch":0,"impr":6927},"2026-01-05":{"ms":1023,"gs":1129,"sp":2152,"mr":0,"gr":10423,"net":-971,"gross":802,"disc":-80,"ret":-1693,"clicks":216,"purch":0,"impr":7479},"2026-01-06":{"ms":1005,"gs":941,"sp":1946,"mr":0,"gr":4312,"net":4295,"gross":7159,"disc":-2864,"ret":0,"clicks":207,"purch":0,"impr":6465},"2026-01-07":{"ms":1023,"gs":1333,"sp":2356,"mr":0,"gr":0,"net":20429,"gross":28627,"disc":-6987,"ret":-1211,"clicks":203,"purch":0,"impr":6100},"2026-01-08":{"ms":948,"gs":1040,"sp":1988,"mr":5997,"gr":0,"net":12954,"gross":18505,"disc":-5552,"ret":0,"clicks":211,"purch":1,"impr":5999},"2026-01-09":{"ms":961,"gs":668,"sp":1629,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":151,"purch":0,"impr":5631},"2026-01-10":{"ms":998,"gs":0,"sp":998,"mr":9809,"gr":0,"net":12621,"gross":16871,"disc":-4250,"ret":0,"clicks":117,"purch":2,"impr":5454},"2026-01-11":{"ms":1068,"gs":1,"sp":1069,"mr":0,"gr":0,"net":8739,"gross":12485,"disc":-3745,"ret":0,"clicks":159,"purch":0,"impr":6399},"2026-01-12":{"ms":1000,"gs":0,"sp":1000,"mr":0,"gr":0,"net":10382,"gross":11842,"disc":-1460,"ret":0,"clicks":139,"purch":0,"impr":6969},"2026-01-13":{"ms":1002,"gs":0,"sp":1002,"mr":5548,"gr":0,"net":5542,"gross":6928,"disc":-1386,"ret":0,"clicks":151,"purch":1,"impr":6270},"2026-01-14":{"ms":976,"gs":0,"sp":976,"mr":4413,"gr":0,"net":4111,"gross":10806,"disc":-2161,"ret":-4534,"clicks":127,"purch":1,"impr":6357},"2026-01-15":{"ms":987,"gs":0,"sp":987,"mr":6190,"gr":0,"net":12415,"gross":15519,"disc":-3104,"ret":0,"clicks":115,"purch":1,"impr":6163},"2026-01-16":{"ms":967,"gs":0,"sp":967,"mr":0,"gr":0,"net":4525,"gross":4525,"disc":0,"ret":0,"clicks":147,"purch":0,"impr":6262},"2026-01-17":{"ms":996,"gs":0,"sp":996,"mr":8083,"gr":0,"net":12010,"gross":15908,"disc":-3898,"ret":0,"clicks":139,"purch":1,"impr":5820},"2026-01-18":{"ms":1080,"gs":0,"sp":1080,"mr":10273,"gr":0,"net":14212,"gross":19052,"disc":-4840,"ret":0,"clicks":183,"purch":1,"impr":6849},"2026-01-19":{"ms":988,"gs":0,"sp":988,"mr":0,"gr":0,"net":5510,"gross":5510,"disc":0,"ret":0,"clicks":167,"purch":0,"impr":7048},"2026-01-20":{"ms":1008,"gs":0,"sp":1008,"mr":26235,"gr":0,"net":25755,"gross":37859,"disc":-12104,"ret":0,"clicks":161,"purch":5,"impr":6804},"2026-01-21":{"ms":983,"gs":0,"sp":983,"mr":8534,"gr":0,"net":7550,"gross":15014,"disc":-5764,"ret":-1701,"clicks":137,"purch":2,"impr":6187},"2026-01-22":{"ms":991,"gs":0,"sp":991,"mr":4280,"gr":0,"net":4284,"gross":7140,"disc":-2856,"ret":0,"clicks":164,"purch":1,"impr":6301},"2026-01-23":{"ms":970,"gs":0,"sp":970,"mr":5847,"gr":0,"net":11232,"gross":21265,"disc":-5649,"ret":-4385,"clicks":180,"purch":1,"impr":6299},"2026-01-24":{"ms":975,"gs":0,"sp":975,"mr":6803,"gr":0,"net":17239,"gross":24628,"disc":-7388,"ret":0,"clicks":163,"purch":1,"impr":5559},"2026-01-25":{"ms":1069,"gs":0,"sp":1069,"mr":0,"gr":0,"net":10192,"gross":12137,"disc":-1945,"ret":0,"clicks":186,"purch":0,"impr":7056},"2026-01-26":{"ms":987,"gs":0,"sp":987,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":120,"purch":0,"impr":7125},"2026-01-27":{"ms":1025,"gs":0,"sp":1025,"mr":7259,"gr":0,"net":6996,"gross":9247,"disc":-2251,"ret":0,"clicks":143,"purch":2,"impr":6564},"2026-01-28":{"ms":1001,"gs":0,"sp":1001,"mr":1446,"gr":0,"net":7341,"gross":11519,"disc":-4178,"ret":0,"clicks":175,"purch":1,"impr":6598},"2026-01-29":{"ms":964,"gs":0,"sp":964,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":134,"purch":0,"impr":6490},"2026-01-30":{"ms":963,"gs":0,"sp":963,"mr":7641,"gr":0,"net":14613,"gross":20875,"disc":-6263,"ret":0,"clicks":120,"purch":1,"impr":5802},"2026-01-31":{"ms":989,"gs":0,"sp":989,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":126,"purch":0,"impr":5438},"2026-02-01":{"ms":1108,"gs":0,"sp":1108,"mr":11624,"gr":0,"net":11395,"gross":15610,"disc":-4214,"ret":0,"clicks":135,"purch":2,"impr":7120},"2026-02-02":{"ms":1184,"gs":0,"sp":1184,"mr":5230,"gr":0,"net":8518,"gross":20517,"disc":-8936,"ret":-3063,"clicks":205,"purch":2,"impr":8045},"2026-02-03":{"ms":957,"gs":0,"sp":957,"mr":0,"gr":0,"net":9125,"gross":15208,"disc":-6083,"ret":0,"clicks":113,"purch":0,"impr":6170},"2026-02-04":{"ms":934,"gs":0,"sp":934,"mr":9585,"gr":0,"net":18492,"gross":30820,"disc":-12328,"ret":0,"clicks":147,"purch":1,"impr":6969},"2026-02-05":{"ms":968,"gs":3,"sp":971,"mr":6904,"gr":0,"net":6649,"gross":11082,"disc":-4433,"ret":0,"clicks":170,"purch":2,"impr":7127},"2026-02-06":{"ms":892,"gs":0,"sp":892,"mr":0,"gr":0,"net":4836,"gross":8060,"disc":-3224,"ret":0,"clicks":121,"purch":0,"impr":5671},"2026-02-07":{"ms":957,"gs":0,"sp":957,"mr":1989,"gr":0,"net":1746,"gross":2910,"disc":-1164,"ret":0,"clicks":114,"purch":1,"impr":5600},"2026-02-08":{"ms":1112,"gs":0,"sp":1112,"mr":4810,"gr":0,"net":4797,"gross":7994,"disc":-3198,"ret":0,"clicks":112,"purch":1,"impr":6581},"2026-02-09":{"ms":1022,"gs":0,"sp":1022,"mr":6099,"gr":0,"net":11260,"gross":18066,"disc":-6806,"ret":0,"clicks":107,"purch":2,"impr":6935},"2026-02-10":{"ms":1071,"gs":0,"sp":1071,"mr":5758,"gr":0,"net":14275,"gross":23791,"disc":-9516,"ret":0,"clicks":88,"purch":1,"impr":6333},"2026-02-11":{"ms":909,"gs":0,"sp":909,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":75,"purch":0,"impr":5558},"2026-02-12":{"ms":1030,"gs":0,"sp":1030,"mr":11133,"gr":0,"net":22801,"gross":43497,"disc":-20696,"ret":0,"clicks":116,"purch":3,"impr":6667},"2026-02-13":{"ms":868,"gs":0,"sp":868,"mr":8112,"gr":0,"net":12554,"gross":31085,"disc":-18531,"ret":0,"clicks":115,"purch":1,"impr":4283},"2026-02-14":{"ms":977,"gs":0,"sp":977,"mr":5639,"gr":0,"net":9411,"gross":21072,"disc":-11661,"ret":0,"clicks":114,"purch":2,"impr":5679},"2026-02-15":{"ms":1193,"gs":0,"sp":1193,"mr":4036,"gr":0,"net":8260,"gross":18637,"disc":-10377,"ret":0,"clicks":159,"purch":1,"impr":7083},"2026-02-16":{"ms":974,"gs":0,"sp":974,"mr":10049,"gr":0,"net":22633,"gross":45056,"disc":-22423,"ret":0,"clicks":145,"purch":3,"impr":6781},"2026-02-17":{"ms":940,"gs":0,"sp":940,"mr":3538,"gr":0,"net":3049,"gross":5167,"disc":-2119,"ret":0,"clicks":153,"purch":2,"impr":7152},"2026-02-18":{"ms":967,"gs":0,"sp":967,"mr":18319,"gr":0,"net":17781,"gross":44452,"disc":-26671,"ret":0,"clicks":165,"purch":5,"impr":7912},"2026-02-19":{"ms":978,"gs":0,"sp":978,"mr":0,"gr":0,"net":2411,"gross":5728,"disc":-3317,"ret":0,"clicks":120,"purch":0,"impr":6898},"2026-02-20":{"ms":994,"gs":0,"sp":994,"mr":4692,"gr":0,"net":10292,"gross":25731,"disc":-15439,"ret":0,"clicks":115,"purch":1,"impr":7302},"2026-02-21":{"ms":953,"gs":0,"sp":953,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":129,"purch":0,"impr":7449},"2026-02-22":{"ms":1143,"gs":0,"sp":1143,"mr":4483,"gr":0,"net":11226,"gross":21527,"disc":-10302,"ret":0,"clicks":116,"purch":1,"impr":8116},"2026-02-23":{"ms":808,"gs":0,"sp":808,"mr":10160,"gr":0,"net":10156,"gross":17324,"disc":-7168,"ret":0,"clicks":81,"purch":2,"impr":6759},"2026-02-24":{"ms":577,"gs":0,"sp":577,"mr":8909,"gr":0,"net":1996,"gross":29693,"disc":-17332,"ret":-10365,"clicks":79,"purch":2,"impr":4872},"2026-02-25":{"ms":1129,"gs":0,"sp":1129,"mr":0,"gr":0,"net":4020,"gross":8040,"disc":-4020,"ret":0,"clicks":118,"purch":0,"impr":8901},"2026-02-26":{"ms":1128,"gs":0,"sp":1128,"mr":3056,"gr":0,"net":7309,"gross":10775,"disc":-3467,"ret":0,"clicks":110,"purch":1,"impr":7602},"2026-02-27":{"ms":1134,"gs":0,"sp":1134,"mr":9886,"gr":0,"net":18899,"gross":39559,"disc":-20659,"ret":0,"clicks":119,"purch":3,"impr":7230},"2026-02-28":{"ms":1080,"gs":2,"sp":1082,"mr":11306,"gr":0,"net":16438,"gross":35923,"disc":-18208,"ret":-1277,"clicks":116,"purch":2,"impr":6246},"2026-03-01":{"ms":1156,"gs":0,"sp":1156,"mr":4769,"gr":0,"net":4287,"gross":9216,"disc":-4928,"ret":0,"clicks":111,"purch":2,"impr":7785},"2026-03-02":{"ms":1062,"gs":0,"sp":1062,"mr":4671,"gr":0,"net":4671,"gross":10175,"disc":-5504,"ret":0,"clicks":149,"purch":1,"impr":8438},"2026-03-03":{"ms":1051,"gs":0,"sp":1051,"mr":8991,"gr":0,"net":8741,"gross":16372,"disc":-7631,"ret":0,"clicks":139,"purch":2,"impr":7707},"2026-03-04":{"ms":935,"gs":0,"sp":935,"mr":0,"gr":0,"net":2457,"gross":4913,"disc":-2457,"ret":0,"clicks":140,"purch":0,"impr":6836},"2026-03-05":{"ms":844,"gs":0,"sp":844,"mr":5717,"gr":0,"net":5733,"gross":12505,"disc":-6772,"ret":0,"clicks":69,"purch":1,"impr":5824},"2026-03-06":{"ms":1480,"gs":0,"sp":1480,"mr":11377,"gr":0,"net":13674,"gross":35780,"disc":-19518,"ret":-2589,"clicks":391,"purch":2,"impr":12584},"2026-03-07":{"ms":1136,"gs":0,"sp":1136,"mr":5200,"gr":0,"net":17188,"gross":30237,"disc":-13049,"ret":0,"clicks":271,"purch":1,"impr":8298},"2026-03-08":{"ms":987,"gs":0,"sp":987,"mr":10481,"gr":0,"net":15025,"gross":28028,"disc":-13003,"ret":0,"clicks":295,"purch":2,"impr":8332},"2026-03-09":{"ms":877,"gs":0,"sp":877,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":285,"purch":0,"impr":8189},"2026-03-10":{"ms":946,"gs":0,"sp":946,"mr":10637,"gr":0,"net":20623,"gross":43409,"disc":-22786,"ret":0,"clicks":242,"purch":2,"impr":8165},"2026-03-11":{"ms":994,"gs":0,"sp":994,"mr":11467,"gr":0,"net":5357,"gross":22848,"disc":-11383,"ret":-6107,"clicks":216,"purch":2,"impr":8072},"2026-03-12":{"ms":1084,"gs":0,"sp":1084,"mr":5329,"gr":0,"net":5323,"gross":12633,"disc":-7310,"ret":0,"clicks":250,"purch":1,"impr":9373},"2026-03-13":{"ms":1022,"gs":1676,"sp":2698,"mr":5357,"gr":0,"net":8201,"gross":17143,"disc":-8942,"ret":0,"clicks":318,"purch":1,"impr":8832},"2026-03-14":{"ms":1079,"gs":1564,"sp":2643,"mr":0,"gr":10331,"net":10298,"gross":24967,"disc":-14669,"ret":0,"clicks":307,"purch":0,"impr":8301},"2026-03-15":{"ms":1106,"gs":1603,"sp":2709,"mr":9476,"gr":0,"net":13892,"gross":23726,"disc":-9834,"ret":0,"clicks":319,"purch":2,"impr":8781},"2026-03-16":{"ms":951,"gs":923,"sp":1874,"mr":0,"gr":0,"net":2922,"gross":8162,"disc":-1638,"ret":-3602,"clicks":253,"purch":0,"impr":8437},"2026-03-17":{"ms":1027,"gs":803,"sp":1830,"mr":0,"gr":0,"net":5092,"gross":9198,"disc":-4106,"ret":0,"clicks":269,"purch":0,"impr":8533},"2026-03-18":{"ms":888,"gs":647,"sp":1535,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":241,"purch":0,"impr":8263},"2026-03-19":{"ms":1016,"gs":634,"sp":1650,"mr":3142,"gr":8449,"net":2890,"gross":4514,"disc":-1624,"ret":0,"clicks":240,"purch":1,"impr":9557},"2026-03-20":{"ms":985,"gs":590,"sp":1575,"mr":23233,"gr":10186,"net":22781,"gross":46483,"disc":-23701,"ret":0,"clicks":240,"purch":5,"impr":9296},"2026-03-21":{"ms":1021,"gs":712,"sp":1733,"mr":0,"gr":0,"net":8287,"gross":13965,"disc":-5679,"ret":0,"clicks":236,"purch":0,"impr":8681},"2026-03-22":{"ms":1228,"gs":815,"sp":2043,"mr":0,"gr":5652,"net":0,"gross":0,"disc":0,"ret":0,"clicks":296,"purch":0,"impr":9049},"2026-03-23":{"ms":439,"gs":488,"sp":927,"mr":4096,"gr":0,"net":4096,"gross":8183,"disc":-4087,"ret":0,"clicks":136,"purch":1,"impr":3851},"2026-03-24":{"ms":0,"gs":757,"sp":757,"mr":0,"gr":2463,"net":8098,"gross":17087,"disc":-8989,"ret":0,"clicks":53,"purch":0,"impr":0},"2026-03-25":{"ms":0,"gs":412,"sp":412,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":34,"purch":0,"impr":0},"2026-03-26":{"ms":541,"gs":671,"sp":1212,"mr":0,"gr":0,"net":-2086,"gross":0,"disc":0,"ret":-2086,"clicks":130,"purch":0,"impr":4152},"2026-03-27":{"ms":1716,"gs":406,"sp":2122,"mr":5415,"gr":0,"net":7899,"gross":16881,"disc":-8982,"ret":0,"clicks":342,"purch":1,"impr":14079},"2026-03-28":{"ms":1696,"gs":862,"sp":2558,"mr":0,"gr":0,"net":2857,"gross":4486,"disc":-1629,"ret":0,"clicks":395,"purch":0,"impr":14484},"2026-03-29":{"ms":1239,"gs":654,"sp":1893,"mr":4204,"gr":9880,"net":9909,"gross":21357,"disc":-11448,"ret":0,"clicks":290,"purch":1,"impr":10150},"2026-03-30":{"ms":1093,"gs":351,"sp":1444,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":300,"purch":0,"impr":9324},"2026-03-31":{"ms":802,"gs":431,"sp":1233,"mr":4371,"gr":0,"net":9412,"gross":20842,"disc":-11430,"ret":0,"clicks":193,"purch":1,"impr":7611},"2026-04-01":{"ms":965,"gs":617,"sp":1582,"mr":0,"gr":11311,"net":10740,"gross":22776,"disc":-11449,"ret":-587,"clicks":246,"purch":0,"impr":9193},"2026-04-02":{"ms":923,"gs":363,"sp":1286,"mr":28940,"gr":11094,"net":32678,"gross":67711,"disc":-35034,"ret":0,"clicks":223,"purch":5,"impr":8629},"2026-04-03":{"ms":1036,"gs":693,"sp":1729,"mr":9159,"gr":2118,"net":9172,"gross":20604,"disc":-11432,"ret":0,"clicks":224,"purch":2,"impr":9947},"2026-04-04":{"ms":928,"gs":456,"sp":1384,"mr":9472,"gr":0,"net":14102,"gross":30396,"disc":-16295,"ret":0,"clicks":241,"purch":2,"impr":8460},"2026-04-05":{"ms":1150,"gs":452,"sp":1602,"mr":5590,"gr":0,"net":21308,"gross":47416,"disc":-26108,"ret":0,"clicks":270,"purch":1,"impr":9900},"2026-04-06":{"ms":1058,"gs":399,"sp":1457,"mr":5709,"gr":10244,"net":11412,"gross":26103,"disc":-14691,"ret":0,"clicks":252,"purch":1,"impr":9341},"2026-04-07":{"ms":987,"gs":386,"sp":1373,"mr":0,"gr":812,"net":5359,"gross":9436,"disc":-4077,"ret":0,"clicks":222,"purch":0,"impr":9605},"2026-04-08":{"ms":838,"gs":408,"sp":1246,"mr":9864,"gr":0,"net":6870,"gross":21259,"disc":-11411,"ret":-2979,"clicks":233,"purch":2,"impr":8785},"2026-04-09":{"ms":966,"gs":281,"sp":1247,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":236,"purch":0,"impr":9630},"2026-04-10":{"ms":1000,"gs":710,"sp":1710,"mr":6073,"gr":5270,"net":16595,"gross":38466,"disc":-21871,"ret":0,"clicks":222,"purch":1,"impr":9979},"2026-04-11":{"ms":988,"gs":398,"sp":1386,"mr":7309,"gr":4220,"net":11509,"gross":22849,"disc":-11339,"ret":0,"clicks":260,"purch":1,"impr":8508},"2026-04-12":{"ms":1102,"gs":696,"sp":1798,"mr":0,"gr":2437,"net":7647,"gross":16555,"disc":-8908,"ret":0,"clicks":262,"purch":0,"impr":10401},"2026-04-13":{"ms":0,"gs":454,"sp":454,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":46,"purch":0,"impr":0}},"2XU TW":{"2026-01-01":{"ms":2894,"gs":755,"sp":3649,"mr":24552,"gr":8295,"net":28404,"gross":30820,"disc":-2416,"ret":0,"clicks":429,"purch":6,"impr":28291},"2026-01-02":{"ms":2988,"gs":914,"sp":3902,"mr":23380,"gr":16776,"net":23300,"gross":26840,"disc":-3540,"ret":0,"clicks":420,"purch":6,"impr":28207},"2026-01-03":{"ms":3705,"gs":825,"sp":4530,"mr":13700,"gr":6040,"net":16402,"gross":18740,"disc":-2338,"ret":0,"clicks":549,"purch":5,"impr":30870},"2026-01-04":{"ms":3824,"gs":759,"sp":4583,"mr":34364,"gr":8126,"net":34365,"gross":43680,"disc":-9315,"ret":0,"clicks":529,"purch":7,"impr":34363},"2026-01-05":{"ms":3588,"gs":999,"sp":4587,"mr":26042,"gr":4010,"net":25962,"gross":29320,"disc":-3358,"ret":0,"clicks":538,"purch":6,"impr":32577},"2026-01-06":{"ms":3972,"gs":704,"sp":4676,"mr":12248,"gr":10196,"net":12168,"gross":14880,"disc":-2712,"ret":0,"clicks":461,"purch":6,"impr":27975},"2026-01-07":{"ms":3637,"gs":898,"sp":4535,"mr":7126,"gr":6388,"net":1313,"gross":8620,"disc":-1494,"ret":-5813,"clicks":465,"purch":3,"impr":34392},"2026-01-08":{"ms":3889,"gs":778,"sp":4667,"mr":11068,"gr":15611,"net":11068,"gross":14400,"disc":-3332,"ret":0,"clicks":460,"purch":5,"impr":32189},"2026-01-09":{"ms":3651,"gs":709,"sp":4360,"mr":5022,"gr":0,"net":5022,"gross":5580,"disc":-558,"ret":0,"clicks":422,"purch":1,"impr":28120},"2026-01-10":{"ms":3465,"gs":789,"sp":4254,"mr":7998,"gr":7162,"net":11576,"gross":13840,"disc":-2264,"ret":0,"clicks":359,"purch":5,"impr":25298},"2026-01-11":{"ms":4234,"gs":944,"sp":5178,"mr":2212,"gr":0,"net":6892,"gross":7840,"disc":-948,"ret":0,"clicks":537,"purch":1,"impr":33867},"2026-01-12":{"ms":4820,"gs":849,"sp":5669,"mr":11647,"gr":3080,"net":18914,"gross":24120,"disc":-3400,"ret":-1806,"clicks":593,"purch":3,"impr":40369},"2026-01-13":{"ms":3996,"gs":745,"sp":4741,"mr":14163,"gr":2872,"net":8241,"gross":19120,"disc":-5036,"ret":-5843,"clicks":447,"purch":4,"impr":31096},"2026-01-14":{"ms":3360,"gs":712,"sp":4072,"mr":20290,"gr":15610,"net":21870,"gross":25420,"disc":-3550,"ret":0,"clicks":421,"purch":7,"impr":28966},"2026-01-15":{"ms":3536,"gs":958,"sp":4494,"mr":8923,"gr":18373,"net":16684,"gross":19380,"disc":-2696,"ret":0,"clicks":453,"purch":7,"impr":31721},"2026-01-16":{"ms":3538,"gs":768,"sp":4306,"mr":23384,"gr":0,"net":23386,"gross":32560,"disc":-9174,"ret":0,"clicks":405,"purch":5,"impr":30892},"2026-01-17":{"ms":3804,"gs":828,"sp":4632,"mr":7427,"gr":6608,"net":7427,"gross":9290,"disc":-1863,"ret":0,"clicks":431,"purch":4,"impr":30661},"2026-01-18":{"ms":4419,"gs":778,"sp":5197,"mr":8378,"gr":6230,"net":8218,"gross":9620,"disc":-1402,"ret":0,"clicks":543,"purch":5,"impr":39688},"2026-01-19":{"ms":3996,"gs":823,"sp":4819,"mr":14322,"gr":18787,"net":25861,"gross":31400,"disc":-5539,"ret":0,"clicks":474,"purch":5,"impr":37461},"2026-01-20":{"ms":3891,"gs":1528,"sp":5419,"mr":0,"gr":13017,"net":0,"gross":0,"disc":0,"ret":0,"clicks":471,"purch":1,"impr":32387},"2026-01-21":{"ms":3376,"gs":2165,"sp":5541,"mr":0,"gr":10491,"net":3122,"gross":4460,"disc":-1338,"ret":0,"clicks":893,"purch":3,"impr":34030},"2026-01-22":{"ms":2326,"gs":2132,"sp":4458,"mr":18166,"gr":12216,"net":23541,"gross":30440,"disc":-6899,"ret":0,"clicks":697,"purch":6,"impr":20095},"2026-01-23":{"ms":2258,"gs":2471,"sp":4729,"mr":22844,"gr":13333,"net":41064,"gross":49960,"disc":-8896,"ret":0,"clicks":576,"purch":6,"impr":19128},"2026-01-24":{"ms":2307,"gs":2136,"sp":4443,"mr":19249,"gr":14456,"net":21129,"gross":26460,"disc":-5331,"ret":0,"clicks":643,"purch":7,"impr":19872},"2026-01-25":{"ms":2631,"gs":2282,"sp":4913,"mr":11267,"gr":7360,"net":15548,"gross":18660,"disc":-3112,"ret":0,"clicks":663,"purch":5,"impr":24577},"2026-01-26":{"ms":2416,"gs":2860,"sp":5276,"mr":6632,"gr":30226,"net":5259,"gross":7640,"disc":-1008,"ret":-1373,"clicks":603,"purch":6,"impr":22098},"2026-01-27":{"ms":2664,"gs":1905,"sp":4569,"mr":20622,"gr":22482,"net":20623,"gross":23700,"disc":-3077,"ret":0,"clicks":581,"purch":7,"impr":23187},"2026-01-28":{"ms":2786,"gs":1807,"sp":4593,"mr":26140,"gr":14658,"net":27781,"gross":33620,"disc":-5839,"ret":0,"clicks":567,"purch":13,"impr":22806},"2026-01-29":{"ms":2528,"gs":1163,"sp":3691,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":472,"purch":0,"impr":19597},"2026-01-30":{"ms":2205,"gs":1911,"sp":4116,"mr":4464,"gr":28545,"net":11856,"gross":14820,"disc":-2964,"ret":0,"clicks":568,"purch":8,"impr":20139},"2026-01-31":{"ms":2232,"gs":2345,"sp":4577,"mr":29199,"gr":23561,"net":34048,"gross":44760,"disc":-10712,"ret":0,"clicks":573,"purch":8,"impr":18800},"2026-02-01":{"ms":3191,"gs":2560,"sp":5751,"mr":57179,"gr":27522,"net":77242,"gross":103260,"disc":-26018,"ret":0,"clicks":755,"purch":18,"impr":25898},"2026-02-02":{"ms":2208,"gs":2648,"sp":4856,"mr":40223,"gr":40006,"net":51837,"gross":69020,"disc":-17183,"ret":0,"clicks":710,"purch":22,"impr":21939},"2026-02-03":{"ms":2182,"gs":2304,"sp":4486,"mr":42378,"gr":41881,"net":54726,"gross":77560,"disc":-19835,"ret":-2999,"clicks":532,"purch":21,"impr":22070},"2026-02-04":{"ms":2693,"gs":2481,"sp":5174,"mr":52242,"gr":10274,"net":60957,"gross":80266,"disc":-19309,"ret":0,"clicks":584,"purch":12,"impr":26449},"2026-02-05":{"ms":3856,"gs":2565,"sp":6421,"mr":26988,"gr":25660,"net":28563,"gross":37920,"disc":-9357,"ret":0,"clicks":678,"purch":14,"impr":33529},"2026-02-06":{"ms":2969,"gs":2438,"sp":5407,"mr":59308,"gr":7168,"net":63859,"gross":91040,"disc":-20253,"ret":-6928,"clicks":623,"purch":13,"impr":30143},"2026-02-07":{"ms":2913,"gs":2834,"sp":5747,"mr":43451,"gr":30859,"net":43293,"gross":58840,"disc":-15547,"ret":0,"clicks":681,"purch":14,"impr":29087},"2026-02-08":{"ms":3668,"gs":2658,"sp":6326,"mr":12406,"gr":18730,"net":24998,"gross":32440,"disc":-7442,"ret":0,"clicks":701,"purch":10,"impr":34296},"2026-02-09":{"ms":3549,"gs":2033,"sp":5582,"mr":32668,"gr":7210,"net":26938,"gross":54800,"disc":-13005,"ret":-14857,"clicks":625,"purch":10,"impr":33822},"2026-02-10":{"ms":3478,"gs":1817,"sp":5295,"mr":36312,"gr":8326,"net":31347,"gross":43960,"disc":-11333,"ret":-1280,"clicks":548,"purch":11,"impr":33042},"2026-02-11":{"ms":3338,"gs":2804,"sp":6142,"mr":12182,"gr":11190,"net":18390,"gross":25880,"disc":-7490,"ret":0,"clicks":572,"purch":7,"impr":32664},"2026-02-12":{"ms":1721,"gs":1228,"sp":2949,"mr":3046,"gr":9376,"net":1472,"gross":4760,"disc":-1714,"ret":-1574,"clicks":320,"purch":4,"impr":14718},"2026-02-13":{"ms":1749,"gs":1068,"sp":2817,"mr":14614,"gr":5014,"net":14614,"gross":19200,"disc":-4586,"ret":0,"clicks":328,"purch":4,"impr":17738},"2026-02-14":{"ms":1521,"gs":1015,"sp":2536,"mr":10674,"gr":7398,"net":16963,"gross":24540,"disc":-7577,"ret":0,"clicks":361,"purch":4,"impr":15177},"2026-02-15":{"ms":1175,"gs":1111,"sp":2286,"mr":15589,"gr":3367,"net":23702,"gross":35420,"disc":-11718,"ret":0,"clicks":349,"purch":5,"impr":12035},"2026-02-16":{"ms":1160,"gs":714,"sp":1874,"mr":1824,"gr":0,"net":4192,"gross":5240,"disc":-1048,"ret":0,"clicks":345,"purch":1,"impr":15247},"2026-02-17":{"ms":1218,"gs":789,"sp":2007,"mr":6646,"gr":6022,"net":6566,"gross":8920,"disc":-2354,"ret":0,"clicks":406,"purch":3,"impr":19094},"2026-02-18":{"ms":1260,"gs":857,"sp":2117,"mr":1824,"gr":8903,"net":23552,"gross":31940,"disc":-8388,"ret":0,"clicks":418,"purch":4,"impr":17815},"2026-02-19":{"ms":1216,"gs":1060,"sp":2276,"mr":12358,"gr":1873,"net":12278,"gross":16100,"disc":-3822,"ret":0,"clicks":403,"purch":6,"impr":15911},"2026-02-20":{"ms":1457,"gs":1508,"sp":2965,"mr":2656,"gr":1248,"net":2496,"gross":3120,"disc":-624,"ret":0,"clicks":383,"purch":4,"impr":15009},"2026-02-21":{"ms":2511,"gs":3087,"sp":5598,"mr":3744,"gr":13294,"net":3744,"gross":4680,"disc":-936,"ret":0,"clicks":670,"purch":4,"impr":32248},"2026-02-22":{"ms":2912,"gs":3018,"sp":5930,"mr":46873,"gr":12885,"net":61037,"gross":86860,"disc":-25823,"ret":0,"clicks":784,"purch":10,"impr":33894},"2026-02-23":{"ms":2922,"gs":2756,"sp":5678,"mr":22149,"gr":18544,"net":36227,"gross":60960,"disc":-15974,"ret":-8758,"clicks":653,"purch":9,"impr":30806},"2026-02-24":{"ms":3069,"gs":1676,"sp":4745,"mr":22190,"gr":20174,"net":41366,"gross":55940,"disc":-14574,"ret":0,"clicks":653,"purch":12,"impr":30486},"2026-02-25":{"ms":2716,"gs":1690,"sp":4406,"mr":10760,"gr":5008,"net":13866,"gross":20100,"disc":-6234,"ret":0,"clicks":521,"purch":6,"impr":29886},"2026-02-26":{"ms":2516,"gs":1695,"sp":4211,"mr":16175,"gr":7661,"net":19030,"gross":26260,"disc":-7230,"ret":0,"clicks":549,"purch":7,"impr":26890},"2026-02-27":{"ms":2745,"gs":1689,"sp":4434,"mr":20280,"gr":17693,"net":31232,"gross":42720,"disc":-11488,"ret":0,"clicks":703,"purch":12,"impr":30812},"2026-02-28":{"ms":2154,"gs":1689,"sp":3843,"mr":5216,"gr":5616,"net":11910,"gross":15540,"disc":-3630,"ret":0,"clicks":599,"purch":4,"impr":25146},"2026-03-01":{"ms":3137,"gs":3547,"sp":6684,"mr":16642,"gr":15627,"net":21971,"gross":29800,"disc":-7829,"ret":0,"clicks":807,"purch":8,"impr":38752},"2026-03-02":{"ms":2921,"gs":2711,"sp":5632,"mr":5142,"gr":7917,"net":-1549,"gross":14480,"disc":-4528,"ret":-11501,"clicks":679,"purch":4,"impr":37518},"2026-03-03":{"ms":3162,"gs":1547,"sp":4709,"mr":19614,"gr":8343,"net":19537,"gross":28220,"disc":-8683,"ret":0,"clicks":660,"purch":7,"impr":31553},"2026-03-04":{"ms":3059,"gs":2381,"sp":5440,"mr":20103,"gr":22263,"net":24335,"gross":42680,"disc":-12857,"ret":-5488,"clicks":666,"purch":9,"impr":31274},"2026-03-05":{"ms":2360,"gs":2496,"sp":4856,"mr":7850,"gr":14218,"net":15050,"gross":22920,"disc":-5463,"ret":-2406,"clicks":487,"purch":8,"impr":23979},"2026-03-06":{"ms":2783,"gs":2364,"sp":5147,"mr":49333,"gr":26901,"net":51582,"gross":76240,"disc":-24658,"ret":0,"clicks":524,"purch":19,"impr":28770},"2026-03-07":{"ms":3062,"gs":2890,"sp":5952,"mr":23928,"gr":2086,"net":23850,"gross":33380,"disc":-9530,"ret":0,"clicks":553,"purch":7,"impr":27736},"2026-03-08":{"ms":3392,"gs":1970,"sp":5362,"mr":35619,"gr":28181,"net":44327,"gross":58060,"disc":-13733,"ret":0,"clicks":607,"purch":13,"impr":33534},"2026-03-09":{"ms":2959,"gs":2043,"sp":5002,"mr":7648,"gr":17976,"net":2820,"gross":7240,"disc":-1390,"ret":-3030,"clicks":550,"purch":6,"impr":31186},"2026-03-10":{"ms":3008,"gs":2058,"sp":5066,"mr":41853,"gr":30874,"net":51691,"gross":68200,"disc":-16509,"ret":0,"clicks":546,"purch":18,"impr":31491},"2026-03-11":{"ms":2898,"gs":2528,"sp":5426,"mr":20105,"gr":10122,"net":21535,"gross":29100,"disc":-6301,"ret":-1264,"clicks":548,"purch":7,"impr":30075},"2026-03-12":{"ms":2964,"gs":2363,"sp":5327,"mr":45846,"gr":26544,"net":53188,"gross":81820,"disc":-20362,"ret":-8270,"clicks":601,"purch":13,"impr":33591},"2026-03-13":{"ms":3065,"gs":2090,"sp":5155,"mr":19544,"gr":13956,"net":37854,"gross":47920,"disc":-10066,"ret":0,"clicks":760,"purch":8,"impr":31506},"2026-03-14":{"ms":2551,"gs":2020,"sp":4571,"mr":45492,"gr":26952,"net":51124,"gross":75860,"disc":-24736,"ret":0,"clicks":655,"purch":13,"impr":26452},"2026-03-15":{"ms":3473,"gs":2420,"sp":5893,"mr":30440,"gr":23472,"net":47584,"gross":66480,"disc":-18896,"ret":0,"clicks":897,"purch":12,"impr":38886},"2026-03-16":{"ms":2955,"gs":1863,"sp":4818,"mr":27846,"gr":31628,"net":32060,"gross":39060,"disc":-7000,"ret":0,"clicks":709,"purch":8,"impr":33056},"2026-03-17":{"ms":3198,"gs":2082,"sp":5280,"mr":25813,"gr":882,"net":17891,"gross":30700,"disc":-4965,"ret":-7844,"clicks":699,"purch":6,"impr":30350},"2026-03-18":{"ms":2615,"gs":1938,"sp":4553,"mr":14563,"gr":12004,"net":17981,"gross":28280,"disc":-10299,"ret":0,"clicks":693,"purch":6,"impr":32837},"2026-03-19":{"ms":2811,"gs":1815,"sp":4626,"mr":42234,"gr":14008,"net":47892,"gross":86600,"disc":-28903,"ret":-9805,"clicks":706,"purch":13,"impr":38011},"2026-03-20":{"ms":2906,"gs":1812,"sp":4718,"mr":9091,"gr":19135,"net":23872,"gross":39280,"disc":-11006,"ret":-4401,"clicks":692,"purch":7,"impr":28921},"2026-03-21":{"ms":2867,"gs":1586,"sp":4453,"mr":43785,"gr":15754,"net":65030,"gross":94000,"disc":-28970,"ret":0,"clicks":650,"purch":10,"impr":27571},"2026-03-22":{"ms":3500,"gs":2051,"sp":5551,"mr":33964,"gr":14544,"net":57783,"gross":85160,"disc":-27377,"ret":0,"clicks":817,"purch":12,"impr":34489},"2026-03-23":{"ms":1399,"gs":2577,"sp":3976,"mr":20908,"gr":3372,"net":19545,"gross":37000,"disc":-16252,"ret":-1203,"clicks":413,"purch":9,"impr":13812},"2026-03-24":{"ms":0,"gs":1545,"sp":1545,"mr":18388,"gr":6255,"net":6564,"gross":40760,"disc":-16182,"ret":-18014,"clicks":120,"purch":4,"impr":0},"2026-03-25":{"ms":0,"gs":2024,"sp":2024,"mr":16436,"gr":15400,"net":30054,"gross":46300,"disc":-15306,"ret":-940,"clicks":119,"purch":7,"impr":0},"2026-03-26":{"ms":832,"gs":1758,"sp":2590,"mr":7620,"gr":21350,"net":32942,"gross":57380,"disc":-19108,"ret":-5330,"clicks":321,"purch":7,"impr":8208},"2026-03-27":{"ms":5099,"gs":2425,"sp":7524,"mr":55136,"gr":29898,"net":49615,"gross":109020,"disc":-52495,"ret":-6910,"clicks":1354,"purch":21,"impr":52732},"2026-03-28":{"ms":5115,"gs":934,"sp":6048,"mr":29510,"gr":2470,"net":61400,"gross":112840,"disc":-51440,"ret":0,"clicks":1054,"purch":11,"impr":51000},"2026-03-29":{"ms":3805,"gs":11,"sp":3816,"mr":75648,"gr":0,"net":82849,"gross":149100,"disc":-66251,"ret":0,"clicks":864,"purch":19,"impr":38280},"2026-03-30":{"ms":3166,"gs":2591,"sp":5757,"mr":25216,"gr":10891,"net":56885,"gross":122820,"disc":-43807,"ret":-22128,"clicks":896,"purch":9,"impr":34420},"2026-03-31":{"ms":2780,"gs":2002,"sp":4782,"mr":40995,"gr":25579,"net":92773,"gross":160340,"disc":-63907,"ret":-3660,"clicks":748,"purch":14,"impr":28238},"2026-04-01":{"ms":2377,"gs":1600,"sp":3977,"mr":10178,"gr":12439,"net":-16942,"gross":13600,"disc":-2360,"ret":-28182,"clicks":644,"purch":4,"impr":24129},"2026-04-02":{"ms":2484,"gs":1467,"sp":3951,"mr":11456,"gr":5548,"net":18260,"gross":21400,"disc":-3140,"ret":0,"clicks":680,"purch":3,"impr":26274},"2026-04-03":{"ms":2698,"gs":1444,"sp":4142,"mr":10192,"gr":11528,"net":17954,"gross":21060,"disc":-3106,"ret":0,"clicks":790,"purch":2,"impr":29902},"2026-04-04":{"ms":2164,"gs":2070,"sp":4234,"mr":8136,"gr":9918,"net":14130,"gross":15700,"disc":-1570,"ret":0,"clicks":675,"purch":5,"impr":26095},"2026-04-05":{"ms":2575,"gs":2239,"sp":4814,"mr":17630,"gr":0,"net":17630,"gross":20700,"disc":-3070,"ret":0,"clicks":741,"purch":2,"impr":31896},"2026-04-06":{"ms":2766,"gs":1633,"sp":4400,"mr":8728,"gr":5778,"net":10260,"gross":11400,"disc":-1140,"ret":0,"clicks":756,"purch":6,"impr":34410},"2026-04-07":{"ms":2429,"gs":1706,"sp":4135,"mr":15344,"gr":3582,"net":11490,"gross":23080,"disc":-4154,"ret":-7436,"clicks":548,"purch":3,"impr":33302},"2026-04-08":{"ms":2429,"gs":2094,"sp":4523,"mr":9044,"gr":11582,"net":28512,"gross":37980,"disc":-6838,"ret":-2630,"clicks":545,"purch":4,"impr":30807},"2026-04-09":{"ms":2727,"gs":1503,"sp":4230,"mr":31742,"gr":27272,"net":35736,"gross":43480,"disc":-7744,"ret":0,"clicks":583,"purch":16,"impr":31733},"2026-04-10":{"ms":2625,"gs":1298,"sp":3923,"mr":4522,"gr":1206,"net":6440,"gross":13720,"disc":-4400,"ret":-2880,"clicks":517,"purch":2,"impr":31823},"2026-04-11":{"ms":2906,"gs":1987,"sp":4893,"mr":10124,"gr":4522,"net":21972,"gross":32560,"disc":-10588,"ret":0,"clicks":630,"purch":3,"impr":29132},"2026-04-12":{"ms":3187,"gs":2083,"sp":5270,"mr":11065,"gr":5681,"net":22211,"gross":31700,"disc":-9489,"ret":0,"clicks":775,"purch":5,"impr":31064},"2026-04-13":{"ms":0,"gs":1230,"sp":1230,"mr":0,"gr":0,"net":-1498,"gross":3360,"disc":-336,"ret":-4522,"clicks":146,"purch":0,"impr":0}},"K-SWISS":{"2026-01-01":{"ms":2580,"gs":478,"sp":3058,"mr":0,"gr":3265,"net":3253,"gross":4067,"disc":-813,"ret":0,"clicks":512,"purch":1,"impr":35630},"2026-01-02":{"ms":2194,"gs":903,"sp":3097,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":438,"purch":0,"impr":30017},"2026-01-03":{"ms":2185,"gs":1739,"sp":3924,"mr":4718,"gr":0,"net":4717,"gross":5896,"disc":-1179,"ret":0,"clicks":597,"purch":2,"impr":37226},"2026-01-04":{"ms":2806,"gs":1043,"sp":3849,"mr":8455,"gr":0,"net":8462,"gross":10577,"disc":-2115,"ret":0,"clicks":561,"purch":2,"impr":40443},"2026-01-05":{"ms":2525,"gs":981,"sp":3506,"mr":1837,"gr":0,"net":1840,"gross":2300,"disc":-460,"ret":0,"clicks":653,"purch":1,"impr":45941},"2026-01-06":{"ms":3242,"gs":1122,"sp":4364,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":564,"purch":0,"impr":50887},"2026-01-07":{"ms":3318,"gs":993,"sp":4311,"mr":1949,"gr":0,"net":1944,"gross":2430,"disc":-486,"ret":0,"clicks":730,"purch":1,"impr":57304},"2026-01-08":{"ms":3633,"gs":907,"sp":4540,"mr":2862,"gr":2881,"net":2878,"gross":3597,"disc":-719,"ret":0,"clicks":668,"purch":2,"impr":44032},"2026-01-09":{"ms":3536,"gs":911,"sp":4447,"mr":0,"gr":5684,"net":-204,"gross":7089,"disc":-1418,"ret":-5875,"clicks":385,"purch":1,"impr":24967},"2026-01-10":{"ms":3034,"gs":1418,"sp":4452,"mr":4300,"gr":0,"net":4298,"gross":4298,"disc":0,"ret":0,"clicks":369,"purch":1,"impr":17131},"2026-01-11":{"ms":3931,"gs":1186,"sp":5117,"mr":11689,"gr":1897,"net":11695,"gross":14618,"disc":-2924,"ret":0,"clicks":437,"purch":5,"impr":22655},"2026-01-12":{"ms":3575,"gs":753,"sp":4328,"mr":0,"gr":319,"net":373,"gross":4864,"disc":-973,"ret":-3518,"clicks":371,"purch":0,"impr":26057},"2026-01-13":{"ms":3542,"gs":580,"sp":4122,"mr":6048,"gr":319,"net":6051,"gross":7564,"disc":-1513,"ret":0,"clicks":386,"purch":2,"impr":23233},"2026-01-14":{"ms":3441,"gs":457,"sp":3898,"mr":0,"gr":5872,"net":0,"gross":0,"disc":0,"ret":0,"clicks":333,"purch":1,"impr":21703},"2026-01-15":{"ms":3374,"gs":783,"sp":4157,"mr":0,"gr":0,"net":5871,"gross":7338,"disc":-1468,"ret":0,"clicks":323,"purch":0,"impr":19041},"2026-01-16":{"ms":3437,"gs":384,"sp":3821,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":315,"purch":0,"impr":23173},"2026-01-17":{"ms":2961,"gs":532,"sp":3493,"mr":0,"gr":0,"net":3224,"gross":4030,"disc":-806,"ret":0,"clicks":336,"purch":0,"impr":16469},"2026-01-18":{"ms":3909,"gs":442,"sp":4351,"mr":5197,"gr":5201,"net":5213,"gross":6516,"disc":-1303,"ret":0,"clicks":300,"purch":2,"impr":19973},"2026-01-19":{"ms":3881,"gs":408,"sp":4289,"mr":10056,"gr":6126,"net":7862,"gross":16317,"disc":-4020,"ret":-4434,"clicks":329,"purch":5,"impr":19308},"2026-01-20":{"ms":3477,"gs":192,"sp":3669,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":280,"purch":0,"impr":15136},"2026-01-21":{"ms":3720,"gs":501,"sp":4221,"mr":5870,"gr":3528,"net":5850,"gross":7313,"disc":-1462,"ret":0,"clicks":339,"purch":3,"impr":19163},"2026-01-22":{"ms":4459,"gs":424,"sp":4883,"mr":3719,"gr":3734,"net":3745,"gross":4681,"disc":-936,"ret":0,"clicks":375,"purch":2,"impr":22607},"2026-01-23":{"ms":3463,"gs":366,"sp":3829,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":304,"purch":0,"impr":16406},"2026-01-24":{"ms":3463,"gs":437,"sp":3900,"mr":2123,"gr":0,"net":4067,"gross":5083,"disc":-1017,"ret":0,"clicks":318,"purch":1,"impr":14669},"2026-01-25":{"ms":4413,"gs":660,"sp":5073,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":407,"purch":0,"impr":20101},"2026-01-26":{"ms":4015,"gs":251,"sp":4266,"mr":4682,"gr":0,"net":4653,"gross":5817,"disc":-1163,"ret":0,"clicks":250,"purch":2,"impr":17211},"2026-01-27":{"ms":4880,"gs":391,"sp":5271,"mr":3551,"gr":0,"net":3535,"gross":4419,"disc":-884,"ret":0,"clicks":316,"purch":1,"impr":21802},"2026-01-28":{"ms":3784,"gs":226,"sp":4010,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":232,"purch":0,"impr":14972},"2026-01-29":{"ms":3507,"gs":358,"sp":3865,"mr":0,"gr":0,"net":2932,"gross":3258,"disc":-326,"ret":0,"clicks":225,"purch":0,"impr":14996},"2026-01-30":{"ms":3124,"gs":419,"sp":3543,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":245,"purch":0,"impr":15231},"2026-01-31":{"ms":2863,"gs":434,"sp":3297,"mr":6330,"gr":0,"net":6350,"gross":7937,"disc":-1587,"ret":0,"clicks":770,"purch":2,"impr":27702},"2026-02-01":{"ms":3814,"gs":1074,"sp":4888,"mr":0,"gr":3611,"net":3636,"gross":3636,"disc":0,"ret":0,"clicks":1050,"purch":1,"impr":34415},"2026-02-02":{"ms":3388,"gs":938,"sp":4326,"mr":9631,"gr":7094,"net":9679,"gross":12099,"disc":-2420,"ret":0,"clicks":900,"purch":3,"impr":28213},"2026-02-03":{"ms":3519,"gs":1028,"sp":4547,"mr":1956,"gr":0,"net":7921,"gross":9901,"disc":-1980,"ret":0,"clicks":932,"purch":1,"impr":33239},"2026-02-04":{"ms":3832,"gs":1093,"sp":4925,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":757,"purch":0,"impr":33208},"2026-02-05":{"ms":3470,"gs":1148,"sp":4618,"mr":2516,"gr":2950,"net":2541,"gross":3177,"disc":-635,"ret":0,"clicks":758,"purch":2,"impr":32350},"2026-02-06":{"ms":2754,"gs":946,"sp":3700,"mr":2943,"gr":0,"net":-2294,"gross":2950,"disc":0,"ret":-5244,"clicks":818,"purch":1,"impr":29107},"2026-02-07":{"ms":2557,"gs":1294,"sp":3851,"mr":2540,"gr":6156,"net":8676,"gross":10844,"disc":-2169,"ret":0,"clicks":818,"purch":2,"impr":24355},"2026-02-08":{"ms":3320,"gs":1088,"sp":4408,"mr":3455,"gr":0,"net":7277,"gross":8144,"disc":-866,"ret":0,"clicks":935,"purch":1,"impr":32405},"2026-02-09":{"ms":3050,"gs":928,"sp":3978,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":884,"purch":0,"impr":31904},"2026-02-10":{"ms":2548,"gs":1004,"sp":3552,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":458,"purch":0,"impr":18876},"2026-02-11":{"ms":1949,"gs":722,"sp":2671,"mr":2427,"gr":0,"net":2440,"gross":3050,"disc":-610,"ret":0,"clicks":202,"purch":1,"impr":11283},"2026-02-12":{"ms":1624,"gs":933,"sp":2557,"mr":1709,"gr":1720,"net":1719,"gross":1719,"disc":0,"ret":0,"clicks":255,"purch":2,"impr":10447},"2026-02-13":{"ms":1620,"gs":1280,"sp":2900,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":229,"purch":0,"impr":10260},"2026-02-14":{"ms":1322,"gs":920,"sp":2242,"mr":1516,"gr":0,"net":1518,"gross":1897,"disc":-379,"ret":0,"clicks":181,"purch":1,"impr":10128},"2026-02-15":{"ms":1859,"gs":1046,"sp":2905,"mr":1516,"gr":0,"net":1515,"gross":1894,"disc":-379,"ret":0,"clicks":305,"purch":1,"impr":14328},"2026-02-16":{"ms":1740,"gs":1039,"sp":2779,"mr":0,"gr":0,"net":-2953,"gross":0,"disc":0,"ret":-2953,"clicks":228,"purch":0,"impr":12586},"2026-02-17":{"ms":1827,"gs":1018,"sp":2845,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":256,"purch":0,"impr":14264},"2026-02-18":{"ms":1817,"gs":1025,"sp":2842,"mr":1918,"gr":0,"net":1919,"gross":2399,"disc":-480,"ret":0,"clicks":248,"purch":1,"impr":14377},"2026-02-19":{"ms":1606,"gs":665,"sp":2271,"mr":0,"gr":0,"net":858,"gross":6635,"disc":-1327,"ret":-4450,"clicks":227,"purch":0,"impr":11234},"2026-02-20":{"ms":1597,"gs":1265,"sp":2862,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":257,"purch":0,"impr":10490},"2026-02-21":{"ms":1443,"gs":906,"sp":2349,"mr":7840,"gr":0,"net":11611,"gross":13580,"disc":-1969,"ret":0,"clicks":208,"purch":1,"impr":9151},"2026-02-22":{"ms":1926,"gs":1047,"sp":2973,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":335,"purch":0,"impr":14217},"2026-02-23":{"ms":1531,"gs":258,"sp":1789,"mr":2892,"gr":0,"net":3042,"gross":9336,"disc":-1005,"ret":-5289,"clicks":158,"purch":1,"impr":9697},"2026-02-24":{"ms":1909,"gs":65,"sp":1974,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":181,"purch":0,"impr":9313},"2026-02-25":{"ms":1769,"gs":1557,"sp":3326,"mr":1893,"gr":0,"net":1899,"gross":1899,"disc":0,"ret":0,"clicks":442,"purch":1,"impr":10654},"2026-02-26":{"ms":1617,"gs":1585,"sp":3202,"mr":0,"gr":0,"net":-3717,"gross":0,"disc":0,"ret":-3717,"clicks":568,"purch":0,"impr":8004},"2026-02-27":{"ms":1633,"gs":1187,"sp":2820,"mr":0,"gr":1365,"net":1366,"gross":1708,"disc":-342,"ret":0,"clicks":427,"purch":1,"impr":9301},"2026-02-28":{"ms":1505,"gs":1111,"sp":2616,"mr":8958,"gr":0,"net":13580,"gross":16975,"disc":-3395,"ret":0,"clicks":417,"purch":2,"impr":8638},"2026-03-01":{"ms":1856,"gs":859,"sp":2715,"mr":0,"gr":2080,"net":2085,"gross":2607,"disc":-521,"ret":0,"clicks":379,"purch":1,"impr":12108},"2026-03-02":{"ms":1827,"gs":984,"sp":2811,"mr":0,"gr":0,"net":3626,"gross":3626,"disc":0,"ret":0,"clicks":346,"purch":0,"impr":11649},"2026-03-03":{"ms":1698,"gs":752,"sp":2450,"mr":1275,"gr":0,"net":1267,"gross":1584,"disc":-317,"ret":0,"clicks":290,"purch":1,"impr":10174},"2026-03-04":{"ms":1802,"gs":1276,"sp":3078,"mr":0,"gr":0,"net":-2083,"gross":0,"disc":0,"ret":-2083,"clicks":501,"purch":0,"impr":10426},"2026-03-05":{"ms":1736,"gs":1068,"sp":2804,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":374,"purch":0,"impr":11758},"2026-03-06":{"ms":1643,"gs":719,"sp":2362,"mr":3825,"gr":0,"net":3831,"gross":4789,"disc":-958,"ret":0,"clicks":379,"purch":1,"impr":9409},"2026-03-07":{"ms":1313,"gs":1376,"sp":2689,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":641,"purch":0,"impr":7382},"2026-03-08":{"ms":1831,"gs":958,"sp":2789,"mr":3108,"gr":3460,"net":3118,"gross":3118,"disc":0,"ret":0,"clicks":565,"purch":2,"impr":11531},"2026-03-09":{"ms":1753,"gs":1097,"sp":2850,"mr":3472,"gr":0,"net":3491,"gross":4364,"disc":-873,"ret":0,"clicks":527,"purch":1,"impr":11452},"2026-03-10":{"ms":1786,"gs":1035,"sp":2821,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":498,"purch":0,"impr":9915},"2026-03-11":{"ms":1587,"gs":1032,"sp":2619,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":466,"purch":0,"impr":10167},"2026-03-12":{"ms":1627,"gs":1255,"sp":2882,"mr":1869,"gr":0,"net":1897,"gross":2371,"disc":-474,"ret":0,"clicks":536,"purch":1,"impr":10592},"2026-03-13":{"ms":1524,"gs":1142,"sp":2666,"mr":0,"gr":0,"net":-6375,"gross":0,"disc":0,"ret":-6375,"clicks":500,"purch":0,"impr":9364},"2026-03-14":{"ms":1452,"gs":598,"sp":2050,"mr":0,"gr":2497,"net":2499,"gross":3124,"disc":-625,"ret":0,"clicks":299,"purch":1,"impr":7972},"2026-03-15":{"ms":2020,"gs":1238,"sp":3258,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":566,"purch":0,"impr":11403},"2026-03-16":{"ms":1535,"gs":1055,"sp":2590,"mr":7730,"gr":0,"net":7732,"gross":9665,"disc":-1933,"ret":0,"clicks":530,"purch":2,"impr":10049},"2026-03-17":{"ms":1916,"gs":819,"sp":2735,"mr":0,"gr":0,"net":3524,"gross":4406,"disc":-881,"ret":0,"clicks":398,"purch":0,"impr":6544},"2026-03-18":{"ms":1067,"gs":983,"sp":2050,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":437,"purch":0,"impr":7281},"2026-03-19":{"ms":1502,"gs":902,"sp":2404,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":427,"purch":0,"impr":10607},"2026-03-20":{"ms":1713,"gs":1150,"sp":2863,"mr":8754,"gr":0,"net":8764,"gross":10954,"disc":-2190,"ret":0,"clicks":652,"purch":2,"impr":12102},"2026-03-21":{"ms":1433,"gs":735,"sp":2168,"mr":0,"gr":4976,"net":5956,"gross":7445,"disc":-1489,"ret":0,"clicks":447,"purch":1,"impr":9728},"2026-03-22":{"ms":1796,"gs":864,"sp":2660,"mr":7937,"gr":0,"net":18778,"gross":23472,"disc":-4694,"ret":0,"clicks":604,"purch":1,"impr":12953},"2026-03-23":{"ms":1027,"gs":708,"sp":1735,"mr":0,"gr":0,"net":5319,"gross":6649,"disc":-1330,"ret":0,"clicks":317,"purch":0,"impr":6979},"2026-03-24":{"ms":0,"gs":1191,"sp":1191,"mr":0,"gr":0,"net":-5318,"gross":0,"disc":0,"ret":-5318,"clicks":346,"purch":0,"impr":0},"2026-03-25":{"ms":0,"gs":974,"sp":974,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":302,"purch":0,"impr":0},"2026-03-26":{"ms":544,"gs":865,"sp":1409,"mr":0,"gr":0,"net":13128,"gross":15278,"disc":-2150,"ret":0,"clicks":402,"purch":0,"impr":4289},"2026-03-27":{"ms":2776,"gs":1225,"sp":4001,"mr":4087,"gr":0,"net":4903,"gross":5821,"disc":-918,"ret":0,"clicks":646,"purch":2,"impr":14650},"2026-03-28":{"ms":2749,"gs":897,"sp":3646,"mr":1811,"gr":0,"net":1811,"gross":1811,"disc":0,"ret":0,"clicks":547,"purch":1,"impr":14925},"2026-03-29":{"ms":2134,"gs":1077,"sp":3211,"mr":1811,"gr":0,"net":4134,"gross":4715,"disc":-581,"ret":0,"clicks":576,"purch":1,"impr":10328},"2026-03-30":{"ms":1794,"gs":728,"sp":2522,"mr":0,"gr":0,"net":1771,"gross":2214,"disc":-443,"ret":0,"clicks":313,"purch":0,"impr":7615},"2026-03-31":{"ms":1223,"gs":1079,"sp":2302,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":482,"purch":0,"impr":9031},"2026-04-01":{"ms":1611,"gs":865,"sp":2476,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":453,"purch":0,"impr":11500},"2026-04-02":{"ms":1687,"gs":1121,"sp":2808,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":563,"purch":0,"impr":9535},"2026-04-03":{"ms":1552,"gs":1036,"sp":2588,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":413,"purch":0,"impr":8461},"2026-04-04":{"ms":1182,"gs":1097,"sp":2279,"mr":4769,"gr":0,"net":4793,"gross":4793,"disc":0,"ret":0,"clicks":512,"purch":1,"impr":6941},"2026-04-05":{"ms":1812,"gs":1185,"sp":2997,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":597,"purch":0,"impr":10577},"2026-04-06":{"ms":1587,"gs":1042,"sp":2629,"mr":0,"gr":0,"net":-5090,"gross":0,"disc":0,"ret":-5090,"clicks":570,"purch":0,"impr":9299},"2026-04-07":{"ms":1618,"gs":703,"sp":2321,"mr":2745,"gr":0,"net":9629,"gross":9629,"disc":0,"ret":0,"clicks":374,"purch":1,"impr":9060},"2026-04-08":{"ms":1577,"gs":310,"sp":1887,"mr":0,"gr":0,"net":3258,"gross":3258,"disc":0,"ret":0,"clicks":183,"purch":0,"impr":10040},"2026-04-09":{"ms":1488,"gs":419,"sp":1907,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":208,"purch":0,"impr":8854},"2026-04-10":{"ms":2577,"gs":609,"sp":3186,"mr":11598,"gr":8086,"net":11575,"gross":13472,"disc":-1898,"ret":0,"clicks":320,"purch":5,"impr":13448},"2026-04-11":{"ms":2055,"gs":448,"sp":2503,"mr":11526,"gr":3504,"net":11607,"gross":14509,"disc":-2902,"ret":0,"clicks":316,"purch":3,"impr":11565},"2026-04-12":{"ms":2413,"gs":535,"sp":2948,"mr":3172,"gr":2575,"net":3169,"gross":3962,"disc":-792,"ret":0,"clicks":373,"purch":2,"impr":14695},"2026-04-13":{"ms":0,"gs":331,"sp":331,"mr":0,"gr":0,"net":8375,"gross":12169,"disc":-675,"ret":-3119,"clicks":25,"purch":0,"impr":0}},"Palladium":{"2026-01-01":{"ms":0,"gs":2550,"sp":2550,"mr":0,"gr":0,"net":3506,"gross":3506,"disc":0,"ret":0,"clicks":168,"purch":0,"impr":0},"2026-01-02":{"ms":0,"gs":1309,"sp":1309,"mr":0,"gr":0,"net":7559,"gross":9946,"disc":-2387,"ret":0,"clicks":1309,"purch":1,"impr":0},"2026-01-03":{"ms":0,"gs":1094,"sp":1094,"mr":0,"gr":0,"net":7019,"gross":7019,"disc":0,"ret":0,"clicks":1016,"purch":0,"impr":0},"2026-01-04":{"ms":0,"gs":561,"sp":561,"mr":0,"gr":0,"net":4979,"gross":4979,"disc":0,"ret":0,"clicks":291,"purch":0,"impr":0},"2026-01-05":{"ms":0,"gs":1096,"sp":1096,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1165,"purch":0,"impr":0},"2026-01-06":{"ms":0,"gs":954,"sp":954,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1253,"purch":1,"impr":0},"2026-01-07":{"ms":0,"gs":984,"sp":984,"mr":0,"gr":0,"net":2891,"gross":3804,"disc":-913,"ret":0,"clicks":891,"purch":0,"impr":0},"2026-01-08":{"ms":0,"gs":1074,"sp":1074,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":735,"purch":0,"impr":0},"2026-01-09":{"ms":0,"gs":935,"sp":935,"mr":0,"gr":0,"net":5298,"gross":5298,"disc":0,"ret":0,"clicks":517,"purch":1,"impr":0},"2026-01-10":{"ms":0,"gs":788,"sp":788,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":181,"purch":0,"impr":0},"2026-01-11":{"ms":0,"gs":1804,"sp":1804,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":572,"purch":1,"impr":0},"2026-01-12":{"ms":0,"gs":1534,"sp":1534,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":346,"purch":0,"impr":0},"2026-01-13":{"ms":0,"gs":1258,"sp":1258,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":180,"purch":0,"impr":0},"2026-01-14":{"ms":0,"gs":1441,"sp":1441,"mr":0,"gr":0,"net":3243,"gross":3243,"disc":0,"ret":0,"clicks":229,"purch":1,"impr":0},"2026-01-15":{"ms":0,"gs":1098,"sp":1098,"mr":0,"gr":0,"net":6342,"gross":7927,"disc":-1585,"ret":0,"clicks":195,"purch":0,"impr":0},"2026-01-16":{"ms":8574,"gs":1090,"sp":9664,"mr":3333,"gr":0,"net":3356,"gross":3356,"disc":0,"ret":0,"clicks":1513,"purch":1,"impr":71216},"2026-01-17":{"ms":8576,"gs":1338,"sp":9914,"mr":15434,"gr":0,"net":19605,"gross":21463,"disc":-1858,"ret":0,"clicks":1420,"purch":5,"impr":60719},"2026-01-18":{"ms":5617,"gs":1368,"sp":6985,"mr":3479,"gr":0,"net":20798,"gross":24727,"disc":-3929,"ret":0,"clicks":918,"purch":3,"impr":33338},"2026-01-19":{"ms":4972,"gs":962,"sp":5934,"mr":9620,"gr":0,"net":9719,"gross":9881,"disc":-162,"ret":0,"clicks":765,"purch":4,"impr":39951},"2026-01-20":{"ms":4891,"gs":1707,"sp":6598,"mr":0,"gr":0,"net":2686,"gross":2984,"disc":-298,"ret":0,"clicks":817,"purch":0,"impr":37084},"2026-01-21":{"ms":4956,"gs":1495,"sp":6451,"mr":5305,"gr":0,"net":10244,"gross":11792,"disc":-1547,"ret":0,"clicks":842,"purch":1,"impr":43578},"2026-01-22":{"ms":5144,"gs":1161,"sp":6305,"mr":5560,"gr":0,"net":5610,"gross":7381,"disc":-1771,"ret":0,"clicks":740,"purch":2,"impr":51386},"2026-01-23":{"ms":5249,"gs":2064,"sp":7313,"mr":3005,"gr":0,"net":3018,"gross":3177,"disc":-159,"ret":0,"clicks":764,"purch":1,"impr":38834},"2026-01-24":{"ms":5631,"gs":2451,"sp":8082,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":813,"purch":0,"impr":43362},"2026-01-25":{"ms":7932,"gs":2860,"sp":10792,"mr":0,"gr":0,"net":3255,"gross":3255,"disc":0,"ret":0,"clicks":1312,"purch":0,"impr":50188},"2026-01-26":{"ms":5622,"gs":1724,"sp":7346,"mr":3505,"gr":0,"net":4866,"gross":5718,"disc":-853,"ret":0,"clicks":882,"purch":1,"impr":38523},"2026-01-27":{"ms":5414,"gs":2435,"sp":7849,"mr":3015,"gr":0,"net":3026,"gross":3185,"disc":-159,"ret":0,"clicks":730,"purch":1,"impr":33906},"2026-01-28":{"ms":4295,"gs":2008,"sp":6303,"mr":339,"gr":0,"net":83,"gross":3194,"disc":-160,"ret":-2951,"clicks":634,"purch":0,"impr":23485},"2026-01-29":{"ms":0,"gs":1952,"sp":1952,"mr":0,"gr":0,"net":3494,"gross":3678,"disc":-184,"ret":0,"clicks":235,"purch":0,"impr":0},"2026-01-30":{"ms":0,"gs":2132,"sp":2132,"mr":29,"gr":0,"net":2858,"gross":3008,"disc":-151,"ret":0,"clicks":290,"purch":1,"impr":0},"2026-01-31":{"ms":0,"gs":2474,"sp":2474,"mr":0,"gr":0,"net":2589,"gross":3699,"disc":-1110,"ret":0,"clicks":316,"purch":0,"impr":0},"2026-02-01":{"ms":0,"gs":1963,"sp":1963,"mr":0,"gr":0,"net":10995,"gross":13174,"disc":-2179,"ret":0,"clicks":247,"purch":0,"impr":0},"2026-02-02":{"ms":0,"gs":1651,"sp":1651,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":187,"purch":0,"impr":0},"2026-02-03":{"ms":0,"gs":23,"sp":23,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":6,"purch":0,"impr":0},"2026-02-04":{"ms":0,"gs":18,"sp":18,"mr":0,"gr":0,"net":6409,"gross":6409,"disc":0,"ret":0,"clicks":2,"purch":0,"impr":0},"2026-02-05":{"ms":1677,"gs":38,"sp":1715,"mr":0,"gr":0,"net":6705,"gross":8381,"disc":-1676,"ret":0,"clicks":661,"purch":0,"impr":21056},"2026-02-06":{"ms":3596,"gs":0,"sp":3596,"mr":0,"gr":0,"net":-2867,"gross":0,"disc":0,"ret":-2867,"clicks":1202,"purch":0,"impr":27042},"2026-02-07":{"ms":3320,"gs":1465,"sp":4785,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1328,"purch":0,"impr":27051},"2026-02-08":{"ms":3699,"gs":39,"sp":3738,"mr":0,"gr":0,"net":4707,"gross":5884,"disc":-1177,"ret":0,"clicks":1187,"purch":0,"impr":30792},"2026-02-09":{"ms":3474,"gs":57,"sp":3531,"mr":3181,"gr":0,"net":5154,"gross":5641,"disc":-487,"ret":0,"clicks":985,"purch":1,"impr":29941},"2026-02-10":{"ms":3697,"gs":6,"sp":3703,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1157,"purch":0,"impr":37854},"2026-02-11":{"ms":2726,"gs":66,"sp":2792,"mr":0,"gr":0,"net":-2601,"gross":0,"disc":0,"ret":-2601,"clicks":770,"purch":0,"impr":20977},"2026-02-12":{"ms":2047,"gs":0,"sp":2047,"mr":2494,"gr":0,"net":4482,"gross":4482,"disc":0,"ret":0,"clicks":577,"purch":1,"impr":15706},"2026-02-13":{"ms":1943,"gs":0,"sp":1943,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":555,"purch":0,"impr":17206},"2026-02-14":{"ms":1874,"gs":0,"sp":1874,"mr":37,"gr":0,"net":3725,"gross":4656,"disc":-931,"ret":0,"clicks":567,"purch":0,"impr":15020},"2026-02-15":{"ms":2290,"gs":2,"sp":2292,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":812,"purch":0,"impr":20636},"2026-02-16":{"ms":2113,"gs":0,"sp":2113,"mr":3010,"gr":0,"net":8256,"gross":12260,"disc":-1288,"ret":-2716,"clicks":656,"purch":1,"impr":18211},"2026-02-17":{"ms":2225,"gs":0,"sp":2225,"mr":8616,"gr":0,"net":8689,"gross":10370,"disc":-1682,"ret":0,"clicks":690,"purch":3,"impr":20407},"2026-02-18":{"ms":2061,"gs":0,"sp":2061,"mr":7603,"gr":0,"net":7659,"gross":8947,"disc":-1287,"ret":0,"clicks":623,"purch":2,"impr":17965},"2026-02-19":{"ms":1928,"gs":2,"sp":1930,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":622,"purch":0,"impr":16957},"2026-02-20":{"ms":1924,"gs":0,"sp":1924,"mr":52,"gr":0,"net":5159,"gross":6449,"disc":-1290,"ret":0,"clicks":612,"purch":0,"impr":16556},"2026-02-21":{"ms":1808,"gs":1,"sp":1809,"mr":2755,"gr":0,"net":2790,"gross":2790,"disc":0,"ret":0,"clicks":528,"purch":1,"impr":15724},"2026-02-22":{"ms":2183,"gs":0,"sp":2183,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":716,"purch":0,"impr":18919},"2026-02-23":{"ms":2130,"gs":2,"sp":2132,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":648,"purch":0,"impr":17908},"2026-02-24":{"ms":2231,"gs":0,"sp":2231,"mr":2517,"gr":0,"net":-7207,"gross":8551,"disc":0,"ret":-15757,"clicks":570,"purch":1,"impr":16938},"2026-02-25":{"ms":1962,"gs":2700,"sp":4662,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":702,"purch":0,"impr":15822},"2026-02-26":{"ms":2082,"gs":3670,"sp":5752,"mr":5777,"gr":0,"net":5829,"gross":6835,"disc":-1006,"ret":0,"clicks":2158,"purch":3,"impr":16148},"2026-02-27":{"ms":2001,"gs":3477,"sp":5478,"mr":0,"gr":0,"net":8096,"gross":9587,"disc":-1491,"ret":0,"clicks":1918,"purch":0,"impr":16230},"2026-02-28":{"ms":1746,"gs":2755,"sp":4501,"mr":6978,"gr":0,"net":9911,"gross":11450,"disc":-1539,"ret":0,"clicks":705,"purch":5,"impr":13480},"2026-03-01":{"ms":2452,"gs":1923,"sp":4375,"mr":2484,"gr":0,"net":2507,"gross":2507,"disc":0,"ret":0,"clicks":886,"purch":1,"impr":23544},"2026-03-02":{"ms":2132,"gs":2314,"sp":4446,"mr":1943,"gr":0,"net":1962,"gross":8392,"disc":-1286,"ret":-5145,"clicks":890,"purch":1,"impr":21444},"2026-03-03":{"ms":2007,"gs":2194,"sp":4201,"mr":0,"gr":0,"net":0,"gross":3905,"disc":-781,"ret":-3124,"clicks":789,"purch":0,"impr":19805},"2026-03-04":{"ms":2080,"gs":3054,"sp":5134,"mr":0,"gr":0,"net":-2896,"gross":0,"disc":0,"ret":-2896,"clicks":836,"purch":0,"impr":19503},"2026-03-05":{"ms":901,"gs":2324,"sp":3225,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":582,"purch":0,"impr":8339},"2026-03-06":{"ms":811,"gs":2066,"sp":2877,"mr":0,"gr":0,"net":0,"gross":2507,"disc":-501,"ret":-2006,"clicks":373,"purch":0,"impr":4285},"2026-03-07":{"ms":2197,"gs":3068,"sp":5265,"mr":2711,"gr":0,"net":5475,"gross":6083,"disc":-608,"ret":0,"clicks":708,"purch":2,"impr":12064},"2026-03-08":{"ms":1710,"gs":2464,"sp":4174,"mr":0,"gr":0,"net":0,"gross":2168,"disc":-25,"ret":-2143,"clicks":567,"purch":0,"impr":8024},"2026-03-09":{"ms":1402,"gs":2466,"sp":3868,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":580,"purch":0,"impr":7622},"2026-03-10":{"ms":1301,"gs":1822,"sp":3123,"mr":0,"gr":0,"net":0,"gross":5179,"disc":-1631,"ret":-3549,"clicks":499,"purch":0,"impr":6614},"2026-03-11":{"ms":1725,"gs":1648,"sp":3373,"mr":0,"gr":0,"net":0,"gross":2994,"disc":-599,"ret":-2395,"clicks":593,"purch":0,"impr":7485},"2026-03-12":{"ms":1420,"gs":2775,"sp":4195,"mr":0,"gr":0,"net":-1718,"gross":0,"disc":0,"ret":-1718,"clicks":652,"purch":0,"impr":5917},"2026-03-13":{"ms":1420,"gs":2885,"sp":4305,"mr":0,"gr":0,"net":2739,"gross":3043,"disc":-304,"ret":0,"clicks":706,"purch":0,"impr":5905},"2026-03-14":{"ms":1584,"gs":2285,"sp":3869,"mr":6310,"gr":0,"net":3572,"gross":3968,"disc":-397,"ret":0,"clicks":710,"purch":2,"impr":6112},"2026-03-15":{"ms":1609,"gs":3167,"sp":4776,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":852,"purch":0,"impr":6559},"2026-03-16":{"ms":2219,"gs":2713,"sp":4932,"mr":0,"gr":0,"net":3065,"gross":6415,"disc":-766,"ret":-2584,"clicks":1155,"purch":1,"impr":23828},"2026-03-17":{"ms":2753,"gs":1366,"sp":4119,"mr":1500,"gr":0,"net":1513,"gross":4741,"disc":-168,"ret":-3060,"clicks":824,"purch":2,"impr":26717},"2026-03-18":{"ms":2625,"gs":3482,"sp":6107,"mr":5443,"gr":0,"net":4028,"gross":4475,"disc":-448,"ret":0,"clicks":1496,"purch":2,"impr":29655},"2026-03-19":{"ms":2646,"gs":1708,"sp":4354,"mr":0,"gr":0,"net":2359,"gross":2949,"disc":-590,"ret":0,"clicks":1112,"purch":1,"impr":22947},"2026-03-20":{"ms":2606,"gs":2140,"sp":4746,"mr":4054,"gr":0,"net":4045,"gross":4494,"disc":-449,"ret":0,"clicks":1137,"purch":4,"impr":26989},"2026-03-21":{"ms":2478,"gs":1694,"sp":4172,"mr":0,"gr":0,"net":3459,"gross":3843,"disc":-384,"ret":0,"clicks":1026,"purch":0,"impr":22899},"2026-03-22":{"ms":2736,"gs":2203,"sp":4939,"mr":8133,"gr":0,"net":8206,"gross":9702,"disc":-1496,"ret":0,"clicks":1096,"purch":3,"impr":22972},"2026-03-23":{"ms":1498,"gs":1867,"sp":3365,"mr":0,"gr":0,"net":-3577,"gross":0,"disc":0,"ret":-3577,"clicks":910,"purch":0,"impr":10773},"2026-03-24":{"ms":0,"gs":1507,"sp":1507,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":378,"purch":0,"impr":0},"2026-03-25":{"ms":0,"gs":2284,"sp":2284,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":791,"purch":1,"impr":0},"2026-03-26":{"ms":1532,"gs":2330,"sp":3862,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":977,"purch":0,"impr":20751},"2026-03-27":{"ms":3479,"gs":3769,"sp":7248,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1432,"purch":0,"impr":23659},"2026-03-28":{"ms":3176,"gs":2696,"sp":5872,"mr":2410,"gr":0,"net":2190,"gross":2433,"disc":-243,"ret":0,"clicks":953,"purch":1,"impr":14920},"2026-03-29":{"ms":2460,"gs":2106,"sp":4566,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":1081,"purch":0,"impr":12362},"2026-03-30":{"ms":2273,"gs":1169,"sp":3442,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":766,"purch":0,"impr":14679},"2026-03-31":{"ms":2089,"gs":647,"sp":2736,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":532,"purch":0,"impr":14249},"2026-04-01":{"ms":3474,"gs":819,"sp":4293,"mr":2265,"gr":0,"net":2256,"gross":2506,"disc":-251,"ret":0,"clicks":795,"purch":1,"impr":36302},"2026-04-02":{"ms":4538,"gs":809,"sp":5347,"mr":7305,"gr":0,"net":7306,"gross":7306,"disc":0,"ret":0,"clicks":890,"purch":2,"impr":42485},"2026-04-03":{"ms":2440,"gs":971,"sp":3411,"mr":10549,"gr":0,"net":10611,"gross":10611,"disc":0,"ret":0,"clicks":428,"purch":4,"impr":20501},"2026-04-04":{"ms":2493,"gs":682,"sp":3175,"mr":10735,"gr":0,"net":3594,"gross":3594,"disc":0,"ret":0,"clicks":370,"purch":3,"impr":15357},"2026-04-05":{"ms":3429,"gs":766,"sp":4194,"mr":3588,"gr":0,"net":3595,"gross":3595,"disc":0,"ret":0,"clicks":483,"purch":1,"impr":20661},"2026-04-06":{"ms":3046,"gs":870,"sp":3916,"mr":3826,"gr":0,"net":3832,"gross":3832,"disc":0,"ret":0,"clicks":421,"purch":1,"impr":19920},"2026-04-07":{"ms":3210,"gs":683,"sp":3893,"mr":6009,"gr":0,"net":9316,"gross":11943,"disc":-2627,"ret":0,"clicks":512,"purch":4,"impr":27022},"2026-04-08":{"ms":2825,"gs":361,"sp":3186,"mr":1726,"gr":0,"net":1739,"gross":1739,"disc":0,"ret":0,"clicks":380,"purch":1,"impr":18947},"2026-04-09":{"ms":3093,"gs":759,"sp":3852,"mr":2289,"gr":0,"net":2314,"gross":2314,"disc":0,"ret":0,"clicks":398,"purch":1,"impr":18441},"2026-04-10":{"ms":2978,"gs":427,"sp":3405,"mr":5392,"gr":0,"net":5160,"gross":6450,"disc":-1290,"ret":0,"clicks":325,"purch":2,"impr":17526},"2026-04-11":{"ms":3617,"gs":621,"sp":4238,"mr":6273,"gr":0,"net":6296,"gross":7191,"disc":-895,"ret":0,"clicks":341,"purch":2,"impr":15711},"2026-04-12":{"ms":4290,"gs":638,"sp":4928,"mr":10967,"gr":0,"net":10976,"gross":12939,"disc":-1963,"ret":0,"clicks":506,"purch":4,"impr":25000},"2026-04-13":{"ms":0,"gs":499,"sp":499,"mr":0,"gr":0,"net":0,"gross":0,"disc":0,"ret":0,"clicks":38,"purch":0,"impr":0}}};
+
+const SHEET_ID='16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE';
+const BASE=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+const URL_META=BASE+'metaads_by_brand_contry';
+const URL_GADS=BASE+'gads_by+brand_contry';
+const URL_SALES=BASE+'all+brand+sale';
+
+const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
+const BCOLORS=['#1e4d35','#2d6b4a','#3d8460','#52a07a','#6aad86','#88c09d','#aad4b8','#cce4d2'];
+const MONTHS=['2026-01','2026-02','2026-03','2026-04'];
+
+let RAW={meta:[],gads:[],sales:[]};
+let F={brand:'all',country:'all',dateFrom:'',dateTo:''};
+let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
+
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};
+
+// Format numbers - full integers, no K abbreviations
+function fmtN(n){if(!n||isNaN(n))return'—';return'$'+Math.round(Math.abs(n)).toLocaleString();}
+function fmtI(n){if(!n||isNaN(n))return'—';return Math.round(Math.abs(n)).toLocaleString();}
+function fmtR(n,d=2){if(!n||isNaN(n))return'—';return n.toFixed(d)+'×';}
+function fmtP(n){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(1)+'%';}
+function showStatus(t,m){const el=$("sbar");el.className=t;el.textContent=m;}
+
+/* Date helpers */
+function normDate(raw){
+  if(!raw)return null;
+  const s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
+  const a=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(a)return`${a[3]}-${a[1].padStart(2,'0')}-${a[2].padStart(2,'0')}`;
+  const b=s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if(b)return`${b[1]}-${b[2].padStart(2,'0')}-${b[3].padStart(2,'0')}`;
+  try{const d=new Date(s);if(!isNaN(d.getTime()))return d.toISOString().slice(0,10);}catch(e){}
+  return null;
+}
+
+/* Time filter */
+function setTime(t,el){
+  document.querySelectorAll('[data-t]').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  $('cr').classList.toggle('show',t==='custom');
+  if(t==='custom'){$('dt').value=today();return;}
+  F.dateFrom=t==='1'?daysAgo(1):daysAgo(parseInt(t));
+  F.dateTo=t==='1'?daysAgo(1):today();
+  if(RAW.meta.length||RAW.sales.length)render();
+}
+function applyCustom(){
+  F.dateFrom=$('df').value;F.dateTo=$('dt').value;
+  if(F.dateFrom&&F.dateTo&&(RAW.meta.length||RAW.sales.length))render();
+}
+function setC(c,el){document.querySelectorAll('[data-c]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.country=c;if(RAW.meta.length||RAW.sales.length)render();}
+function setB(b,el){document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.brand=b;if(RAW.meta.length||RAW.sales.length)render();}
+function setDim(d,el){dimMode=d;document.querySelectorAll('.dim-btn').forEach(x=>x.classList.remove('on'));el.classList.add('on');render();}
+
+/* Fetch + Parse */
+async function fetchCsv(url){
+  try{const r=await fetch(url,{mode:'cors'});if(r.ok)return await r.text();}catch(e){}
+  try{const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url));if(r.ok){const j=await r.json();if(j?.contents)return j.contents;}}catch(e){}
+  try{const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(url));if(r.ok)return await r.text();}catch(e){}
+  throw new Error('All CORS proxies failed');
+}
+function csv(url){return fetchCsv(url).then(t=>Papa.parse(t,{header:true,skipEmptyLines:true}).data);}
+function kf(row,...pts){const keys=Object.keys(row);for(const p of pts){const k=keys.find(k=>new RegExp(p,'i').test(k));if(k)return k;}return pts[pts.length-1];}
+
+function parseMeta(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={media:kf(R,'媒體','media'),brand:kf(R,'^品牌$','brand'),country:kf(R,'國家','country'),
+    date:kf(R,'天數','分析報告開始','date'),spend:kf(R,'花費金額','spend','cost'),
+    rev:kf(R,'購買轉換值','revenue','value'),clicks:kf(R,'連結點擊','link.click','clicks'),
+    purch:kf(R,'購買次數','purchases'),cpc:kf(R,'CPC','單次點擊'),
+    ctr:kf(R,'CTR','點閱率'),impr:kf(R,'曝光次數','impressions'),atc:kf(R,'加到購物車','add.to.cart')};
+  return rows.filter(r=>/meta/i.test(r[K.media]||'')).map(r=>{
+    const date=normDate(r[K.date]);
+    const spend=parseFloat(String(r[K.spend]||'0').replace(/,/g,''))||0;
+    const clicks=parseFloat(String(r[K.clicks]||'0').replace(/,/g,''))||0;
+    const impr=parseFloat(String(r[K.impr]||'0').replace(/,/g,''))||0;
+    // Meta CTR is already in % (e.g. 2.317 means 2.317%)
+    const ctr_raw=parseFloat(String(r[K.ctr]||'0').replace(/,/g,''))||0;
+    const ctr=impr>0?(clicks/impr*100):ctr_raw;
+    return{brand:(r[K.brand]||'').trim(),country:(r[K.country]||'').trim().toUpperCase(),
+      date,month:date?date.slice(0,7):null,spend,
+      rev:parseFloat(String(r[K.rev]||'0').replace(/,/g,''))||0,
+      clicks,purchases:parseFloat(String(r[K.purch]||'0').replace(/,/g,''))||0,
+      cpc:parseFloat(String(r[K.cpc]||'0').replace(/,/g,''))||0,
+      ctr,impr,atc:parseFloat(String(r[K.atc]||'0').replace(/,/g,''))||0};
+  }).filter(r=>r.date&&r.brand);
+}
+
+function parseGads(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={media:kf(R,'媒體','media'),brand:kf(R,'^品牌$','brand'),country:kf(R,'國家','country'),
+    date:kf(R,'^日期$','^date$'),spend:kf(R,'費用','cost','spend'),rev:kf(R,'購買價值','purchase.value','revenue'),
+    clicks:kf(R,'^點擊$','^clicks$'),purch:kf(R,'^購買$','^purchases$'),
+    ctr:kf(R,'點閱率','ctr'),impr:kf(R,'^曝光$','impressions')};
+  return rows.filter(r=>/google/i.test(r[K.media]||'')).map(r=>{
+    const date=normDate(r[K.date]);
+    const spend=parseFloat(String(r[K.spend]||'0').replace(/,/g,''))||0;
+    const clicks=parseFloat(String(r[K.clicks]||'0').replace(/,/g,''))||0;
+    const impr=parseFloat(String(r[K.impr]||'0').replace(/,/g,''))||0;
+    // Google CTR is decimal (e.g. 0.0384 = 3.84%) -> multiply by 100
+    const ctr_raw=parseFloat(String(r[K.ctr]||'0').replace(/,/g,''))||0;
+    const ctr=impr>0?(clicks/impr*100):(ctr_raw*100);
+    const rawC=(r[K.country]||'').trim().toUpperCase();
+    const countries=rawC.includes('+')?rawC.split('+'):[rawC];
+    return{brand:(r[K.brand]||'').trim(),country:rawC,countries,date,month:date?date.slice(0,7):null,
+      spend,rev:parseFloat(String(r[K.rev]||'0').replace(/,/g,''))||0,
+      clicks,purchases:parseFloat(String(r[K.purch]||'0').replace(/,/g,''))||0,
+      cpc:clicks>0?spend/clicks:0,ctr,impr};
+  }).filter(r=>r.date&&r.brand);
+}
+
+function parseSales(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={brand:kf(R,'^品牌$','brand'),date:kf(R,'日期','A \\(日期\\)','date'),
+    gross:kf(R,'B \\(銷售總額\\)','銷售總額','gross'),disc:kf(R,'C \\(折扣\\)','折扣','discount'),
+    ret:kf(R,'D \\(退貨金額\\)','退貨','return'),net:kf(R,'E \\(銷貨淨額\\)','銷貨淨額','net')};
+  return rows.map(r=>{
+    const date=normDate(r[K.date]);
+    return{brand:(r[K.brand]||'').trim(),date,month:date?date.slice(0,7):null,
+      gross:parseFloat(String(r[K.gross]||'0').replace(/,/g,''))||0,
+      disc:parseFloat(String(r[K.disc]||'0').replace(/,/g,''))||0,
+      ret:parseFloat(String(r[K.ret]||'0').replace(/,/g,''))||0,
+      net:parseFloat(String(r[K.net]||'0').replace(/,/g,''))||0};
+  }).filter(r=>r.date&&r.brand);
+}
+
+/* Filters */
+const inD=r=>r.date>=F.dateFrom&&r.date<=F.dateTo;
+const inB=r=>F.brand==='all'||r.brand===F.brand;
+const inCm=r=>F.country==='all'||r.country===F.country;
+const inCg=r=>F.country==='all'||(r.countries?r.countries.includes(F.country):r.country.includes(F.country));
+
+/* Aggregate using BRAND_DAILY embedded data */
+function aggFromEmbedded(){
+  const meta=RAW.meta.filter(r=>inD(r)&&inB(r)&&inCm(r));
+  const gads=RAW.gads.filter(r=>inD(r)&&inB(r)&&inCg(r));
+  const sales=RAW.sales.filter(r=>inD(r)&&inB(r));
+
+  const ms=meta.reduce((s,r)=>s+r.spend,0);
+  const gs=gads.reduce((s,r)=>s+r.spend,0);
+  const sp=ms+gs;
+  const mr=meta.reduce((s,r)=>s+r.rev,0);
+  const gr=gads.reduce((s,r)=>s+r.rev,0);
+  const gross=sales.reduce((s,r)=>s+r.gross,0);
+  const disc=sales.reduce((s,r)=>s+r.disc,0);
+  const ret=sales.reduce((s,r)=>s+r.ret,0);
+  const net=sales.reduce((s,r)=>s+r.net,0);
+  const clicks=meta.reduce((s,r)=>s+r.clicks,0)+gads.reduce((s,r)=>s+r.clicks,0);
+  const purch=meta.reduce((s,r)=>s+r.purchases,0)+gads.reduce((s,r)=>s+r.purchases,0);
+  const impr=meta.reduce((s,r)=>s+r.impr,0)+gads.reduce((s,r)=>s+r.impr,0);
+  const atc=meta.reduce((s,r)=>s+r.atc,0);
+  // CTR = total clicks / total impressions * 100
+  const ctr=impr>0?clicks/impr*100:0;
+  const cpc=clicks>0?sp/clicks:0;
+  const cvr=clicks>0?purch/clicks*100:0;
+  const roi=sp>0?net/sp:0;
+  const roas=sp>0?(mr+gr)/sp:0;
+
+  // Brand rows
+  const brandRows=BRANDS.map(bn=>{
+    const bm=RAW.meta.filter(r=>r.brand===bn&&inD(r)&&inCm(r));
+    const bg=RAW.gads.filter(r=>r.brand===bn&&inD(r)&&inCg(r));
+    const bs=RAW.sales.filter(r=>r.brand===bn&&inD(r));
+    const bms=bm.reduce((s,r)=>s+r.spend,0),bgs=bg.reduce((s,r)=>s+r.spend,0),bsp=bms+bgs;
+    const bmr=bm.reduce((s,r)=>s+r.rev,0),bgr=bg.reduce((s,r)=>s+r.rev,0);
+    const bg2=bs.reduce((s,r)=>s+r.gross,0),bd=bs.reduce((s,r)=>s+r.disc,0);
+    const br=bs.reduce((s,r)=>s+r.ret,0),bn2=bs.reduce((s,r)=>s+r.net,0);
+    const bclk=bm.reduce((s,r)=>s+r.clicks,0)+bg.reduce((s,r)=>s+r.clicks,0);
+    const bpch=bm.reduce((s,r)=>s+r.purchases,0)+bg.reduce((s,r)=>s+r.purchases,0);
+    const bimpr=bm.reduce((s,r)=>s+r.impr,0)+bg.reduce((s,r)=>s+r.impr,0);
+    const batc=bm.reduce((s,r)=>s+r.atc,0);
+    const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
+    return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,
+      gross:bg2,disc:bd,ret:br,net:bn2,
+      disc_pct:bg2?Math.abs(bd/bg2*100):0,ret_pct:bg2?Math.abs(br/bg2*100):0,
+      clicks:bclk,purchases:bpch,cpc:bclk>0?bsp/bclk:0,
+      ctr:bimpr>0?bclk/bimpr*100:0,
+      cvr:bclk>0?bpch/bclk*100:0,atc:batc,impr:bimpr,
+      roi:bsp>0?bn2/bsp:0,roas:bsp>0?(bmr+bgr)/bsp:0};
+  });
+
+  // Daily rows for day-dimension table
+  const dayMap={};
+  const allDates=new Set([...meta.map(r=>r.date),...gads.map(r=>r.date),...sales.map(r=>r.date)]);
+  allDates.forEach(dt=>{
+    const dm=meta.filter(r=>r.date===dt);
+    const dg=gads.filter(r=>r.date===dt);
+    const ds=sales.filter(r=>r.date===dt);
+    const dms=dm.reduce((s,r)=>s+r.spend,0),dgs=dg.reduce((s,r)=>s+r.spend,0),dsp=dms+dgs;
+    const dmr=dm.reduce((s,r)=>s+r.rev,0),dgr=dg.reduce((s,r)=>s+r.rev,0);
+    const dnet=ds.reduce((s,r)=>s+r.net,0);
+    const dclk=dm.reduce((s,r)=>s+r.clicks,0)+dg.reduce((s,r)=>s+r.clicks,0);
+    const dpch=dm.reduce((s,r)=>s+r.purchases,0)+dg.reduce((s,r)=>s+r.purchases,0);
+    const dimpr=dm.reduce((s,r)=>s+r.impr,0)+dg.reduce((s,r)=>s+r.impr,0);
+    dayMap[dt]={date:dt,ms:dms,gs:dgs,sp:dsp,mr:dmr,gr:dgr,net:dnet,
+      gross:ds.reduce((s,r)=>s+r.gross,0),disc:ds.reduce((s,r)=>s+r.disc,0),ret:ds.reduce((s,r)=>s+r.ret,0),
+      clicks:dclk,purchases:dpch,impr:dimpr,
+      ctr:dimpr>0?dclk/dimpr*100:0,cvr:dclk>0?dpch/dclk*100:0,
+      cpc:dclk>0?dsp/dclk:0,roi:dsp>0?dnet/dsp:0,roas:dsp>0?(dmr+dgr)/dsp:0};
+  });
+  const dayRows=Object.values(dayMap).sort((a,b2)=>a.date<b2.date?-1:1);
+
+  // Time-series for charts
+  // Build period-appropriate buckets
+  const dayCount=(new Date(F.dateTo)-new Date(F.dateFrom))/(86400000)+1;
+  let tsBuckets={};
+  if(dayCount<=31){
+    // daily
+    allDates.forEach(dt=>{if(dayMap[dt])tsBuckets[dt]=dayMap[dt];});
+  } else {
+    // weekly
+    allDates.forEach(dt=>{
+      const d=new Date(dt),wk=`${d.getFullYear()}-W${String(getISO(d)).padStart(2,'0')}`;
+      if(!tsBuckets[wk])tsBuckets[wk]={spend:0,net:0,ms:0,gs:0};
+      tsBuckets[wk].spend+=(dayMap[dt]?.sp||0);
+      tsBuckets[wk].net+=(dayMap[dt]?.net||0);
+      tsBuckets[wk].ms+=(dayMap[dt]?.ms||0);
+      tsBuckets[wk].gs+=(dayMap[dt]?.gs||0);
+    });
+    Object.keys(tsBuckets).forEach(k=>{
+      const b=tsBuckets[k];
+      tsBuckets[k].roi=b.spend>0?b.net/b.spend:0;
+      tsBuckets[k].roas=b.spend>0?b.net/b.spend:0;
+    });
+  }
+  const tsKeys=Object.keys(tsBuckets).sort();
+  const tsSeries=tsKeys.map(k=>({
+    label:k.replace('2026-',''),
+    spend:tsBuckets[k].spend||tsBuckets[k].sp||0,
+    net:tsBuckets[k].net||0,
+    ms:tsBuckets[k].ms||0,
+    gs:tsBuckets[k].gs||0,
+    roi:tsBuckets[k].roi??((tsBuckets[k].sp||0)>0?(tsBuckets[k].net||0)/(tsBuckets[k].sp||1):0)
+  }));
+
+  // Monthly for stacked charts (always monthly for those)
+  const mMeta=MONTHS.map(m=>RAW.meta.filter(r=>inB(r)&&inCm(r)&&r.month===m).reduce((s,r)=>s+r.spend,0));
+  const mGads=MONTHS.map(m=>RAW.gads.filter(r=>inB(r)&&inCg(r)&&r.month===m).reduce((s,r)=>s+r.spend,0));
+  const bMNet=BRANDS.reduce((acc,bn)=>{acc[bn]=MONTHS.map(m=>RAW.sales.filter(r=>r.brand===bn&&r.month===m).reduce((s,r)=>s+r.net,0));return acc;},{});
+  const heat=BRANDS.map(bn=>({brand:bn,vals:MONTHS.map(m=>{
+    const bsp=RAW.meta.filter(r=>r.brand===bn&&r.month===m&&inCm(r)).reduce((s,r)=>s+r.spend,0)+RAW.gads.filter(r=>r.brand===bn&&r.month===m&&inCg(r)).reduce((s,r)=>s+r.spend,0);
+    const bnet=RAW.sales.filter(r=>r.brand===bn&&r.month===m).reduce((s,r)=>s+r.net,0);
+    return bsp>0?bnet/bsp:null;
+  })}));
+
+  return{sp,ms,gs,roi,roas,gross,disc,ret,net,clicks,purch,cpc,ctr,cvr,impr,atc,brandRows,dayRows,tsSeries,mMeta,mGads,bMNet,heat,dayCount};
+}
+
+function getISO(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);const w1=new Date(dt.getFullYear(),0,4);return 1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7);}
+
+function periodLabel(){
+  if($('cr').classList.contains('show'))return`${F.dateFrom} – ${F.dateTo}`;
+  const a=document.querySelector('[data-t].on');const t=a?.dataset.t||'7';
+  return t==='1'?'Yesterday':`Last ${t} days`;
+}
+
+/* RENDER */
+function render(){
+  const d=aggFromEmbedded();
+  const pl=periodLabel();
+  $('trend-badge').textContent=pl;
+  $('roi-brand-badge').textContent=pl;
+  $('tbl-badge').textContent=pl;
+
+  const revPeriod=d.dayCount<=31?'daily':'weekly bucketed';
+  $('rev-period-badge').textContent=revPeriod;
+  $('spend-period-badge').textContent=revPeriod;
+
+  // ROI HERO
+  const roiVal=d.roi;
+  const roiBig=$('roi-big');
+  roiBig.textContent=roiVal>0?roiVal.toFixed(2)+'×':'—';
+  roiBig.className='roi-big'+(roiVal>=5?'':roiVal>=2?' warn':' bad');
+  $('roi-net').textContent=fmtN(d.net);
+  $('roi-sp').textContent=fmtN(d.sp);
+  $('roi-status-text').textContent=roiVal>=5?'Good':roiVal>=2?'Review':roiVal>0?'Stop':'';
+  $('roi-status-text').style.color=roiVal>=5?'var(--ok)':roiVal>=2?'var(--warn)':'var(--red)';
+  $('roas-mini').textContent=fmtR(d.roas);
+  $('cvr-mini').textContent=fmtP(d.cvr);
+  $('ret-mini').textContent=d.gross>0?fmtP(Math.abs(d.ret/d.gross*100)):'—';
+  $('disc-mini').textContent=d.gross>0?fmtP(Math.abs(d.disc/d.gross*100)):'—';
+
+  // Business
+  $('k-net').textContent=fmtN(d.net);
+  $('k-gross').textContent=fmtN(d.gross);
+  $('k-gross-s').textContent='Gross before deductions';
+  $('k-disc').textContent=fmtN(Math.abs(d.disc));
+  $('k-disc-s').innerHTML=d.gross?`<span class="dn">${fmtP(Math.abs(d.disc/d.gross*100))} of gross</span>`:'';
+  $('k-ret').textContent=fmtN(Math.abs(d.ret));
+  $('k-ret-s').innerHTML=d.gross?`<span class="dn">${fmtP(Math.abs(d.ret/d.gross*100))} of gross</span>`:'';
+
+  // Ads row 1
+  $('k-sp').textContent=fmtN(d.sp);
+  $('k-sp-s').textContent=`Meta ${fmtN(d.ms)} + Google ${fmtN(d.gs)}`;
+  $('k-roas').textContent=fmtR(d.roas);
+  $('k-purch').textContent=fmtI(d.purch);
+  $('k-clk').textContent=fmtI(d.clicks);
+  $('k-clk-s').textContent='Meta + Google';
+  $('k-cvr').textContent=fmtP(d.cvr);
+  $('k-cvr-s').textContent=`${fmtI(d.purch)} purchases / ${fmtI(d.clicks)} clicks`;
+  $('k-ctr').textContent=fmtP(d.ctr);
+
+  // Ads row 2
+  $('k-cpc').textContent=d.cpc>0?'$'+d.cpc.toFixed(1):'—';
+  $('k-impr').textContent=fmtI(d.impr);
+  $('k-ms').textContent=fmtN(d.ms);
+  const mp=d.sp>0?Math.round(d.ms/d.sp*100):0;
+  $('k-ms-s').textContent=`${mp}% of total`;
+  $('k-gs').textContent=fmtN(d.gs);
+  $('k-gs-s').textContent=`${100-mp}% of total`;
+  $('k-atc').textContent=fmtI(d.atc);
+  $('k-split').textContent=d.sp>0?`${mp}% / ${100-mp}%`:'—';
+
+  // ROI bars
+  const maxR=Math.max(...d.brandRows.map(b=>b.roi),0.1);
+  $('roi-bars').innerHTML=[...d.brandRows].sort((a,b2)=>b2.roi-a.roi).map(b=>{
+    const p2=Math.round(b.roi/maxR*100);
+    const col=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+    const vc=b.roi>=5?'color:var(--ok)':b.roi>=2?'color:var(--warn)':'color:var(--red)';
+    return`<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:${p2}%;background:${col}"></div></div><span class="roi-v" style="${vc}">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</span></div>`;
+  }).join('');
+  // Summary for ROI bars
+  const topBrand=[...d.brandRows].sort((a,b2)=>b2.roi-a.roi)[0];
+  const botBrand=[...d.brandRows].filter(b=>b.sp>0).sort((a,b2)=>a.roi-b2.roi)[0];
+  $('roi-sum').innerHTML=`<div class="sum-item">Best <strong>${topBrand?.brand||'—'}</strong> ${topBrand?.roi>0?topBrand.roi.toFixed(2)+'×':'—'}</div><div class="sum-item">Lowest <strong>${botBrand?.brand||'—'}</strong> ${botBrand?.roi>0?botBrand.roi.toFixed(2)+'×':'—'}</div><div class="sum-item">Avg ROI <strong>${d.roi>0?d.roi.toFixed(2)+'×':'—'}</strong></div>`;
+
+  renderTrend(d.tsSeries,d.dayCount);
+  renderStack(d.bMNet,d.tsSeries,d.dayCount);
+  renderSpend(d.mMeta,d.mGads,d.tsSeries,d.dayCount);
+  renderHeat(d.heat);
+  renderTable(d.brandRows,d.dayRows);
+}
+
+/* Charts */
+const tc='rgba(26,26,24,.2)',gc='rgba(26,26,24,.05)';
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function renderTrend(series,dayCount){
+  dc('trend');
+  charts.trend=new Chart($('trendC'),{
+    data:{labels:series.map(s=>s.label),datasets:[
+      {type:'bar',data:series.map(s=>Math.round(s.spend)),backgroundColor:'rgba(74,144,104,.18)',borderRadius:2,yAxisID:'y'},
+      {type:'line',data:series.map(s=>Math.round(s.roi*10)/10),borderColor:'#1e4d35',backgroundColor:'transparent',tension:.4,pointRadius:2.5,pointBackgroundColor:'#1e4d35',borderWidth:1.5,yAxisID:'y2'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return' Spend: $'+ctx.raw.toLocaleString();return' ROI: '+ctx.raw.toFixed(1)+'×';}}}},
+      scales:{
+        y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc},position:'left'},
+        y2:{ticks:{color:'#2d6b4a',font:{size:10},callback:v=>v.toFixed(1)+'×'},grid:{display:false},position:'right'}
+      }}
+  });
+}
+
+function renderStack(bms,series,dayCount){
+  dc('stack');
+  let labels,datasets;
+  if(dayCount<=31){
+    // daily stacked
+    const allDates=[...new Set(Object.values(bms).flatMap(arr=>arr.map((_,i)=>MONTHS[i])))];
+    labels=MONTHS;
+    datasets=BRANDS.map((b,i)=>({label:b,data:bms[b].map(v=>Math.round(v)),backgroundColor:BCOLORS[i],stack:'s',borderRadius:0}));
+  } else {
+    labels=MONTHS;
+    datasets=BRANDS.map((b,i)=>({label:b,data:bms[b].map(v=>Math.round(v)),backgroundColor:BCOLORS[i],stack:'s',borderRadius:0}));
+  }
+  charts.stack=new Chart($('stackC'),{type:'bar',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw.toLocaleString()}}},
+      scales:{x:{stacked:true,ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc}}}}});
+}
+
+function renderSpend(mMeta,mGads,series,dayCount){
+  dc('spend');
+  let labels,metaD,gadsD;
+  if(dayCount<=31){
+    labels=series.map(s=>s.label);
+    metaD=series.map(s=>Math.round(s.ms));
+    gadsD=series.map(s=>Math.round(s.gs));
+  } else {
+    labels=MONTHS.map(m=>m.replace('2026-','')+'月');
+    metaD=mMeta.map(v=>Math.round(v));
+    gadsD=mGads.map(v=>Math.round(v));
+  }
+  charts.spend=new Chart($('spendC'),{type:'bar',data:{labels,datasets:[
+    {label:'Meta',data:metaD,backgroundColor:'#1e4d35',borderRadius:3,stack:'s'},
+    {label:'Google',data:gadsD,backgroundColor:'#6aad86',borderRadius:3,stack:'s'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw.toLocaleString()}}},
+    scales:{x:{stacked:true,ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc}}}}});
+}
+
+function renderHeat(hd){
+  const hc=v=>{
+    if(v===null)return'background:var(--paper2);color:var(--ink4)';
+    if(v>=10)return'background:rgba(30,77,53,.22);color:var(--ok)';
+    if(v>=6)return'background:rgba(30,77,53,.12);color:var(--ok)';
+    if(v>=3)return'background:rgba(122,77,0,.1);color:var(--warn)';
+    if(v>=1)return'background:rgba(122,77,0,.06);color:var(--warn)';
+    return'background:rgba(155,36,18,.1);color:var(--red)';
+  };
+  const th='padding:5px 7px;color:var(--ink3);text-align:center;border-bottom:1px solid var(--rule);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px';
+  let h=`<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="${th};text-align:left">Brand</th>`;
+  MONTHS.forEach(m=>h+=`<th style="${th}">${m.slice(5)}月</th>`);
+  h+='</tr></thead><tbody>';
+  hd.forEach(row=>{
+    h+=`<tr><td style="padding:5px 7px;color:var(--ink2);font-size:11px;white-space:nowrap">${row.brand}</td>`;
+    row.vals.forEach(v=>{h+=`<td style="padding:5px 6px;text-align:center;border-radius:3px;${hc(v)};font-family:'DM Mono',monospace;font-weight:500;font-size:11px">${v!==null?v.toFixed(1)+'×':'—'}</td>`;});
+    h+='</tr>';
+  });
+  $('heat-table').innerHTML=h+'</tbody></table>';
+  // Summary
+  const allVals=hd.flatMap(r=>r.vals.filter(v=>v!==null));
+  const avg=allVals.length?allVals.reduce((s,v)=>s+v,0)/allVals.length:0;
+  const best=hd.reduce((b,r)=>{const mx=Math.max(...r.vals.filter(v=>v!==null),-Infinity);return mx>b.val?{brand:r.brand,val:mx}:b;},{brand:'',val:-Infinity});
+  const worst=hd.filter(r=>r.vals.some(v=>v!==null)).reduce((b,r)=>{const mn=Math.min(...r.vals.filter(v=>v!==null),Infinity);return mn<b.val?{brand:r.brand,val:mn}:b;},{brand:'',val:Infinity});
+  $('heat-sum').innerHTML=`<div class="sum-item">Avg monthly ROI <strong>${avg>0?avg.toFixed(1)+'×':'—'}</strong></div><div class="sum-item">Best month <strong>${best.val>-Infinity?best.brand+' '+best.val.toFixed(1)+'×':'—'}</strong></div><div class="sum-item">Lowest <strong>${worst.val<Infinity?worst.brand+' '+worst.val.toFixed(1)+'×':'—'}</strong></div>`;
+}
+
+function renderTable(brandRows,dayRows){
+  const isBrand=dimMode==='brand';
+  const head=$('tbl-head');
+  const tbody=$('tbl-body');
+
+  if(isBrand){
+    head.innerHTML=`<tr>
+      <th onclick="srt('brand')">Brand</th>
+      <th onclick="srt('days')">Days</th>
+      <th onclick="srt('clicks')">Clicks</th>
+      <th onclick="srt('cpc')">CPC</th>
+      <th onclick="srt('ctr')">CTR%</th>
+      <th onclick="srt('purchases')">Purchases</th>
+      <th onclick="srt('cvr')">CVR%</th>
+      <th onclick="srt('ms')">Meta $</th>
+      <th onclick="srt('gs')">Google $</th>
+      <th onclick="srt('sp')">Total Spend</th>
+      <th onclick="srt('roi')">ROI</th>
+      <th onclick="srt('roas')">ROAS</th>
+      <th onclick="srt('net')">Net Rev (E)</th>
+      <th onclick="srt('gross')">Gross (B)</th>
+      <th onclick="srt('disc')">Discount (C)</th>
+      <th onclick="srt('disc_pct')">Disc%</th>
+      <th onclick="srt('ret')">Returns (D)</th>
+      <th onclick="srt('ret_pct')">Ret%</th>
+      <th>Status</th>
+    </tr>`;
+    const sorted=[...brandRows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
+    tbody.innerHTML=sorted.map(b=>{
+      const rc=b.roi>=5?'tok':b.roi>=2?'twarn':'tbad';
+      const rl=b.roi>=5?'Good':b.roi>=2?'Review':'Stop';
+      const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+      return`<tr>
+        <td style="font-weight:500">${b.brand}</td>
+        <td class="num">${b.days}</td>
+        <td class="num">${Math.round(b.clicks).toLocaleString()}</td>
+        <td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
+        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
+        <td class="num">${Math.round(b.purchases).toLocaleString()}</td>
+        <td class="num">${b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+        <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
+        <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td>
+        <td class="num">$${Math.round(b.sp).toLocaleString()}</td>
+        <td class="num" style="color:${rv};font-weight:500">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
+        <td class="num">${b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
+        <td class="num">$${Math.round(b.net).toLocaleString()}</td>
+        <td class="num">$${Math.round(b.gross).toLocaleString()}</td>
+        <td class="num" style="color:var(--warn)">$${Math.round(Math.abs(b.disc)).toLocaleString()}</td>
+        <td class="num" style="color:var(--warn)">${b.disc_pct.toFixed(1)}%</td>
+        <td class="num" style="color:var(--red)">$${Math.round(Math.abs(b.ret)).toLocaleString()}</td>
+        <td class="num" style="color:var(--red)">${b.ret_pct.toFixed(1)}%</td>
+        <td><span class="tag ${rc}">${rl}</span></td>
+      </tr>`;
+    }).join('');
+    // Summary
+    const totNet=brandRows.reduce((s,b)=>s+b.net,0);
+    const totSp=brandRows.reduce((s,b)=>s+b.sp,0);
+    const totClk=brandRows.reduce((s,b)=>s+b.clicks,0);
+    const totPch=brandRows.reduce((s,b)=>s+b.purchases,0);
+    $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(totNet).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(totSp).toLocaleString()}</strong></div><div class="sum-item">Total Clicks <strong>${Math.round(totClk).toLocaleString()}</strong></div><div class="sum-item">Total Purchases <strong>${Math.round(totPch).toLocaleString()}</strong></div>`;
+  } else {
+    // Day dimension
+    head.innerHTML=`<tr>
+      <th onclick="srtD('date')">Date</th>
+      <th onclick="srtD('clicks')">Clicks</th>
+      <th onclick="srtD('cpc')">CPC</th>
+      <th onclick="srtD('ctr')">CTR%</th>
+      <th onclick="srtD('purchases')">Purchases</th>
+      <th onclick="srtD('cvr')">CVR%</th>
+      <th onclick="srtD('ms')">Meta $</th>
+      <th onclick="srtD('gs')">Google $</th>
+      <th onclick="srtD('sp')">Total Spend</th>
+      <th onclick="srtD('roi')">ROI</th>
+      <th onclick="srtD('roas')">ROAS</th>
+      <th onclick="srtD('net')">Net Rev (E)</th>
+      <th onclick="srtD('gross')">Gross (B)</th>
+    </tr>`;
+    const sortedD=[...dayRows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
+    tbody.innerHTML=sortedD.map(b=>{
+      const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+      return`<tr>
+        <td style="font-weight:500;font-family:'DM Mono',monospace">${b.date}</td>
+        <td class="num">${Math.round(b.clicks).toLocaleString()}</td>
+        <td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
+        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
+        <td class="num">${Math.round(b.purchases).toLocaleString()}</td>
+        <td class="num">${b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+        <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
+        <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td>
+        <td class="num">$${Math.round(b.sp).toLocaleString()}</td>
+        <td class="num" style="color:${rv};font-weight:500">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
+        <td class="num">${b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
+        <td class="num">$${Math.round(b.net).toLocaleString()}</td>
+        <td class="num">$${Math.round(b.gross).toLocaleString()}</td>
+      </tr>`;
+    }).join('');
+    const totNet=dayRows.reduce((s,b)=>s+b.net,0);
+    const totSp=dayRows.reduce((s,b)=>s+b.sp,0);
+    $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(totNet).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(totSp).toLocaleString()}</strong></div>`;
+  }
+  document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
+}
+
+function srt(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
+function srtD(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
+
+/* Load */
+async function loadData(){
+  showStatus('loading','Syncing from Google Sheets…');
+  try{
+    const [rM,rG,rS]=await Promise.all([csv(URL_META),csv(URL_GADS),csv(URL_SALES)]);
+    RAW.meta=parseMeta(rM);RAW.gads=parseGads(rG);RAW.sales=parseSales(rS);
+    const total=RAW.meta.length+RAW.gads.length+RAW.sales.length;
+    if(total===0){
+      showStatus('error',`Parsed 0 records. Meta rows: ${rM.length}, Google: ${rG.length}, Sales: ${rS.length}`);
+      return;
+    }
+    const now=new Date().toLocaleString('zh-TW');
+    $('last-upd').textContent=now;$('footer-ts').textContent='Last sync  '+now;
+    showStatus('ok',`Loaded — Meta ${RAW.meta.length} · Google ${RAW.gads.length} · Sales ${RAW.sales.length}`);
+    render();
+    if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
+  }catch(e){showStatus('error','Load failed: '+e.message);}
+}
+
+F.dateFrom=daysAgo(7);F.dateTo=today();
+loadData();
+</script>
+</body>
+</html>
