@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emers — Marketing Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --ink:#1a1a18;--ink2:#56564f;--ink3:#96968e;--ink4:#c4c4ba;
+  --paper:#faf9f6;--paper2:#f3f2ee;--paper3:#eceae3;
+  --rule:#e4e2da;--rule2:#ceccc4;
+  --accent:#1e4d35;--accent2:#2d6b4a;--accent-l:#eef4f0;--accent-m:#4a9068;
+  --ok:#1b6040;--ok-bg:#e7f4ed;
+  --warn:#7a4d00;--warn-bg:#fdf2df;
+  --red:#9b2412;--red-bg:#fcecea;
+  --r:6px;--r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;min-height:100vh}
+
+header{background:var(--paper);border-bottom:1px solid var(--rule);padding:0 28px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;gap:12px}
+.wm{display:flex;align-items:baseline;gap:9px}
+.wm-n{font-size:16px;font-weight:500;letter-spacing:-.4px}
+.wm-d{color:var(--rule2);font-weight:300}
+.wm-s{font-size:11px;color:var(--ink3);font-style:italic;font-weight:300}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--accent-m);animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.2}}
+.sts{font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace}
+.btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 14px;border-radius:var(--r);border:1px solid var(--rule2);background:transparent;color:var(--ink2);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--paper2);color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:var(--accent2)}
+
+#sbar{display:none;padding:7px 28px;font-size:12px;align-items:center;gap:8px}
+#sbar.loading{display:flex;background:var(--accent-l);color:var(--accent)}
+#sbar.error{display:flex;background:var(--red-bg);color:var(--red)}
+#sbar.ok{display:flex;background:var(--ok-bg);color:var(--ok)}
+
+.ctrlbar{background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cl{font-size:10px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.chip{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--rule);background:transparent;color:var(--ink3);cursor:pointer;transition:all .12s;white-space:nowrap}
+.chip:hover{color:var(--ink2);border-color:var(--rule2)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.cdiv{width:1px;height:20px;background:var(--rule);flex-shrink:0}
+.custom-range{display:none;align-items:center;gap:6px}
+.custom-range.show{display:flex}
+.custom-range input{font-family:'DM Sans',sans-serif;font-size:12px;background:var(--paper2);border:1px solid var(--rule2);color:var(--ink);border-radius:var(--r);padding:4px 9px;outline:none}
+.custom-range input:focus{border-color:var(--accent)}
+.cnote{font-size:10px;color:var(--ink4);font-style:italic}
+
+main{padding:24px 28px;max-width:1480px}
+
+.sec{display:flex;align-items:center;gap:14px;margin:24px 0 12px}
+.sec:first-child{margin-top:0}
+.sec-n{font-size:10px;font-weight:500;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.sec-r{flex:1;height:1px;background:var(--rule)}
+
+/* KPI tiers */
+.tier1{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden}
+.tier2{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden;margin-top:1px}
+.tier3{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden}
+.kcard{background:var(--paper);padding:18px 20px;transition:background .12s}
+.kcard:hover{background:var(--paper2)}
+.kl{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3);margin-bottom:9px}
+.kv{font-size:24px;font-weight:300;letter-spacing:-1px;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.kv.hero{font-size:28px;letter-spacing:-1.2px}
+.kv.ac{color:var(--accent);font-weight:400}
+.kv.rd{color:var(--red)}
+.ks{font-size:11px;color:var(--ink3)}
+.ks .up{color:var(--ok)}.ks .dn{color:var(--red)}
+.kbadge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:7px}
+.kbadge.ok{background:var(--ok-bg);color:var(--ok)}
+.kbadge.warn{background:var(--warn-bg);color:var(--warn)}
+.kbadge.bad{background:var(--red-bg);color:var(--red)}
+
+.row2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px;margin-bottom:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r2);padding:18px 20px}
+.ct{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ct-n{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3)}
+.ct-b{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+.ct-b.g{background:var(--ok-bg);color:var(--ok)}
+.ct-b.n{background:var(--paper3);color:var(--ink2)}
+.cw{position:relative;width:100%}
+.legr{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+.roi-list{display:flex;flex-direction:column;gap:8px}
+.roi-row{display:grid;grid-template-columns:72px 1fr 52px;align-items:center;gap:8px}
+.roi-b{font-size:11px;color:var(--ink3);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roi-track{height:4px;background:var(--paper3);border-radius:2px;overflow:hidden}
+.roi-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.roi-v{font-size:12px;font-weight:500;text-align:right;font-family:'DM Mono',monospace}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--ink3);padding:7px 10px;border-bottom:1px solid var(--rule);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--ink)}
+thead th.sa::after{content:' ↑';color:var(--accent)}
+thead th.sd::after{content:' ↓';color:var(--accent)}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--paper2)}
+.tag{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;display:inline-block}
+.tm{background:var(--accent-l);color:var(--accent)}
+.tg{background:var(--paper3);color:var(--ink2)}
+.tok{background:var(--ok-bg);color:var(--ok)}
+.twarn{background:var(--warn-bg);color:var(--warn)}
+.tbad{background:var(--red-bg);color:var(--red)}
+.num{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+
+footer{margin-top:36px;padding:18px 28px 28px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-c{font-size:11px;color:var(--ink3);font-style:italic}
+.ft-t{font-size:11px;font-family:'DM Mono',monospace;color:var(--ink4);text-align:right}
+
+@media(max-width:1024px){.tier1,.tier2{grid-template-columns:repeat(2,minmax(0,1fr))}.tier3{grid-template-columns:repeat(3,minmax(0,1fr))}.row2,.row3{grid-template-columns:1fr}}
+@media(max-width:640px){.tier1,.tier2,.tier3{grid-template-columns:repeat(2,minmax(0,1fr))}main,header,.ctrlbar{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wm">
+    <span class="wm-n">Emers</span>
+    <span class="wm-d">/</span>
+    <span class="wm-s">Marketing Intelligence</span>
+  </div>
+  <div class="hdr-r">
+    <div class="sdot"></div>
+    <span class="sts" id="last-upd">—</span>
+    <button class="btn pri" onclick="loadData()">Sync</button>
+  </div>
+</header>
+
+<div id="sbar"></div>
+
+<div class="ctrlbar">
+  <div class="cg">
+    <span class="cl">Period</span>
+    <button class="chip" data-t="1"      onclick="setTime('1',this)">Yesterday</button>
+    <button class="chip on" data-t="7"   onclick="setTime('7',this)">7 days</button>
+    <button class="chip" data-t="30"     onclick="setTime('30',this)">30 days</button>
+    <button class="chip" data-t="90"     onclick="setTime('90',this)">90 days</button>
+    <button class="chip" data-t="custom" onclick="setTime('custom',this)">Custom</button>
+    <div class="custom-range" id="cr">
+      <input type="date" id="df" onchange="applyCustom()">
+      <span style="color:var(--ink3);font-size:11px">–</span>
+      <input type="date" id="dt" onchange="applyCustom()">
+    </div>
+  </div>
+  <div class="cdiv"></div>
+  <div class="cg">
+    <span class="cl">Market</span>
+    <button class="chip on" data-c="all" onclick="setC('all',this)">All</button>
+    <button class="chip" data-c="TW"     onclick="setC('TW',this)">TW</button>
+    <button class="chip" data-c="HK"     onclick="setC('HK',this)">HK</button>
+    <button class="chip" data-c="SG"     onclick="setC('SG',this)">SG</button>
+    <button class="chip" data-c="MY"     onclick="setC('MY',this)">MY</button>
+    <span class="cnote">* Ads only · Sales = all markets</span>
+  </div>
+  <div class="cdiv"></div>
+  <div class="cg">
+    <span class="cl">Brand</span>
+    <button class="chip on" data-b="all"        onclick="setB('all',this)">All</button>
+    <button class="chip" data-b="Descente"      onclick="setB('Descente',this)">Descente</button>
+    <button class="chip" data-b="ASH GOLF"      onclick="setB('ASH GOLF',this)">ASH Golf</button>
+    <button class="chip" data-b="G/FORE"        onclick="setB('G/FORE',this)">G/FORE</button>
+    <button class="chip" data-b="Callaway"      onclick="setB('Callaway',this)">Callaway</button>
+    <button class="chip" data-b="2XU TW"        onclick="setB('2XU TW',this)">2XU TW</button>
+    <button class="chip" data-b="2XU HK"        onclick="setB('2XU HK',this)">2XU HK</button>
+    <button class="chip" data-b="K-SWISS"       onclick="setB('K-SWISS',this)">K-SWISS</button>
+    <button class="chip" data-b="Palladium"     onclick="setB('Palladium',this)">Palladium</button>
+  </div>
+</div>
+
+<main>
+
+<!-- TIER 1 — CEO first look -->
+<div class="sec"><span class="sec-n">Business Health</span><div class="sec-r"></div></div>
+<div class="tier1">
+  <div class="kcard">
+    <div class="kl">Net Revenue</div>
+    <div class="kv hero ac" id="k-net">—</div>
+    <div class="ks">After discounts &amp; returns</div>
+    <div class="kbadge ok" id="kb-roi">ROI —</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Conversion Rate</div>
+    <div class="kv hero" id="k-cvr">—</div>
+    <div class="ks">Purchases ÷ Link clicks</div>
+    <div class="ks" id="k-cvr-s" style="margin-top:4px"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Return Rate</div>
+    <div class="kv hero" id="k-ret-pct">—</div>
+    <div class="ks">Returns ÷ Gross sales</div>
+    <div class="ks" id="k-ret-s" style="margin-top:4px"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Discount Rate</div>
+    <div class="kv hero" id="k-disc-pct">—</div>
+    <div class="ks">Discounts ÷ Gross sales</div>
+    <div class="ks" id="k-disc-s" style="margin-top:4px"></div>
+  </div>
+</div>
+
+<!-- TIER 2 — Sales detail -->
+<div class="tier2">
+  <div class="kcard">
+    <div class="kl">Gross Sales (B)</div>
+    <div class="kv" id="k-gross">—</div>
+    <div class="ks">Before deductions</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Discounts (C)</div>
+    <div class="kv" id="k-disc">—</div>
+    <div class="ks" id="k-disc-s2"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Returns (D)</div>
+    <div class="kv" id="k-ret">—</div>
+    <div class="ks" id="k-ret-s2"></div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Total Ad Spend</div>
+    <div class="kv" id="k-sp">—</div>
+    <div class="ks" id="k-sp-s">Meta + Google</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">ROAS</div>
+    <div class="kv" id="k-roas">—</div>
+    <div class="ks">Ad revenue ÷ Ad spend</div>
+  </div>
+</div>
+
+<!-- TIER 3 — Ad detail -->
+<div class="sec"><span class="sec-n">Ad Performance</span><div class="sec-r"></div></div>
+<div class="tier3">
+  <div class="kcard">
+    <div class="kl">Purchases</div>
+    <div class="kv" id="k-purch">—</div>
+    <div class="ks">Meta + Google conversions</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Link Clicks</div>
+    <div class="kv" id="k-clk">—</div>
+    <div class="ks">Meta + Google</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">CPC (avg)</div>
+    <div class="kv" id="k-cpc">—</div>
+    <div class="ks">Cost per click</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">CTR (Meta)</div>
+    <div class="kv" id="k-ctr">—</div>
+    <div class="ks">Click-through rate</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Meta / Google</div>
+    <div class="kv" id="k-split">—</div>
+    <div class="ks" id="k-split-s">Spend split</div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="sec"><span class="sec-n">Trends</span><div class="sec-r"></div></div>
+<div class="row2">
+  <div class="card">
+    <div class="ct">
+      <span class="ct-n">ROI by Brand</span>
+      <span class="ct-b g" id="period-badge">7 days</span>
+    </div>
+    <div class="roi-list" id="roi-bars"></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="ct-n">Weekly Spend &amp; ROI</span></div>
+    <div class="legr">
+      <div class="leg"><div class="leg-sq" style="background:rgba(74,144,104,.5)"></div>Spend (K)</div>
+      <div class="leg"><div class="leg-sq" style="background:var(--accent);border-radius:50%"></div>ROI</div>
+    </div>
+    <div class="cw" style="height:185px"><canvas id="weeklyC" role="img" aria-label="Weekly spend and ROI"></canvas></div>
+  </div>
+</div>
+<div class="row3">
+  <div class="card">
+    <div class="ct"><span class="ct-n">Monthly Net Revenue</span><span class="ct-b n">stacked by brand</span></div>
+    <div class="cw" style="height:185px"><canvas id="stackC" role="img" aria-label="Monthly stacked net revenue"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="ct-n">Monthly Ad Spend</span></div>
+    <div class="legr">
+      <div class="leg"><div class="leg-sq" style="background:var(--accent)"></div>Meta</div>
+      <div class="leg"><div class="leg-sq" style="background:var(--accent-m)"></div>Google</div>
+    </div>
+    <div class="cw" style="height:185px"><canvas id="spendC" role="img" aria-label="Monthly ad spend"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="ct-n">ROI Heatmap</span><span class="ct-b n">brand × month</span></div>
+    <div id="heat-table"></div>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="sec"><span class="sec-n">Brand Breakdown</span><div class="sec-r"></div></div>
+<div class="card">
+  <div class="ct">
+    <span class="ct-n">Full KPI Table — click any header to sort</span>
+    <span class="ct-b g" id="tbl-badge">7 days</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="main-table">
+      <thead><tr>
+        <th onclick="srt('brand')">Brand</th>
+        <th onclick="srt('days')">Days</th>
+        <th onclick="srt('clicks')">Clicks</th>
+        <th onclick="srt('cpc')">CPC</th>
+        <th onclick="srt('ctr')">CTR%</th>
+        <th onclick="srt('purchases')">Purchases</th>
+        <th onclick="srt('cvr')">CVR%</th>
+        <th onclick="srt('ms')">Meta $</th>
+        <th onclick="srt('gs')">Google $</th>
+        <th onclick="srt('sp')">Total Spend</th>
+        <th onclick="srt('roi')">ROI</th>
+        <th onclick="srt('roas')">ROAS</th>
+        <th onclick="srt('net')">Net Rev (E)</th>
+        <th onclick="srt('gross')">Gross (B)</th>
+        <th onclick="srt('disc')">Discount (C)</th>
+        <th onclick="srt('disc_pct')">Disc%</th>
+        <th onclick="srt('ret')">Returns (D)</th>
+        <th onclick="srt('ret_pct')">Ret%</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <span class="ft-c">© Emers Group · Multi-brand Marketing Intelligence</span>
+  <span class="ft-t" id="footer-ts">—</span>
+</footer>
+
+<script>
+const SHEET_ID='16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE';
+const BASE=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+const URL_META=BASE+'metaads_by_brand_contry';
+const URL_GADS=BASE+'gads_by+brand_contry';
+const URL_SALES=BASE+'all+brand+sale';
+
+const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
+const BCOLORS=['#1e4d35','#2d6b4a','#3d8460','#52a07a','#6aad86','#88c09d','#aad4b8','#cce4d2'];
+const MONTHS=['2026-01','2026-02','2026-03','2026-04'];
+const MLABELS=['Jan','Feb','Mar','Apr'];
+
+let RAW={meta:[],gads:[],sales:[]};
+let F={brand:'all',country:'all',dateFrom:'',dateTo:''};
+let charts={},timer=null,sortKey='roi',sortDir=-1;
+
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};
+function fmtM(n){if(!n||isNaN(n))return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+Math.round(n/1e3)+'K';return'$'+Math.round(n);}
+function fmtF(n){return'$'+Math.round(n).toLocaleString();}
+function fmtK(n){return Math.round(n).toLocaleString();}
+function pct(n,d){return d?((Math.abs(n)/d)*100).toFixed(1)+'%':'—';}
+function showStatus(t,m){const el=$('sbar');el.className=t;el.textContent=m;}
+
+/* Time */
+function setTime(t,el){
+  document.querySelectorAll('[data-t]').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  $('cr').classList.toggle('show',t==='custom');
+  if(t==='custom'){$('dt').value=today();return;}
+  F.dateFrom=t==='1'?daysAgo(1):daysAgo(parseInt(t));
+  F.dateTo=t==='1'?daysAgo(1):today();
+  if(RAW.meta.length||RAW.sales.length)render();
+}
+function applyCustom(){
+  F.dateFrom=$('df').value; F.dateTo=$('dt').value;
+  if(F.dateFrom&&F.dateTo&&(RAW.meta.length||RAW.sales.length))render();
+}
+
+/* Country / Brand */
+function setC(c,el){document.querySelectorAll('[data-c]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.country=c;if(RAW.meta.length||RAW.sales.length)render();}
+function setB(b,el){document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.brand=b;if(RAW.meta.length||RAW.sales.length)render();}
+
+/* Parse */
+function normDate(raw){
+  if(!raw)return null;
+  const s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
+  const a=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(a)return`${a[3]}-${a[1].padStart(2,'0')}-${a[2].padStart(2,'0')}`;
+  const b=s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if(b)return`${b[1]}-${b[2].padStart(2,'0')}-${b[3].padStart(2,'0')}`;
+  try{const d=new Date(s);if(!isNaN(d.getTime()))return d.toISOString().slice(0,10);}catch(e){}
+  return null;
+}
+
+async function fetchCsv(url){
+  try{const r=await fetch(url,{mode:'cors'});if(r.ok)return await r.text();}catch(e){}
+  try{const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url));if(r.ok){const j=await r.json();if(j?.contents)return j.contents;}}catch(e){}
+  try{const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(url));if(r.ok)return await r.text();}catch(e){}
+  throw new Error('All CORS proxies failed — ensure Sheets is public');
+}
+function csv(url){return fetchCsv(url).then(t=>Papa.parse(t,{header:true,skipEmptyLines:true}).data);}
+
+function kf(row,...pts){const keys=Object.keys(row);for(const p of pts){const k=keys.find(k=>new RegExp(p,'i').test(k));if(k)return k;}return pts[pts.length-1];}
+
+function parseMeta(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={media:kf(R,'媒體','media'),brand:kf(R,'^品牌$','brand'),country:kf(R,'國家','country'),
+    date:kf(R,'天數','分析報告開始','date'),spend:kf(R,'花費金額','spend','cost'),
+    rev:kf(R,'購買轉換值','revenue','value'),clicks:kf(R,'連結點擊','link.click','clicks'),
+    purch:kf(R,'購買次數','purchases'),cpc:kf(R,'CPC','單次點擊'),ctr:kf(R,'CTR','點閱率')};
+  return rows.filter(r=>/meta/i.test(r[K.media]||'')).map(r=>{
+    const date=normDate(r[K.date]);
+    const spend=parseFloat(String(r[K.spend]||'').replace(/,/g,''))||0;
+    const clicks=parseFloat(String(r[K.clicks]||'').replace(/,/g,''))||0;
+    return{brand:(r[K.brand]||'').trim(),country:(r[K.country]||'').trim().toUpperCase(),
+      date,month:date?date.slice(0,7):null,spend,
+      rev:parseFloat(String(r[K.rev]||'').replace(/,/g,''))||0,
+      clicks,purchases:parseFloat(String(r[K.purch]||'').replace(/,/g,''))||0,
+      cpc:parseFloat(String(r[K.cpc]||'').replace(/,/g,''))||0,
+      ctr:parseFloat(String(r[K.ctr]||'').replace(/,/g,''))||0};
+  }).filter(r=>r.date&&r.brand);
+}
+
+function parseGads(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={media:kf(R,'媒體','media'),brand:kf(R,'^品牌$','brand'),country:kf(R,'國家','country'),
+    date:kf(R,'^日期$','^date$'),spend:kf(R,'費用','cost','spend'),rev:kf(R,'購買價值','purchase.value','revenue'),
+    clicks:kf(R,'^點擊$','^clicks$'),purch:kf(R,'^購買$','^purchases$'),ctr:kf(R,'點閱率','ctr')};
+  return rows.filter(r=>/google/i.test(r[K.media]||'')).map(r=>{
+    const date=normDate(r[K.date]);
+    const spend=parseFloat(String(r[K.spend]||'').replace(/,/g,''))||0;
+    const clicks=parseFloat(String(r[K.clicks]||'').replace(/,/g,''))||0;
+    const rawC=(r[K.country]||'').trim().toUpperCase();
+    const countries=rawC.includes('+')?rawC.split('+'):[rawC];
+    return{brand:(r[K.brand]||'').trim(),country:rawC,countries,date,month:date?date.slice(0,7):null,
+      spend,rev:parseFloat(String(r[K.rev]||'').replace(/,/g,''))||0,
+      clicks,purchases:parseFloat(String(r[K.purch]||'').replace(/,/g,''))||0,
+      cpc:clicks>0?spend/clicks:0,ctr:parseFloat(String(r[K.ctr]||'').replace(/,/g,''))||0};
+  }).filter(r=>r.date&&r.brand);
+}
+
+function parseSales(rows){
+  if(!rows.length)return[];
+  const R=rows[0],K={brand:kf(R,'^品牌$','brand'),date:kf(R,'日期','A \\(日期\\)','date'),
+    gross:kf(R,'B \\(銷售總額\\)','銷售總額','gross'),disc:kf(R,'C \\(折扣\\)','折扣','discount'),
+    ret:kf(R,'D \\(退貨金額\\)','退貨','return'),net:kf(R,'E \\(銷貨淨額\\)','銷貨淨額','net')};
+  return rows.map(r=>{
+    const date=normDate(r[K.date]);
+    return{brand:(r[K.brand]||'').trim(),date,month:date?date.slice(0,7):null,
+      gross:parseFloat(String(r[K.gross]||'').replace(/,/g,''))||0,
+      disc:parseFloat(String(r[K.disc]||'').replace(/,/g,''))||0,
+      ret:parseFloat(String(r[K.ret]||'').replace(/,/g,''))||0,
+      net:parseFloat(String(r[K.net]||'').replace(/,/g,''))||0};
+  }).filter(r=>r.date&&r.brand);
+}
+
+/* Filter helpers */
+const inD=r=>r.date>=F.dateFrom&&r.date<=F.dateTo;
+const inB=r=>F.brand==='all'||r.brand===F.brand;
+const inCm=r=>F.country==='all'||r.country===F.country;
+const inCg=r=>F.country==='all'||(r.countries?r.countries.includes(F.country):r.country.includes(F.country));
+
+/* Aggregate */
+function agg(){
+  const meta=RAW.meta.filter(r=>inD(r)&&inB(r)&&inCm(r));
+  const gads=RAW.gads.filter(r=>inD(r)&&inB(r)&&inCg(r));
+  const sales=RAW.sales.filter(r=>inD(r)&&inB(r));
+  const ms=meta.reduce((s,r)=>s+r.spend,0),gs=gads.reduce((s,r)=>s+r.spend,0),sp=ms+gs;
+  const mr=meta.reduce((s,r)=>s+r.rev,0),gr=gads.reduce((s,r)=>s+r.rev,0);
+  const gross=sales.reduce((s,r)=>s+r.gross,0),disc=sales.reduce((s,r)=>s+r.disc,0);
+  const ret=sales.reduce((s,r)=>s+r.ret,0),net=sales.reduce((s,r)=>s+r.net,0);
+  const clicks=meta.reduce((s,r)=>s+r.clicks,0)+gads.reduce((s,r)=>s+r.clicks,0);
+  const purch=meta.reduce((s,r)=>s+r.purchases,0)+gads.reduce((s,r)=>s+r.purchases,0);
+  const cpc=clicks>0?sp/clicks:0;
+  const avgCtr=(meta.reduce((s,r)=>s+r.ctr,0)/(meta.length||1))*100;
+  const roi=sp>0?net/sp:0,roas=sp>0?(mr+gr)/sp:0,cvr=clicks>0?purch/clicks*100:0;
+
+  const brandRows=BRANDS.map(bn=>{
+    const bm=RAW.meta.filter(r=>r.brand===bn&&inD(r)&&inCm(r));
+    const bg=RAW.gads.filter(r=>r.brand===bn&&inD(r)&&inCg(r));
+    const bs=RAW.sales.filter(r=>r.brand===bn&&inD(r));
+    const bms=bm.reduce((s,r)=>s+r.spend,0),bgs=bg.reduce((s,r)=>s+r.spend,0),bsp=bms+bgs;
+    const bmr=bm.reduce((s,r)=>s+r.rev,0),bgr=bg.reduce((s,r)=>s+r.rev,0);
+    const bgr2=bs.reduce((s,r)=>s+r.gross,0),bd=bs.reduce((s,r)=>s+r.disc,0);
+    const br=bs.reduce((s,r)=>s+r.ret,0),bn2=bs.reduce((s,r)=>s+r.net,0);
+    const bclk=bm.reduce((s,r)=>s+r.clicks,0)+bg.reduce((s,r)=>s+r.clicks,0);
+    const bpch=bm.reduce((s,r)=>s+r.purchases,0)+bg.reduce((s,r)=>s+r.purchases,0);
+    const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
+    return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,
+      gross:bgr2,disc:bd,ret:br,net:bn2,
+      disc_pct:bgr2?Math.abs(bd/bgr2*100):0,ret_pct:bgr2?Math.abs(br/bgr2*100):0,
+      clicks:bclk,purchases:bpch,cpc:bclk>0?bsp/bclk:0,
+      ctr:(bm.reduce((s,r)=>s+r.ctr,0)/(bm.length||1))*100,
+      cvr:bclk>0?bpch/bclk*100:0,roi:bsp>0?bn2/bsp:0,roas:bsp>0?(bmr+bgr)/bsp:0};
+  });
+
+  const wkMap={};
+  const addW=(date,sp2,n2)=>{
+    if(!date||!inD({date}))return;
+    const d=new Date(date),wk=`${d.getFullYear()}-W${String(getISO(d)).padStart(2,'0')}`;
+    if(!wkMap[wk])wkMap[wk]={spend:0,net:0};
+    wkMap[wk].spend+=sp2;wkMap[wk].net+=n2;
+  };
+  RAW.meta.filter(r=>inB(r)&&inCm(r)).forEach(r=>addW(r.date,r.spend,0));
+  RAW.gads.filter(r=>inB(r)&&inCg(r)).forEach(r=>addW(r.date,r.spend,0));
+  RAW.sales.filter(r=>inB(r)).forEach(r=>addW(r.date,0,r.net));
+  const wks=Object.keys(wkMap).sort().slice(-16);
+  const weekly=wks.map(w=>({wk:w.replace(/\d{4}-/,''),spend:wkMap[w].spend,net:wkMap[w].net,roi:wkMap[w].spend>0?wkMap[w].net/wkMap[w].spend:0}));
+
+  const mMeta=MONTHS.map(m=>RAW.meta.filter(r=>inB(r)&&inCm(r)&&r.month===m).reduce((s,r)=>s+r.spend,0));
+  const mGads=MONTHS.map(m=>RAW.gads.filter(r=>inB(r)&&inCg(r)&&r.month===m).reduce((s,r)=>s+r.spend,0));
+  const bMNet=BRANDS.reduce((acc,bn)=>{acc[bn]=MONTHS.map(m=>RAW.sales.filter(r=>r.brand===bn&&r.month===m).reduce((s,r)=>s+r.net,0));return acc;},{});
+  const heat=BRANDS.map(bn=>({brand:bn,vals:MONTHS.map(m=>{
+    const bsp=RAW.meta.filter(r=>r.brand===bn&&r.month===m&&inCm(r)).reduce((s,r)=>s+r.spend,0)+RAW.gads.filter(r=>r.brand===bn&&r.month===m&&inCg(r)).reduce((s,r)=>s+r.spend,0);
+    const bnet=RAW.sales.filter(r=>r.brand===bn&&r.month===m).reduce((s,r)=>s+r.net,0);
+    return bsp>0?bnet/bsp:null;
+  })}));
+
+  return{sp,ms,gs,roi,roas,gross,disc,ret,net,clicks,purch,cpc,avgCtr,cvr,brandRows,weekly,mMeta,mGads,bMNet,heat};
+}
+
+function getISO(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+3-(dt.getDay()+6)%7);const w1=new Date(dt.getFullYear(),0,4);return 1+Math.round(((dt-w1)/86400000-3+(w1.getDay()+6)%7)/7);}
+
+/* Render */
+function periodLabel(){
+  if($('cr').classList.contains('show'))return`${F.dateFrom} – ${F.dateTo}`;
+  const a=document.querySelector('[data-t].on');const t=a?.dataset.t||'7';
+  return t==='1'?'Yesterday':`Last ${t} days`;
+}
+
+function render(){
+  const d=agg(),pl=periodLabel();
+  $('period-badge').textContent=pl;
+  $('tbl-badge').textContent=pl;
+
+  // Tier 1
+  $('k-net').textContent=fmtM(d.net);
+  const ro=d.roi>=5?'ok':d.roi>=2?'warn':'bad';
+  $('kb-roi').className=`kbadge ${ro}`;
+  $('kb-roi').textContent=`ROI ${d.roi>0?d.roi.toFixed(2)+'×':'—'}`;
+  $('k-cvr').textContent=d.cvr>0?d.cvr.toFixed(2)+'%':'—';
+  $('k-cvr-s').innerHTML=d.purch>0?`<span>${fmtK(d.purch)} purchases / ${fmtK(d.clicks)} clicks</span>`:'';
+  $('k-ret-pct').textContent=d.gross>0?pct(d.ret,d.gross):'—';
+  $('k-ret-pct').className=`kv hero${Math.abs(d.ret/(d.gross||1))>.1?' rd':''}`;
+  $('k-ret-s').innerHTML=`<span>${fmtM(Math.abs(d.ret))} returned</span>`;
+  $('k-disc-pct').textContent=d.gross>0?pct(d.disc,d.gross):'—';
+  $('k-disc-s').innerHTML=`<span>${fmtM(Math.abs(d.disc))} discounted</span>`;
+
+  // Tier 2
+  $('k-gross').textContent=fmtM(d.gross);
+  $('k-disc').textContent=fmtM(Math.abs(d.disc));
+  $('k-disc-s2').innerHTML=`<span class="dn">${d.gross?pct(d.disc,d.gross):'—'} of gross</span>`;
+  $('k-ret').textContent=fmtM(Math.abs(d.ret));
+  $('k-ret-s2').innerHTML=`<span class="dn">${d.gross?pct(d.ret,d.gross):'—'} of gross</span>`;
+  $('k-sp').textContent=fmtM(d.sp);
+  $('k-sp-s').textContent=`Meta ${fmtM(d.ms)} · Google ${fmtM(d.gs)}`;
+  $('k-roas').textContent=d.roas>0?d.roas.toFixed(2)+'×':'—';
+
+  // Tier 3
+  $('k-purch').textContent=d.purch>0?fmtK(d.purch):'—';
+  $('k-clk').textContent=d.clicks>0?fmtK(d.clicks):'—';
+  $('k-cpc').textContent=d.cpc>0?'$'+d.cpc.toFixed(1):'—';
+  $('k-ctr').textContent=d.avgCtr>0?d.avgCtr.toFixed(2)+'%':'—';
+  const mp=d.sp>0?Math.round(d.ms/d.sp*100):0;
+  $('k-split').textContent=d.sp>0?`${mp}% / ${100-mp}%`:'—';
+
+  // ROI bars
+  const mx=Math.max(...d.brandRows.map(b=>b.roi),1);
+  $('roi-bars').innerHTML=[...d.brandRows].sort((a,b2)=>b2.roi-a.roi).map(b=>{
+    const p2=Math.round(b.roi/mx*100);
+    const col=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+    const vc=b.roi>=5?'color:var(--ok)':b.roi>=2?'color:var(--warn)':'color:var(--red)';
+    return`<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:${p2}%;background:${col}"></div></div><span class="roi-v" style="${vc}">${b.roi.toFixed(2)}×</span></div>`;
+  }).join('');
+
+  renderWeekly(d.weekly);renderStack(d.bMNet);renderSpend(d.mMeta,d.mGads);renderHeat(d.heat);renderTable(d.brandRows);
+}
+
+const tc='rgba(26,26,24,.2)',gc='rgba(26,26,24,.05)';
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+function renderWeekly(w){
+  dc('weekly');
+  charts.weekly=new Chart($('weeklyC'),{
+    data:{labels:w.map(x=>x.wk),datasets:[
+      {type:'bar',data:w.map(x=>Math.round(x.spend/1000)),backgroundColor:'rgba(74,144,104,.18)',borderRadius:2,yAxisID:'y'},
+      {type:'line',data:w.map(x=>+(x.roi.toFixed(2))),borderColor:'#1e4d35',backgroundColor:'transparent',tension:.4,pointRadius:2.5,pointBackgroundColor:'#1e4d35',borderWidth:1.5,yAxisID:'y2'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{color:tc,font:{size:10},callback:v=>v+'K'},grid:{color:gc},position:'left'},
+              y2:{ticks:{color:'#2d6b4a',font:{size:10},callback:v=>v+'×'},grid:{display:false},position:'right'}}}
+  });
+}
+function renderStack(bms){
+  dc('stack');
+  charts.stack=new Chart($('stackC'),{type:'bar',data:{labels:MLABELS,datasets:BRANDS.map((b,i)=>({label:b,data:bms[b].map(v=>Math.round(v/1000)),backgroundColor:BCOLORS[i],stack:'s',borderRadius:0}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{stacked:true,ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'M':v+'K'},grid:{color:gc}}}}});
+}
+function renderSpend(m,g){
+  dc('spend');
+  charts.spend=new Chart($('spendC'),{type:'bar',data:{labels:MLABELS,datasets:[
+    {label:'Meta',data:m.map(v=>Math.round(v/1000)),backgroundColor:'#1e4d35',borderRadius:3,stack:'s'},
+    {label:'Google',data:g.map(v=>Math.round(v/1000)),backgroundColor:'#6aad86',borderRadius:3,stack:'s'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{stacked:true,ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:10},callback:v=>v+'K'},grid:{color:gc}}}}});
+}
+function renderHeat(hd){
+  const hc=v=>{
+    if(v===null)return'background:var(--paper2);color:var(--ink4)';
+    if(v>=10)return'background:rgba(30,77,53,.22);color:var(--ok)';
+    if(v>=6)return'background:rgba(30,77,53,.12);color:var(--ok)';
+    if(v>=3)return'background:rgba(122,77,0,.1);color:var(--warn)';
+    if(v>=1)return'background:rgba(122,77,0,.06);color:var(--warn)';
+    return'background:rgba(155,36,18,.1);color:var(--red)';
+  };
+  const th='padding:5px 7px;color:var(--ink3);text-align:center;border-bottom:1px solid var(--rule);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px';
+  let h=`<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="${th};text-align:left">Brand</th>`;
+  MLABELS.forEach(m=>h+=`<th style="${th}">${m}</th>`);
+  h+='</tr></thead><tbody>';
+  hd.forEach(row=>{
+    h+=`<tr><td style="padding:5px 7px;color:var(--ink2);font-size:11px;white-space:nowrap">${row.brand}</td>`;
+    row.vals.forEach(v=>{h+=`<td style="padding:5px 6px;text-align:center;border-radius:3px;${hc(v)};font-family:'DM Mono',monospace;font-weight:500;font-size:11px">${v!==null?v.toFixed(1)+'×':'—'}</td>`;});
+    h+='</tr>';
+  });
+  $('heat-table').innerHTML=h+'</tbody></table>';
+}
+function renderTable(rows){
+  const sorted=[...rows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
+  $('tbl-body').innerHTML=sorted.map(b=>{
+    const rc=b.roi>=5?'tok':b.roi>=2?'twarn':'tbad';
+    const rl=b.roi>=5?'Good':b.roi>=2?'Review':'Stop';
+    const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+    return`<tr><td style="font-weight:500">${b.brand}</td><td class="num">${b.days}</td><td class="num">${fmtK(b.clicks)}</td><td class="num">$${b.cpc.toFixed(1)}</td><td class="num">${b.ctr.toFixed(2)}%</td><td class="num">${fmtK(b.purchases)}</td><td class="num">${b.cvr.toFixed(2)}%</td><td><span class="tag tm">${fmtM(b.ms)}</span></td><td><span class="tag tg">${fmtM(b.gs)}</span></td><td class="num">${fmtM(b.sp)}</td><td class="num" style="color:${rv};font-weight:500">${b.roi.toFixed(2)}×</td><td class="num">${b.roas.toFixed(2)}×</td><td class="num">${fmtF(b.net)}</td><td class="num">${fmtF(b.gross)}</td><td class="num" style="color:var(--warn)">${fmtF(Math.abs(b.disc))}</td><td class="num" style="color:var(--warn)">${b.disc_pct.toFixed(1)}%</td><td class="num" style="color:var(--red)">${fmtF(Math.abs(b.ret))}</td><td class="num" style="color:var(--red)">${b.ret_pct.toFixed(1)}%</td><td><span class="tag ${rc}">${rl}</span></td></tr>`;
+  }).join('');
+  document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
+}
+function srt(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
+
+async function loadData(){
+  showStatus('loading','Syncing from Google Sheets…');
+  try{
+    const [rM,rG,rS]=await Promise.all([csv(URL_META),csv(URL_GADS),csv(URL_SALES)]);
+    RAW.meta=parseMeta(rM);RAW.gads=parseGads(rG);RAW.sales=parseSales(rS);
+    const total=RAW.meta.length+RAW.gads.length+RAW.sales.length;
+    if(total===0){showStatus('error',`Parsed 0 records. Meta:${rM.length} Google:${rG.length} Sales:${rS.length} raw rows`);return;}
+    const now=new Date().toLocaleString('zh-TW');
+    $('last-upd').textContent=now;$('footer-ts').textContent='Last sync  '+now;
+    showStatus('ok',`Loaded — Meta ${RAW.meta.length} · Google ${RAW.gads.length} · Sales ${RAW.sales.length}`);
+    render();
+    if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
+  }catch(e){showStatus('error','Load failed: '+e.message);}
+}
+
+F.dateFrom=daysAgo(7);F.dateTo=today();
+loadData();
+</script>
+</body>
+</html>
