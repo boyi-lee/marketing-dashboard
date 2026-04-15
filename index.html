@@ -110,6 +110,9 @@ header{background:#ffffff;border-bottom:1px solid var(--rule);padding:0 28px;hei
 .cg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
 
+/* 動態提示列 */
+#dynamic-warning-bar{display:none; background:var(--warn-bg); color:var(--warn); padding:10px 28px; font-size:12px; font-weight:500; border-bottom:1px solid #fde68a; line-height:1.6;}
+
 /* ── 強制防護：按鈕設計 ── */
 .chip{
   font-size:12px;
@@ -311,6 +314,8 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 </header>
 
 <div id="sbar"></div>
+<!-- 動態防呆提示列 -->
+<div id="dynamic-warning-bar"></div>
 
 <div class="ctrlbar">
   <div class="cg">
@@ -336,7 +341,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     </label>
   </div>
   <div class="cdiv"></div>
-  <!-- 改為動態多選綁定 -->
+  <!-- 動態多選綁定 -->
   <div class="cg" id="market-filters">
     <span class="cl">Market</span>
     <button class="chip on" data-c="all" onclick="toggleC('all')">All</button>
@@ -347,7 +352,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <span class="cnote">* 確保 Sales 表內含「國家」欄位以啟用過濾</span>
   </div>
   <div class="cdiv"></div>
-  <!-- 改為動態多選綁定 -->
+  <!-- 動態多選綁定 -->
   <div class="cg" id="brand-filters">
     <span class="cl">Brand</span>
     <button class="chip on" data-b="all" onclick="toggleB('all')">All</button>
@@ -671,7 +676,7 @@ let RAW={meta:[],gads:[],sales:[]};
 let brandToCountries={};
 let countryToBrands={};
 
-// 注意：現在 F.brand 與 F.country 改為陣列型態，實作多選與聯動機制
+// 注意：F.brand 與 F.country 為陣列型態，實作多選與聯動機制
 let F={brand:['all'],country:['all'],dateFrom:'',dateTo:'',comparePrev:false};
 let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
 window.brandMetric = 'roi'; 
@@ -682,9 +687,9 @@ const today=()=>getLocalD(new Date());
 const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return getLocalD(d);};
 
 // Format helpers
-function fmtN(n){if(!n||isNaN(n))return'—';return'$'+Math.round(Math.abs(n)).toLocaleString();}
-function fmtI(n){if(!n||isNaN(n))return'—';return Math.round(Math.abs(n)).toLocaleString();}
-function fmtR(n,d=2){if(!n||isNaN(n))return'—';return n.toFixed(d)+'×';}
+function fmtN(n){if(n===null||n===undefined||isNaN(n))return'—';return'$'+Math.round(Math.abs(n)).toLocaleString();}
+function fmtI(n){if(n===null||n===undefined||isNaN(n))return'—';return Math.round(Math.abs(n)).toLocaleString();}
+function fmtR(n,d=2){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(d)+'×';}
 function fmtP(n){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(2)+'%';}
 function showStatus(t,m){const el=$("sbar");el.className=t;el.textContent=m;}
 
@@ -749,8 +754,21 @@ function toggleC(c) {
     F.brand = ['all'];
   } else {
     if (F.country.includes('all')) F.country = [];
-    if (F.country.includes(c)) F.country = F.country.filter(x => x !== c);
-    else F.country.push(c);
+    
+    // 強制聯動：MY 與 SG 作為同一戰區共同開關
+    const isMySg = c === 'MY' || c === 'SG';
+    if (isMySg) {
+      const hasEither = F.country.includes('MY') || F.country.includes('SG');
+      if (hasEither) { // 如果已經有任一個，表示這次點擊是要把它們關掉
+        F.country = F.country.filter(x => x !== 'MY' && x !== 'SG');
+      } else { // 把它們一起打開
+        F.country.push('MY', 'SG');
+      }
+    } else {
+      // 一般國家的常規開關
+      if (F.country.includes(c)) F.country = F.country.filter(x => x !== c);
+      else F.country.push(c);
+    }
 
     if (F.country.length === 0) {
       F.country = ['all'];
@@ -784,7 +802,6 @@ function setTime(t,el){
   if (t === 'thisMonth') {
       const d = new Date();
       F.dateFrom = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-      // 修正：扣除沒有完整數據的今天，將當月進度天數算至「昨天」(若遇到1號則保底算今天)
       F.dateTo = d.getDate() === 1 ? today() : daysAgo(1);
   } else {
       F.dateFrom = daysAgo(parseInt(t));
@@ -882,7 +899,6 @@ function parseSales(rows){
 function aggData(dFrom, dTo){
   const inD=r=>r.date>=dFrom&&r.date<=dTo;
   
-  // 支援多選過濾
   const inB=r=>F.brand.includes('all')||F.brand.includes(r.brand);
   const inCm=r=>F.country.includes('all')||F.country.includes(r.country);
   const inCg=r=>F.country.includes('all')||(r.countries?r.countries.some(c=>F.country.includes(c)):F.country.includes(r.country));
@@ -894,20 +910,20 @@ function aggData(dFrom, dTo){
   
   const targetBrands=F.brand.includes('all')?BRANDS:F.brand;
 
-  const ms=meta.reduce((s,r)=>s+r.spend,0), gs=gads.reduce((s,r)=>s+r.spend,0), sp=ms+gs;
-  const mr=meta.reduce((s,r)=>s+r.rev,0), gr=gads.reduce((s,r)=>s+r.rev,0);
-  const gross=sales.reduce((s,r)=>s+r.gross,0), disc=sales.reduce((s,r)=>s+r.disc,0);
-  const ret=sales.reduce((s,r)=>s+r.ret,0), net=sales.reduce((s,r)=>s+r.net,0);
-  const clicks=meta.reduce((s,r)=>s+r.clicks,0)+gads.reduce((s,r)=>s+r.clicks,0);
-  const purch=meta.reduce((s,r)=>s+r.purchases,0)+gads.reduce((s,r)=>s+r.purchases,0);
-  const impr=meta.reduce((s,r)=>s+r.impr,0)+gads.reduce((s,r)=>s+r.impr,0);
-  const atc=meta.reduce((s,r)=>s+r.atc,0);
+  let ms=meta.reduce((s,r)=>s+r.spend,0), gs=gads.reduce((s,r)=>s+r.spend,0), sp=ms+gs;
+  let mr=meta.reduce((s,r)=>s+r.rev,0), gr=gads.reduce((s,r)=>s+r.rev,0);
+  let gross=sales.reduce((s,r)=>s+r.gross,0), disc=sales.reduce((s,r)=>s+r.disc,0);
+  let ret=sales.reduce((s,r)=>s+r.ret,0), net=sales.reduce((s,r)=>s+r.net,0);
+  let clicks=meta.reduce((s,r)=>s+r.clicks,0)+gads.reduce((s,r)=>s+r.clicks,0);
+  let purch=meta.reduce((s,r)=>s+r.purchases,0)+gads.reduce((s,r)=>s+r.purchases,0);
+  let impr=meta.reduce((s,r)=>s+r.impr,0)+gads.reduce((s,r)=>s+r.impr,0);
+  let atc=meta.reduce((s,r)=>s+r.atc,0);
   
-  const ctr=impr>0?clicks/impr*100:0;
-  const cpc=clicks>0?sp/clicks:0;
-  const cvr=clicks>0?purch/clicks*100:0;
-  const roi=sp>0?net/sp:0;
-  const roas=sp>0?(mr+gr)/sp:0;
+  let ctr=impr>0?clicks/impr*100:0;
+  let cpc=clicks>0?sp/clicks:0;
+  let cvr=clicks>0?purch/clicks*100:0;
+  let roi=sp>0?net/sp:0;
+  let roas=sp>0?(mr+gr)/sp:0;
 
   // Brand dimension
   const brandRows=targetBrands.map(bn=>{
@@ -922,11 +938,24 @@ function aggData(dFrom, dTo){
     const bpch=bm.reduce((s,r)=>s+r.purchases,0)+bg.reduce((s,r)=>s+r.purchases,0);
     const bimpr=bm.reduce((s,r)=>s+r.impr,0)+bg.reduce((s,r)=>s+r.impr,0);
     const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
-    return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,gross:bg2,disc:bd,ret:br,net:bn2,
-      disc_pct:bg2?Math.abs((bd/bg2)*100):0,ret_pct:bg2?Math.abs((br/bg2)*100):0,
-      clicks:bclk,purchases:bpch,cpc:bclk>0?bsp/bclk:0,ctr:bimpr>0?bclk/bimpr*100:0,
-      cvr:bclk>0?bpch/bclk*100:0,atc:bm.reduce((s,r)=>s+r.atc,0),impr:bimpr,
-      roi:bsp>0?bn2/bsp:0,roas:bsp>0?(bmr+bgr)/bsp:0};
+    
+    // 跨境特別邏輯：若檢視 ASH 但過濾器中未包含 TW (例如單看 HK)，將後端銷售資料轉為 null
+    const isAshCrossBorder = (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
+
+    return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,
+      gross:isAshCrossBorder ? null : bg2,
+      disc:isAshCrossBorder ? null : bd,
+      ret:isAshCrossBorder ? null : br,
+      net:isAshCrossBorder ? null : bn2,
+      disc_pct:isAshCrossBorder||bg2===0?0:Math.abs((bd/bg2)*100),
+      ret_pct:isAshCrossBorder||bg2===0?0:Math.abs((br/bg2)*100),
+      clicks:bclk,
+      purchases:isAshCrossBorder ? null : bpch,
+      cpc:bclk>0?bsp/bclk:0,ctr:bimpr>0?bclk/bimpr*100:0,
+      cvr:isAshCrossBorder ? null : (bclk>0?bpch/bclk*100:0),
+      atc:bm.reduce((s,r)=>s+r.atc,0),impr:bimpr,
+      roi:isAshCrossBorder ? null : (bsp>0?bn2/bsp:0),
+      roas:isAshCrossBorder ? null : (bsp>0?(bmr+bgr)/bsp:0)};
   });
 
   // Daily dimension
@@ -983,10 +1012,22 @@ function aggData(dFrom, dTo){
     ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0?tsBuckets[k].net/tsBuckets[k].spend:0
   }));
 
+  // 全局跨境指標覆寫 (若僅單獨選擇了 ASH GOLF 且未包含 TW)
+  let topLevelCrossBorder = (F.brand.length === 1 && F.brand[0] === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
+  if (topLevelCrossBorder) {
+      net = null; gross = null; disc = null; ret = null; roi = null; roas = null; purch = null; cvr = null;
+      tsSeries.forEach(s => { s.net = null; s.roi = null; });
+      dayRows.forEach(r => { r.net = null; r.gross = null; r.disc = null; r.ret = null; r.roi = null; r.roas = null; r.purchases = null; r.cvr = null; });
+  }
+
   const bStack={}, heat=[];
   targetBrands.forEach(bn=>{
-    bStack[bn]=tsKeys.map(k=>bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0);
+    bStack[bn]=tsKeys.map(k=>{
+      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return 0;
+      return bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0;
+    });
     heat.push({brand:bn, vals:tsKeys.map(k=>{
+      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return null;
       const b=bBuckets[bn][k]; return (b&&b.spend>0)?b.net/b.spend:null;
     })});
   });
@@ -1007,6 +1048,10 @@ function periodLabel(){
 // Diff renderer helper
 function renderVal(id, currV, prevV, fmtFn, colorMode=1){
   const el=$(id); if(!el)return;
+  if (currV === null) {
+      el.innerHTML = '—';
+      return;
+  }
   let html = fmtFn(currV);
   if (F.comparePrev && prevV!==null && prevV!==undefined) {
       const diff = currV - prevV;
@@ -1035,6 +1080,26 @@ function render(){
     p = aggData(pFromD.toISOString().slice(0,10), pToD.toISOString().slice(0,10));
   }
   
+  // 動態防呆提示列處理
+  let warnings = [];
+  const hasAsh = F.brand.includes('all') || F.brand.includes('ASH GOLF');
+  const hasHk = F.country.includes('all') || F.country.includes('HK');
+  if (hasAsh && hasHk && (!F.country.includes('all') && !F.country.includes('TW'))) {
+      warnings.push("💡 <strong>ASH GOLF：</strong> 跨境銷售數據統一歸屬 TW 區。單看 HK 市場時僅展示廣告前端指標（若未手動取消勾選，其花費將拉低當前視圖的整體 ROI）。");
+  }
+  const hasKsPal = F.brand.includes('all') || F.brand.includes('K-SWISS') || F.brand.includes('Palladium');
+  const hasMySg = F.country.includes('all') || F.country.includes('MY') || F.country.includes('SG');
+  if (hasKsPal && hasMySg) {
+      warnings.push("💡 <strong>K-SWISS / Palladium：</strong> 銷售與廣告數據為 MY 與 SG 跨國合併計算。");
+  }
+  const warnBar = $('dynamic-warning-bar');
+  if (warnings.length > 0) {
+      warnBar.innerHTML = warnings.join('<br>');
+      warnBar.style.display = 'block';
+  } else {
+      warnBar.style.display = 'none';
+  }
+
   const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
   const monthKey = F.dateFrom ? F.dateFrom.substring(0,7) : '';
   const currentMonthKpi = getMonthKpi(monthKey);
@@ -1049,8 +1114,8 @@ function render(){
   $('spend-period-badge').textContent=d.dayCount<=31?'daily':'weekly';
 
   // ROI HERO
-  let roiHtml = d.roi>0 ? d.roi.toFixed(2)+'×' : '—';
-  if(p){
+  let roiHtml = (d.roi!==null && d.roi>0) ? d.roi.toFixed(2)+'×' : '—';
+  if(p && d.roi!==null && p.roi!==null){
     const rDiff=d.roi-p.roi;
     if(Math.abs(rDiff)>0.001){
       const cls=rDiff>0?'up':'dn', sign=rDiff>0?'↑':'↓';
@@ -1059,19 +1124,25 @@ function render(){
   }
   $('roi-big').innerHTML=roiHtml;
   $('roi-big').className='roi-big'+(d.roi>=5?'':d.roi>=2?' warn':' bad');
-  $('roi-status-text').textContent=d.roi>=5?'Healthy ROI':d.roi>=2?'Needs Review':d.roi>0?'Critical Action Required':'';
-  $('roi-status-text').style.color=d.roi>=5?'var(--ok)':d.roi>=2?'var(--warn)':'var(--red)';
+  
+  if (d.roi === null) {
+      $('roi-status-text').textContent = 'Cross-border Ad Only';
+      $('roi-status-text').style.color = 'var(--ink4)';
+  } else {
+      $('roi-status-text').textContent=d.roi>=5?'Healthy ROI':d.roi>=2?'Needs Review':d.roi>0?'Critical Action Required':'';
+      $('roi-status-text').style.color=d.roi>=5?'var(--ok)':d.roi>=2?'var(--warn)':'var(--red)';
+  }
 
   renderVal('roi-net', d.net, p?.net, fmtN, 1);
   renderVal('roi-sp', d.sp, p?.sp, fmtN, 0);
   renderVal('roas-mini', d.roas, p?.roas, fmtR, 1);
   renderVal('cvr-mini', d.cvr, p?.cvr, fmtP, 1);
   
-  const currRetP = d.gross>0?Math.abs((d.ret/d.gross)*100):0;
+  const currRetP = d.gross>0 && d.gross!==null ? Math.abs((d.ret/d.gross)*100) : (d.gross===null ? null : 0);
   const prevRetP = (p&&p.gross>0)?Math.abs((p.ret/p.gross)*100):null;
   renderVal('ret-mini', currRetP, prevRetP, fmtP, -1);
 
-  const currDiscP = d.gross>0?Math.abs((d.disc/d.gross)*100):0;
+  const currDiscP = d.gross>0 && d.gross!==null ? Math.abs((d.disc/d.gross)*100) : (d.gross===null ? null : 0);
   const prevDiscP = (p&&p.gross>0)?Math.abs((p.disc/p.gross)*100):null;
   renderVal('disc-mini', currDiscP, prevDiscP, fmtP, -1);
 
@@ -1086,8 +1157,8 @@ function render(){
 
   renderVal('k-net', d.net, p?.net, fmtN, 1);
   renderVal('k-gross', d.gross, p?.gross, fmtN, 1);
-  renderVal('k-disc', Math.abs(d.disc), p?Math.abs(p.disc):null, fmtN, -1);
-  renderVal('k-ret', Math.abs(d.ret), p?Math.abs(p.ret):null, fmtN, -1);
+  renderVal('k-disc', d.disc!==null ? Math.abs(d.disc) : null, p&&p.disc!==null?Math.abs(p.disc):null, fmtN, -1);
+  renderVal('k-ret', d.ret!==null ? Math.abs(d.ret) : null, p&&p.ret!==null?Math.abs(p.ret):null, fmtN, -1);
   renderVal('k-sp', d.sp, p?.sp, fmtN, 0);
   renderVal('k-roas', d.roas, p?.roas, fmtR, 1);
   renderVal('k-purch', d.purch, p?.purch, fmtI, 1);
@@ -1119,7 +1190,7 @@ function render(){
     totKpiRev = F.brand.reduce((sum, bn) => sum + (currentMonthKpi[bn]?.rev || 0), 0);
   }
 
-  if (isSingleMonth && totKpiRev > 0) {
+  if (isSingleMonth && totKpiRev > 0 && d.net !== null) {
     const overallPct = Math.min(100, (d.net / totKpiRev) * 100);
     const gap = totKpiRev - d.net;
     const expectedPct = d.dayCount / monthDays;
@@ -1135,16 +1206,20 @@ function render(){
         <span style="color:${barCol};font-weight:700">${trackStatus}</span>
       </div>
     `;
+  } else if (d.net === null) {
+    netProgWrap.innerHTML = `<span style="font-size:11px;color:var(--ink3);margin-top:6px;display:block;">跨境廣告無直接銷售數據比對</span>`;
   } else {
     netProgWrap.innerHTML = '';
   }
 
   // ROI by Brand
   const metric = window.brandMetric; 
-  const maxV = Math.max(...d.brandRows.map(b => b[metric]), 0.1);
+  const maxV = Math.max(...d.brandRows.map(b => b[metric] || 0), 0.1);
   
-  $('roi-bars').innerHTML = [...d.brandRows].sort((a,b2) => b2[metric] - a[metric]).map(b => {
+  $('roi-bars').innerHTML = [...d.brandRows].sort((a,b2) => (b2[metric]||0) - (a[metric]||0)).map(b => {
     const val = b[metric];
+    if (val === null) return `<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:0%;background:var(--paper3)"></div></div><span class="roi-v" style="color:var(--ink4)">—</span></div>`;
+
     const pct = Math.round((val / maxV) * 100);
     const col = val >= 5 ? 'var(--ok)' : val >= 2 ? 'var(--warn)' : 'var(--red)';
     const vc = val >= 5 ? 'color:var(--ok)' : val >= 2 ? 'color:var(--warn)' : 'color:var(--red)';
@@ -1175,7 +1250,7 @@ function render(){
     </div>`;
   }).join('');
   
-  const sortedMetric = [...d.brandRows].filter(b => b.sp > 0).sort((a,b2) => b2[metric] - a[metric]);
+  const sortedMetric = [...d.brandRows].filter(b => b.sp > 0 && b[metric] !== null).sort((a,b2) => b2[metric] - a[metric]);
   const topBrand = sortedMetric[0];
   const botBrand = sortedMetric[sortedMetric.length - 1];
   const avgVal = d[metric] || 0;
@@ -1202,7 +1277,7 @@ function renderTrend(series){
   charts.trend=new Chart($('trendC'),{
     data:{labels:series.map(s=>s.label),datasets:[
       {type:'bar',label:'Spend (TWD)',data:series.map(s=>Math.round(s.spend)),backgroundColor:'rgba(59,130,246,.15)',borderRadius:2,yAxisID:'y'},
-      {type:'line',label:'ROI',data:series.map(s=>Math.round(s.roi*10)/10),borderColor:'#0f3a5e',backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:3,pointBackgroundColor:'#0f3a5e',yAxisID:'y2'}
+      {type:'line',label:'ROI',data:series.map(s=>s.roi!==null?Math.round(s.roi*10)/10:null),borderColor:'#0f3a5e',backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:3,pointBackgroundColor:'#0f3a5e',yAxisID:'y2',spanGaps:true}
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return' Spend: $'+ctx.raw.toLocaleString();return' ROI: '+ctx.raw.toFixed(1)+'×';}}}},
       scales:{
@@ -1217,7 +1292,7 @@ function renderStack(brandRows, targetBrands){
   const labels = targetBrands;
   const data = targetBrands.map(bn => {
     const brand = brandRows.find(b => b.brand === bn);
-    return brand ? Math.round(brand.net) : 0;
+    return brand && brand.net !== null ? Math.round(brand.net) : 0;
   });
   
   charts.stack=new Chart($('stackC'),{type:'bar',data:{
@@ -1287,12 +1362,18 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
       <th onclick="srt('net')">Net Rev (E)</th><th onclick="srt('gross')">Gross (B)</th><th onclick="srt('disc')">Discount (C)</th>
       <th onclick="srt('disc_pct')">Disc%</th><th onclick="srt('ret')">Returns (D)</th><th onclick="srt('ret_pct')">Ret%</th><th>Status</th>
     </tr>`;
-    const sorted=[...brandRows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
+    const sorted=[...brandRows].sort((a,b2)=>{
+        const vA = a[sortKey] === null ? -1 : a[sortKey];
+        const vB = b2[sortKey] === null ? -1 : b2[sortKey];
+        return (vA<vB?-1:1)*sortDir;
+    });
     tbody.innerHTML=sorted.map(b=>{
-      const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+      const rv=b.roi!==null ? (b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)') : 'var(--ink4)';
       
       let statusHtml = '';
-      if (isSingleMonth) {
+      if (b.net === null) {
+          statusHtml = `<span class="tag tg">跨境前端指標</span>`;
+      } else if (isSingleMonth) {
         const bKpi = currentMonthKpi[b.brand] || {rev:0, roi:0};
         if (bKpi.rev > 0 || bKpi.roi > 0) {
           const expectedPct = periodDays / monthDays;
@@ -1318,26 +1399,31 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
 
       return`<tr><td style="font-weight:700;color:var(--accent)">${b.brand}</td><td class="num" style="color:var(--ink2)">${b.days}</td>
         <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
-        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td><td class="num">${Math.round(b.purchases).toLocaleString()}</td>
-        <td class="num">${b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td><td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
+        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
+        <td class="num">${b.purchases!==null?Math.round(b.purchases).toLocaleString():'—'}</td>
+        <td class="num">${b.cvr!==null&&b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+        <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
         <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td><td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.sp).toLocaleString()}</td>
-        <td class="num" style="color:${rv};font-weight:700">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</td><td class="num">${b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
-        <td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.net).toLocaleString()}</td><td class="num">$${Math.round(b.gross).toLocaleString()}</td>
-        <td class="num" style="color:var(--warn)">$${Math.round(Math.abs(b.disc)).toLocaleString()}</td><td class="num" style="color:var(--warn)">${b.disc_pct.toFixed(2)}%</td>
-        <td class="num" style="color:var(--red)">$${Math.round(Math.abs(b.ret)).toLocaleString()}</td><td class="num" style="color:var(--red)">${b.ret_pct.toFixed(2)}%</td>
+        <td class="num" style="color:${rv};font-weight:700">${b.roi!==null&&b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
+        <td class="num">${b.roas!==null&&b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
+        <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
+        <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td>
+        <td class="num" style="color:var(--warn)">${b.disc!==null?'$'+Math.round(Math.abs(b.disc)).toLocaleString():'—'}</td>
+        <td class="num" style="color:var(--warn)">${b.disc_pct!==null?b.disc_pct.toFixed(2)+'%':'—'}</td>
+        <td class="num" style="color:var(--red)">${b.ret!==null?'$'+Math.round(Math.abs(b.ret)).toLocaleString():'—'}</td>
+        <td class="num" style="color:var(--red)">${b.ret_pct!==null?b.ret_pct.toFixed(2)+'%':'—'}</td>
         <td>${statusHtml}</td></tr>`;
     }).join('');
     
-    // Calculate totals
     const totClicks = brandRows.reduce((s,b)=>s+b.clicks,0);
-    const totPurchases = brandRows.reduce((s,b)=>s+b.purchases,0);
+    const totPurchases = brandRows.reduce((s,b)=>s+(b.purchases||0),0);
     const totMs = brandRows.reduce((s,b)=>s+b.ms,0);
     const totGs = brandRows.reduce((s,b)=>s+b.gs,0);
     const totSp = brandRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = brandRows.reduce((s,b)=>s+b.net,0);
-    const totGross = brandRows.reduce((s,b)=>s+b.gross,0);
-    const totDisc = brandRows.reduce((s,b)=>s+b.disc,0);
-    const totRet = brandRows.reduce((s,b)=>s+b.ret,0);
+    const totNet = brandRows.reduce((s,b)=>s+(b.net||0),0);
+    const totGross = brandRows.reduce((s,b)=>s+(b.gross||0),0);
+    const totDisc = brandRows.reduce((s,b)=>s+(b.disc||0),0);
+    const totRet = brandRows.reduce((s,b)=>s+(b.ret||0),0);
     
     const totImpr = brandRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
     const avgCpc = totClicks>0 ? totSp/totClicks : 0;
@@ -1372,7 +1458,7 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
       <td></td>
     </tr>`;
     
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.net,0)).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.sp,0)).toLocaleString()}</strong></div>`;
+    $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(brandRows.reduce((s,b)=>s+(b.net||0),0)).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.sp,0)).toLocaleString()}</strong></div>`;
   } else {
     head.innerHTML=`<tr>
       <th onclick="srtD('date')">Date</th><th onclick="srtD('clicks')">Clicks</th><th onclick="srtD('cpc')">CPC</th>
@@ -1380,25 +1466,33 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
       <th onclick="srtD('ms')">Meta $</th><th onclick="srtD('gs')">Google $</th><th onclick="srtD('sp')">Total Spend</th>
       <th onclick="srtD('roi')">ROI</th><th onclick="srtD('roas')">ROAS</th><th onclick="srtD('net')">Net Rev (E)</th><th onclick="srtD('gross')">Gross (B)</th>
     </tr>`;
-    const sortedD=[...dayRows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
+    const sortedD=[...dayRows].sort((a,b2)=>{
+        const vA = a[sortKey] === null ? -1 : a[sortKey];
+        const vB = b2[sortKey] === null ? -1 : b2[sortKey];
+        return (vA<vB?-1:1)*sortDir;
+    });
     tbody.innerHTML=sortedD.map(b=>{
-      const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+      const rv=b.roi!==null ? (b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)') : 'var(--ink4)';
       return`<tr><td style="font-weight:600;font-family:'DM Mono',monospace;color:var(--accent)">${b.date}</td>
         <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
-        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td><td class="num">${Math.round(b.purchases).toLocaleString()}</td>
-        <td class="num">${b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td><td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
+        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
+        <td class="num">${b.purchases!==null?Math.round(b.purchases).toLocaleString():'—'}</td>
+        <td class="num">${b.cvr!==null&&b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+        <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
         <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td><td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.sp).toLocaleString()}</td>
-        <td class="num" style="color:${rv};font-weight:700">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</td><td class="num">${b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
-        <td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.net).toLocaleString()}</td><td class="num">$${Math.round(b.gross).toLocaleString()}</td></tr>`;
+        <td class="num" style="color:${rv};font-weight:700">${b.roi!==null&&b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
+        <td class="num">${b.roas!==null&&b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
+        <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
+        <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td></tr>`;
     }).join('');
     
     const totClicks = dayRows.reduce((s,b)=>s+b.clicks,0);
-    const totPurchases = dayRows.reduce((s,b)=>s+b.purchases,0);
+    const totPurchases = dayRows.reduce((s,b)=>s+(b.purchases||0),0);
     const totMs = dayRows.reduce((s,b)=>s+b.ms,0);
     const totGs = dayRows.reduce((s,b)=>s+b.gs,0);
     const totSp = dayRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = dayRows.reduce((s,b)=>s+b.net,0);
-    const totGross = dayRows.reduce((s,b)=>s+b.gross,0);
+    const totNet = dayRows.reduce((s,b)=>s+(b.net||0),0);
+    const totGross = dayRows.reduce((s,b)=>s+(b.gross||0),0);
     
     const totImpr = dayRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
     const avgCpc = totClicks>0 ? totSp/totClicks : 0;
@@ -1425,7 +1519,7 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
       <td class="num">$${Math.round(totGross).toLocaleString()}</td>
     </tr>`;
     
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(dayRows.reduce((s,b)=>s+b.net,0)).toLocaleString()}</strong></div>`;
+    $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(dayRows.reduce((s,b)=>s+(b.net||0),0)).toLocaleString()}</strong></div>`;
   }
   document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
 }
