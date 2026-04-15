@@ -1207,8 +1207,6 @@ function render(){
   const targetBrandsForKpi = F.brand.includes('all') ? BRANDS : F.brand;
   totKpiRev = targetBrandsForKpi.reduce((sum, bn) => {
       let valid = true;
-      // 如果選擇了特定國家，我們必須檢查該品牌在這些國家「有沒有銷售」
-      // 避免把例如 ASH GOLF (純TW銷售) 的 KPI 目標，錯誤地加到 HK 區
       if (!F.country.includes('all')) {
           const sc = getBrandSalesC(bn);
           if (!sc.some(c => F.country.includes(c))) valid = false;
@@ -1456,7 +1454,12 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
     const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
     const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
     const avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgRoas = totSp>0 ? totNet/totSp : 0;
+    
+    // --- 【修正】計算 ROAS 總計 ---
+    const totAdRevBrand = brandRows.reduce((s,b)=>s+((b.roas||0)*b.sp),0);
+    const avgRoas = totSp>0 ? totAdRevBrand/totSp : 0;
+    // --------------------------------
+    
     const avgDiscPct = totGross>0 ? (Math.abs(totDisc)/totGross)*100 : 0;
     const avgRetPct = totGross>0 ? (Math.abs(totRet)/totGross)*100 : 0;
     
@@ -1525,7 +1528,11 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
     const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
     const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
     const avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgRoas = totSp>0 ? totNet/totSp : 0;
+    
+    // --- 【修正】計算 ROAS 總計 ---
+    const totAdRevDay = dayRows.reduce((s,b)=>s+((b.roas||0)*b.sp),0);
+    const avgRoas = totSp>0 ? totAdRevDay/totSp : 0;
+    // --------------------------------
     
     const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
     
