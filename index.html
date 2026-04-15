@@ -170,6 +170,17 @@ main{padding:24px 28px;max-width:1480px;margin: 0 auto;}
 .roi-stat-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3)}
 .roi-stat-value{font-size:24px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
 
+/* KPI TIERS - Ad Performance Cards */
+.tier3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:16px}
+.kcard{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:20px;transition:all .2s ease-out;box-shadow:0 1px 4px rgba(15,58,94,0.03)}
+.kcard:hover{border-color:var(--accent-m);box-shadow:0 6px 16px rgba(15,58,94,0.08);transform:translateY(-2px)}
+.kl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+.kv{font-size:26px;font-weight:300;letter-spacing:-.5px;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;color:var(--accent)}
+.kv.ac{color:var(--accent-m);font-weight:400}
+.kv.rd{color:var(--red)}
+.ks{font-size:11px;color:var(--ink3);font-weight:500}
+.up{color:var(--ok)}.dn{color:var(--red)}.nt{color:var(--ink3)}
+
 /* Progress Bar */
 .progress-container{margin-top:8px}
 .progress-bar{width:100%;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden;position:relative}
@@ -360,26 +371,68 @@ footer a:hover{text-decoration:underline}
     </div>
   </div>
   
-  <div class="grid">
-    <div class="card">
-      <div class="card-h">Meta Ads Spend</div>
-      <div class="card-v" id="meta-spend">$—</div>
-      <div class="card-m">Platform: <span class="tag tm">Meta</span></div>
+  <div class="sec"><div class="sec-n">📊 Ad Performance</div><div class="sec-r"></div></div>
+  
+  <div class="tier3">
+    <div class="kcard">
+      <div class="kl" data-tip="Total Meta + Google ad spend">Total Spend</div>
+      <div class="kv" id="k-sp">—</div>
+      <div class="ks" id="k-sp-s"></div>
     </div>
-    <div class="card">
-      <div class="card-h">Google Ads Spend</div>
-      <div class="card-v" id="google-spend">$—</div>
-      <div class="card-m">Platform: <span class="tag tg">Google</span></div>
+    <div class="kcard">
+      <div class="kl" data-tip="Ad revenue ÷ Ad spend">ROAS</div>
+      <div class="kv" id="k-roas">—</div>
+      <div class="ks">Ad revenue ÷ Ad spend</div>
     </div>
-    <div class="card">
-      <div class="card-h">Avg CVR</div>
-      <div class="card-v" id="avg-cvr">—%</div>
-      <div class="card-m">Conversion Rate</div>
+    <div class="kcard">
+      <div class="kl" data-tip="Total purchase conversions">Purchases</div>
+      <div class="kv" id="k-purch">—</div>
+      <div class="ks">Meta + Google conversions</div>
     </div>
-    <div class="card">
-      <div class="card-h">Avg CPC</div>
-      <div class="card-v" id="avg-cpc">$—</div>
-      <div class="card-m">Cost Per Click</div>
+    <div class="kcard">
+      <div class="kl" data-tip="Total link clicks">Link Clicks</div>
+      <div class="kv" id="k-clk">—</div>
+      <div class="ks">Meta + Google</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Conversion rate">CVR%</div>
+      <div class="kv" id="k-cvr">—</div>
+      <div class="ks">Purchases ÷ Clicks</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Click-through rate">CTR%</div>
+      <div class="kv" id="k-ctr">—</div>
+      <div class="ks">Clicks ÷ Impressions</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Cost per click">CPC (avg)</div>
+      <div class="kv" id="k-cpc">—</div>
+      <div class="ks">Spend ÷ Clicks</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Total impressions">Impressions</div>
+      <div class="kv" id="k-impr">—</div>
+      <div class="ks">Meta + Google</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Meta spend amount">Meta Spend</div>
+      <div class="kv" id="k-ms">—</div>
+      <div class="ks" id="k-ms-s"></div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Google spend amount">Google Spend</div>
+      <div class="kv" id="k-gs">—</div>
+      <div class="ks" id="k-gs-s"></div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Meta vs Google spend split">Spend Split</div>
+      <div class="kv" id="k-split">—</div>
+      <div class="ks">Meta / Google</div>
+    </div>
+    <div class="kcard">
+      <div class="kl" data-tip="Add to cart events">Add to Cart</div>
+      <div class="kv" id="k-atc">—</div>
+      <div class="ks">Shopping intent</div>
     </div>
   </div>
   
@@ -437,20 +490,28 @@ footer a:hover{text-decoration:underline}
       <button class="modal-close" onclick="closeSettings()">×</button>
     </div>
     <div class="modal-body">
+      <div style="background:var(--accent-l);padding:12px 16px;border-radius:var(--r);margin-bottom:20px;border-left:4px solid var(--accent)">
+        <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:4px">📝 如何取得 Sheet ID？</div>
+        <div style="font-size:11px;color:var(--ink2);line-height:1.6">
+          從 Google Sheets URL 複製 ID：<br>
+          <code style="background:#fff;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace">https://docs.google.com/spreadsheets/d/<strong style="color:var(--accent)">YOUR_SHEET_ID</strong>/edit</code>
+        </div>
+      </div>
+      
       <div class="form-group">
         <label class="form-label">Meta Ads Sheet ID</label>
-        <input type="text" id="inp-meta" class="form-input" placeholder="Enter Google Sheets ID">
-        <div class="form-help">Sheet name: metaads_by_brand_contry</div>
+        <input type="text" id="inp-meta" class="form-input" placeholder="貼上 Google Sheets ID">
+        <div class="form-help">工作表名稱：metaads_by_brand_contry</div>
       </div>
       <div class="form-group">
         <label class="form-label">Google Ads Sheet ID</label>
-        <input type="text" id="inp-gads" class="form-input" placeholder="Enter Google Sheets ID">
-        <div class="form-help">Sheet name: gads_by+brand_contry</div>
+        <input type="text" id="inp-gads" class="form-input" placeholder="貼上 Google Sheets ID">
+        <div class="form-help">工作表名稱：gads_by+brand_contry</div>
       </div>
       <div class="form-group">
         <label class="form-label">Sales Data Sheet ID</label>
-        <input type="text" id="inp-sales" class="form-input" placeholder="Enter Google Sheets ID">
-        <div class="form-help">Sheet name: all+brand+sale</div>
+        <input type="text" id="inp-sales" class="form-input" placeholder="貼上 Google Sheets ID">
+        <div class="form-help">工作表名稱：all+brand+sale</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -518,9 +579,9 @@ let timer=null;
 let KPIS={};
 
 const CONFIG={
-  metaId:localStorage.getItem('emers_meta_id')||'',
-  gadsId:localStorage.getItem('emers_gads_id')||'',
-  salesId:localStorage.getItem('emers_sales_id')||''
+  metaId:localStorage.getItem('emers_meta_id')||'16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE',
+  gadsId:localStorage.getItem('emers_gads_id')||'16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE',
+  salesId:localStorage.getItem('emers_sales_id')||'16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE'
 };
 
 // KPI Storage
@@ -847,10 +908,14 @@ function render(){
   const totPur=brandRows.reduce((s,b)=>s+b.purchases,0);
   const totClk=brandRows.reduce((s,b)=>s+b.clicks,0);
   const totImpr=brandRows.reduce((s,b)=>s+b.impr,0);
+  const totGross=brandRows.reduce((s,b)=>s+b.gross,0);
   const avgRoi=totSp>0?totNet/totSp:0;
+  const avgRoas=totSp>0?totNet/totSp:0;
   const avgCvr=totClk>0?(totPur/totClk)*100:0;
+  const avgCtr=totImpr>0?(totClk/totImpr)*100:0;
   const avgCpc=totClk>0?totSp/totClk:0;
   
+  // Update hero ROI
   const roiClass=avgRoi>=5?'':'warn';
   const badClass=avgRoi<2?' bad':'';
   $('roi-display').className='roi-big '+roiClass+badClass;
@@ -864,6 +929,24 @@ function render(){
   $('google-spend').textContent='$'+Math.round(totGs).toLocaleString();
   $('avg-cvr').textContent=avgCvr>0?avgCvr.toFixed(2)+'%':'—';
   $('avg-cpc').textContent=avgCpc>0?'$'+avgCpc.toFixed(2):'—';
+  
+  // Update Ad Performance cards
+  $('k-sp').textContent=totSp>0?'$'+Math.round(totSp).toLocaleString():'—';
+  $('k-sp-s').textContent=`Meta $${Math.round(totMs).toLocaleString()} + Google $${Math.round(totGs).toLocaleString()}`;
+  $('k-roas').textContent=avgRoas>0?avgRoas.toFixed(2)+'×':'—';
+  $('k-purch').textContent=Math.round(totPur).toLocaleString();
+  $('k-clk').textContent=Math.round(totClk).toLocaleString();
+  $('k-cvr').textContent=avgCvr>0?avgCvr.toFixed(2)+'%':'—';
+  $('k-ctr').textContent=avgCtr>0?avgCtr.toFixed(2)+'%':'—';
+  $('k-cpc').textContent=avgCpc>0?'$'+avgCpc.toFixed(1):'—';
+  $('k-impr').textContent=totImpr>0?Math.round(totImpr).toLocaleString():'—';
+  $('k-ms').textContent='$'+Math.round(totMs).toLocaleString();
+  $('k-ms-s').textContent=totSp>0?Math.round(totMs/totSp*100)+'% of total':'';
+  $('k-gs').textContent='$'+Math.round(totGs).toLocaleString();
+  $('k-gs-s').textContent=totSp>0?Math.round(totGs/totSp*100)+'% of total':'';
+  const mp=totSp>0?Math.round(totMs/totSp*100):0;
+  $('k-split').textContent=totSp>0?`${mp}% / ${100-mp}%`:'—';
+  $('k-atc').textContent='—';
   
   const month=getMonthFromDateRange();
   const progressDiv=$('net-revenue-progress');
@@ -1254,6 +1337,12 @@ function saveSettings(){
 }
 
 async function loadData(){
+  // Check if configuration is set
+  if(!CONFIG.metaId || !CONFIG.gadsId || !CONFIG.salesId){
+    showStatus('error','⚠️ 請先設定 Data Sources！點擊右上角 ⚙️ Data Sources 按鈕進行設定');
+    return;
+  }
+  
   showStatus('loading','Syncing Meta, Google & Sales sheets simultaneously...');
   
   const urlMeta=`https://docs.google.com/spreadsheets/d/${CONFIG.metaId}/gviz/tq?tqx=out:csv&sheet=metaads_by_brand_contry`;
@@ -1273,7 +1362,10 @@ async function loadData(){
     showStatus('ok',`✅ 成功同步！ Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
     render();
     if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
-  }catch(e){showStatus('error','Load failed: '+e.message);}
+  }catch(e){
+    console.error('Load error:', e);
+    showStatus('error','❌ 載入失敗: '+e.message+' - 請檢查 Sheet ID 是否正確，並確認工作表名稱無誤');
+  }
 }
 
 F.dateFrom=daysAgo(7);F.dateTo=daysAgo(1);
