@@ -209,12 +209,20 @@ main{padding:24px 28px;max-width:1480px;margin: 0 auto;}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);padding:12px 14px;border-bottom:2px solid var(--rule);white-space:nowrap;cursor:pointer;user-select:none;transition:color .2s;background:#fff;position:sticky;top:0;z-index:10;}
+thead th:first-child{position:sticky;left:0;z-index:20;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
 thead th:hover{color:var(--accent)}
 thead th.sa::after{content:' ↑';color:var(--accent-m)}
 thead th.sd::after{content:' ↓';color:var(--accent-m)}
 tbody td{padding:12px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;color:var(--ink2);font-weight:500}
+tbody td:first-child{position:sticky;left:0;background:#fff;z-index:5;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
+tbody tr:nth-child(even) td{background:var(--paper)}
+tbody tr:nth-child(even) td:first-child{background:var(--paper)}
+tbody tr:nth-child(odd) td:first-child{background:#fff}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:var(--accent-l)}
+tbody tr:hover td:first-child{background:var(--accent-l)}
+tfoot td{padding:14px 14px;border-top:3px solid var(--accent);background:var(--accent-l);font-weight:700;color:var(--accent);white-space:nowrap}
+tfoot td:first-child{position:sticky;left:0;z-index:5;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
 .tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;display:inline-block}
 .tm{background:var(--accent-l);color:var(--accent-m)}
 .tg{background:var(--paper3);color:var(--ink2)}
@@ -542,6 +550,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <table id="main-table">
       <thead id="tbl-head"></thead>
       <tbody id="tbl-body"></tbody>
+      <tfoot id="tbl-foot"></tfoot>
     </table>
   </div>
 </div>
@@ -1047,7 +1056,7 @@ function renderHeat(hd, tsKeys, dayCount){
 
 function renderTable(brandRows,dayRows){
   const isBrand=dimMode==='brand';
-  const head=$('tbl-head'), tbody=$('tbl-body');
+  const head=$('tbl-head'), tbody=$('tbl-body'), tfoot=$('tbl-foot');
 
   if(isBrand){
     head.innerHTML=`<tr>
@@ -1072,6 +1081,52 @@ function renderTable(brandRows,dayRows){
         <td class="num" style="color:var(--red)">$${Math.round(Math.abs(b.ret)).toLocaleString()}</td><td class="num" style="color:var(--red)">${b.ret_pct.toFixed(2)}%</td>
         <td><span class="tag ${rc}">${rl}</span></td></tr>`;
     }).join('');
+    
+    // Calculate totals
+    const totClicks = brandRows.reduce((s,b)=>s+b.clicks,0);
+    const totPurchases = brandRows.reduce((s,b)=>s+b.purchases,0);
+    const totMs = brandRows.reduce((s,b)=>s+b.ms,0);
+    const totGs = brandRows.reduce((s,b)=>s+b.gs,0);
+    const totSp = brandRows.reduce((s,b)=>s+b.sp,0);
+    const totNet = brandRows.reduce((s,b)=>s+b.net,0);
+    const totGross = brandRows.reduce((s,b)=>s+b.gross,0);
+    const totDisc = brandRows.reduce((s,b)=>s+b.disc,0);
+    const totRet = brandRows.reduce((s,b)=>s+b.ret,0);
+    
+    // Calculate weighted averages
+    const totImpr = brandRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
+    const avgCpc = totClicks>0 ? totSp/totClicks : 0;
+    const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
+    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
+    const avgRoi = totSp>0 ? totNet/totSp : 0;
+    const avgRoas = totSp>0 ? totNet/totSp : 0;
+    const avgDiscPct = totGross>0 ? (Math.abs(totDisc)/totGross)*100 : 0;
+    const avgRetPct = totGross>0 ? (Math.abs(totRet)/totGross)*100 : 0;
+    
+    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
+    
+    tfoot.innerHTML=`<tr>
+      <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
+      <td class="num">${brandRows.length}</td>
+      <td class="num">${Math.round(totClicks).toLocaleString()}</td>
+      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td>
+      <td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${Math.round(totPurchases).toLocaleString()}</td>
+      <td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
+      <td class="num">$${Math.round(totMs).toLocaleString()}</td>
+      <td class="num">$${Math.round(totGs).toLocaleString()}</td>
+      <td class="num">$${Math.round(totSp).toLocaleString()}</td>
+      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
+      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
+      <td class="num">$${Math.round(totNet).toLocaleString()}</td>
+      <td class="num">$${Math.round(totGross).toLocaleString()}</td>
+      <td class="num">$${Math.round(Math.abs(totDisc)).toLocaleString()}</td>
+      <td class="num">${avgDiscPct.toFixed(2)}%</td>
+      <td class="num">$${Math.round(Math.abs(totRet)).toLocaleString()}</td>
+      <td class="num">${avgRetPct.toFixed(2)}%</td>
+      <td></td>
+    </tr>`;
+    
     $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.net,0)).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.sp,0)).toLocaleString()}</strong></div>`;
   } else {
     head.innerHTML=`<tr>
@@ -1091,6 +1146,41 @@ function renderTable(brandRows,dayRows){
         <td class="num" style="color:${rv};font-weight:700">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</td><td class="num">${b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
         <td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.net).toLocaleString()}</td><td class="num">$${Math.round(b.gross).toLocaleString()}</td></tr>`;
     }).join('');
+    
+    // Calculate totals for day view
+    const totClicks = dayRows.reduce((s,b)=>s+b.clicks,0);
+    const totPurchases = dayRows.reduce((s,b)=>s+b.purchases,0);
+    const totMs = dayRows.reduce((s,b)=>s+b.ms,0);
+    const totGs = dayRows.reduce((s,b)=>s+b.gs,0);
+    const totSp = dayRows.reduce((s,b)=>s+b.sp,0);
+    const totNet = dayRows.reduce((s,b)=>s+b.net,0);
+    const totGross = dayRows.reduce((s,b)=>s+b.gross,0);
+    
+    const totImpr = dayRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
+    const avgCpc = totClicks>0 ? totSp/totClicks : 0;
+    const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
+    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
+    const avgRoi = totSp>0 ? totNet/totSp : 0;
+    const avgRoas = totSp>0 ? totNet/totSp : 0;
+    
+    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
+    
+    tfoot.innerHTML=`<tr>
+      <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
+      <td class="num">${Math.round(totClicks).toLocaleString()}</td>
+      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td>
+      <td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${Math.round(totPurchases).toLocaleString()}</td>
+      <td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
+      <td class="num">$${Math.round(totMs).toLocaleString()}</td>
+      <td class="num">$${Math.round(totGs).toLocaleString()}</td>
+      <td class="num">$${Math.round(totSp).toLocaleString()}</td>
+      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
+      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
+      <td class="num">$${Math.round(totNet).toLocaleString()}</td>
+      <td class="num">$${Math.round(totGross).toLocaleString()}</td>
+    </tr>`;
+    
     $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(dayRows.reduce((s,b)=>s+b.net,0)).toLocaleString()}</strong></div>`;
   }
   document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
