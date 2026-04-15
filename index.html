@@ -336,27 +336,29 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     </label>
   </div>
   <div class="cdiv"></div>
-  <div class="cg">
+  <!-- 改為動態多選綁定 -->
+  <div class="cg" id="market-filters">
     <span class="cl">Market</span>
-    <button class="chip on" data-c="all" onclick="setC('all',this)">All</button>
-    <button class="chip" data-c="TW"     onclick="setC('TW',this)">TW</button>
-    <button class="chip" data-c="HK"     onclick="setC('HK',this)">HK</button>
-    <button class="chip" data-c="SG"     onclick="setC('SG',this)">SG</button>
-    <button class="chip" data-c="MY"     onclick="setC('MY',this)">MY</button>
-    <span class="cnote">* Ads only · Sales = all markets</span>
+    <button class="chip on" data-c="all" onclick="toggleC('all')">All</button>
+    <button class="chip" data-c="TW" onclick="toggleC('TW')">TW</button>
+    <button class="chip" data-c="HK" onclick="toggleC('HK')">HK</button>
+    <button class="chip" data-c="SG" onclick="toggleC('SG')">SG</button>
+    <button class="chip" data-c="MY" onclick="toggleC('MY')">MY</button>
+    <span class="cnote">* 確保 Sales 表內含「國家」欄位以啟用過濾</span>
   </div>
   <div class="cdiv"></div>
-  <div class="cg">
+  <!-- 改為動態多選綁定 -->
+  <div class="cg" id="brand-filters">
     <span class="cl">Brand</span>
-    <button class="chip on" data-b="all"        onclick="setB('all',this)">All</button>
-    <button class="chip" data-b="Descente"      onclick="setB('Descente',this)">Descente</button>
-    <button class="chip" data-b="ASH GOLF"      onclick="setB('ASH GOLF',this)">ASH Golf</button>
-    <button class="chip" data-b="G/FORE"        onclick="setB('G/FORE',this)">G/FORE</button>
-    <button class="chip" data-b="Callaway"      onclick="setB('Callaway',this)">Callaway</button>
-    <button class="chip" data-b="2XU TW"        onclick="setB('2XU TW',this)">2XU TW</button>
-    <button class="chip" data-b="2XU HK"        onclick="setB('2XU HK',this)">2XU HK</button>
-    <button class="chip" data-b="K-SWISS"       onclick="setB('K-SWISS',this)">K-SWISS</button>
-    <button class="chip" data-b="Palladium"     onclick="setB('Palladium',this)">Palladium</button>
+    <button class="chip on" data-b="all" onclick="toggleB('all')">All</button>
+    <button class="chip" data-b="Descente" onclick="toggleB('Descente')">Descente</button>
+    <button class="chip" data-b="ASH GOLF" onclick="toggleB('ASH GOLF')">ASH GOLF</button>
+    <button class="chip" data-b="G/FORE" onclick="toggleB('G/FORE')">G/FORE</button>
+    <button class="chip" data-b="Callaway" onclick="toggleB('Callaway')">Callaway</button>
+    <button class="chip" data-b="2XU TW" onclick="toggleB('2XU TW')">2XU TW</button>
+    <button class="chip" data-b="2XU HK" onclick="toggleB('2XU HK')">2XU HK</button>
+    <button class="chip" data-b="K-SWISS" onclick="toggleB('K-SWISS')">K-SWISS</button>
+    <button class="chip" data-b="Palladium" onclick="toggleB('Palladium')">Palladium</button>
   </div>
 </div>
 
@@ -606,7 +608,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
-<!-- 新增：KPI 設定模組 (依月份儲存) -->
+<!-- KPI 設定模組 (依月份儲存) -->
 <div id="kpi-modal" class="modal">
   <div class="modal-box">
     <div class="modal-header">
@@ -614,14 +616,11 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
       <button class="modal-close" onclick="closeKpiSettings()">×</button>
     </div>
     <div class="modal-content" style="padding-top:16px;">
-      <!-- 新增：選擇月份 -->
       <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed var(--rule2); display:flex; align-items:center; gap:12px;">
         <label style="font-size:13px; font-weight:700; color:var(--accent)">選擇設定月份</label>
         <input type="month" id="kpi-month-selector" onchange="changeKpiMonth()" style="padding:6px 12px; border:1px solid var(--rule2); border-radius:var(--r); font-family:'DM Mono', monospace; font-size:13px; outline:none;">
       </div>
-      <div id="kpi-form-content">
-        <!-- 透過 JS 動態產生各品牌設定輸入框 -->
-      </div>
+      <div id="kpi-form-content"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeKpiSettings()" style="color:var(--ink)">取消</button>
@@ -632,14 +631,15 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 
 <script>
 // --- Chart.js 全局 Tooltip 強制深色設定 ---
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 58, 94, 0.95)'; // 強制深藍底色
-Chart.defaults.plugins.tooltip.titleColor = '#ffffff'; // 強制白字
-Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';  // 強制白字
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 58, 94, 0.95)';
+Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
+Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
 Chart.defaults.plugins.tooltip.padding = 10;
 Chart.defaults.plugins.tooltip.cornerRadius = 6;
 Chart.defaults.plugins.tooltip.displayColors = true;
 
 const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
+const KNOWN_COUNTRIES = ['TW', 'HK', 'SG', 'MY'];
 const BCOLORS=['#0f3a5e','#185a90','#2b7bc4','#3b82f6','#60a5fa','#93c5fd','#bae6fd','#e0f2fe'];
 
 let CONFIG = {
@@ -648,7 +648,7 @@ let CONFIG = {
   salesId: localStorage.getItem('emers_sales_id') || '16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE'
 };
 
-// --- 初始化 KPI (改為依據月份儲存的結構 v2) ---
+// --- KPI 儲存初始化 ---
 const DEFAULT_KPI = {};
 BRANDS.forEach(b => DEFAULT_KPI[b] = { rev: 1000000, roi: 5 });
 
@@ -657,7 +657,6 @@ if (!KPI_DATA) {
     KPI_DATA = {};
     const d = new Date();
     const currM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    // 嘗試遷移舊的 KPI 資料
     const oldKpi = JSON.parse(localStorage.getItem('emers_kpis'));
     if (oldKpi) KPI_DATA[currM] = oldKpi;
     else KPI_DATA[currM] = DEFAULT_KPI;
@@ -669,23 +668,18 @@ function getMonthKpi(monthStr) {
 }
 
 let RAW={meta:[],gads:[],sales:[]};
-let F={brand:'all',country:'all',dateFrom:'',dateTo:'',comparePrev:false};
+let brandToCountries={};
+let countryToBrands={};
+
+// 注意：現在 F.brand 與 F.country 改為陣列型態，實作多選與聯動機制
+let F={brand:['all'],country:['all'],dateFrom:'',dateTo:'',comparePrev:false};
 let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
-window.brandMetric = 'roi'; // ROI by Brand 圖表預設指標
+window.brandMetric = 'roi'; 
 
 const $=id=>document.getElementById(id);
-
-const getLocalD=(d)=>{
-  const x=new Date(d); 
-  x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); 
-  return x.toISOString().slice(0,10);
-};
+const getLocalD=(d)=>{const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10);};
 const today=()=>getLocalD(new Date());
-const daysAgo=n=>{
-  const d=new Date();
-  d.setDate(d.getDate()-n);
-  return getLocalD(d);
-};
+const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return getLocalD(d);};
 
 // Format helpers
 function fmtN(n){if(!n||isNaN(n))return'—';return'$'+Math.round(Math.abs(n)).toLocaleString();}
@@ -694,7 +688,6 @@ function fmtR(n,d=2){if(!n||isNaN(n))return'—';return n.toFixed(d)+'×';}
 function fmtP(n){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(2)+'%';}
 function showStatus(t,m){const el=$("sbar");el.className=t;el.textContent=m;}
 
-/* Date helpers */
 function normDate(raw){
   if(!raw)return null;
   const s=String(raw).trim();
@@ -707,7 +700,78 @@ function normDate(raw){
   return null;
 }
 
-/* Filters */
+/* UI Filters & Data Linking (防呆與多選機制) */
+function updateChips() {
+  document.querySelectorAll('#market-filters .chip').forEach(el => {
+    const val = el.dataset.c;
+    if (F.country.includes('all')) el.classList.toggle('on', val === 'all');
+    else el.classList.toggle('on', F.country.includes(val));
+  });
+  document.querySelectorAll('#brand-filters .chip').forEach(el => {
+    const val = el.dataset.b;
+    if (F.brand.includes('all')) el.classList.toggle('on', val === 'all');
+    else el.classList.toggle('on', F.brand.includes(val));
+  });
+}
+
+function toggleB(b) {
+  if (b === 'all') {
+    F.brand = ['all'];
+    F.country = ['all'];
+  } else {
+    if (F.brand.includes('all')) F.brand = [];
+    if (F.brand.includes(b)) F.brand = F.brand.filter(x => x !== b);
+    else F.brand.push(b);
+
+    if (F.brand.length === 0) {
+      F.brand = ['all'];
+      F.country = ['all'];
+    } else {
+      let validC = new Set();
+      F.brand.forEach(brand => {
+        (brandToCountries[brand] || []).forEach(c => validC.add(c));
+      });
+      if (F.country.includes('all')) {
+        F.country = Array.from(validC);
+      } else {
+        F.country = F.country.filter(c => validC.has(c));
+        if (F.country.length === 0) F.country = Array.from(validC);
+      }
+    }
+  }
+  updateChips();
+  if(RAW.meta.length) render();
+}
+
+function toggleC(c) {
+  if (c === 'all') {
+    F.country = ['all'];
+    F.brand = ['all'];
+  } else {
+    if (F.country.includes('all')) F.country = [];
+    if (F.country.includes(c)) F.country = F.country.filter(x => x !== c);
+    else F.country.push(c);
+
+    if (F.country.length === 0) {
+      F.country = ['all'];
+      F.brand = ['all'];
+    } else {
+      let validB = new Set();
+      F.country.forEach(country => {
+        (countryToBrands[country] || []).forEach(b => validB.add(b));
+      });
+      if (F.brand.includes('all')) {
+        F.brand = Array.from(validB);
+      } else {
+        F.brand = F.brand.filter(b => validB.has(b));
+        if (F.brand.length === 0) F.brand = Array.from(validB);
+      }
+    }
+  }
+  updateChips();
+  if(RAW.meta.length) render();
+}
+
 function setTime(t,el){
   document.querySelectorAll('[data-t]').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
@@ -717,13 +781,12 @@ function setTime(t,el){
       $('dt').value=today(); 
       return;
   }
-  
   if (t === 'thisMonth') {
       const d = new Date();
       F.dateFrom = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-      F.dateTo = today();
+      // 修正：扣除沒有完整數據的今天，將當月進度天數算至「昨天」(若遇到1號則保底算今天)
+      F.dateTo = d.getDate() === 1 ? today() : daysAgo(1);
   } else {
-      // 過去 N 天：從昨天往前推 N-1 天（不含今天）
       F.dateFrom = daysAgo(parseInt(t));
       F.dateTo = daysAgo(1);
   }
@@ -733,8 +796,6 @@ function applyCustom(){
   F.dateFrom=$('df').value;F.dateTo=$('dt').value;
   if(F.dateFrom&&F.dateTo&&(RAW.meta.length||RAW.sales.length))render();
 }
-function setC(c,el){document.querySelectorAll('[data-c]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.country=c;if(RAW.meta.length)render();}
-function setB(b,el){document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('on'));el.classList.add('on');F.brand=b;if(RAW.meta.length)render();}
 function setDim(d,el){dimMode=d;document.querySelectorAll('.dim-btn').forEach(x=>x.classList.remove('on'));el.classList.add('on');render();}
 function setCompare(val){F.comparePrev=val;if(RAW.meta.length)render();}
 function setBrandMetric(m){
@@ -802,10 +863,14 @@ function parseSales(rows){
   if(!rows.length)return[];
   const R=rows[0],K={brand:kf(R,'^品牌$','brand'),date:kf(R,'日期','A \\(日期\\)','date'),
     gross:kf(R,'B \\(銷售總額\\)','銷售總額','gross'),disc:kf(R,'C \\(折扣\\)','折扣','discount'),
-    ret:kf(R,'D \\(退貨金額\\)','退貨','return'),net:kf(R,'E \\(銷貨淨額\\)','銷貨淨額','net')};
+    ret:kf(R,'D \\(退貨金額\\)','退貨','return'),net:kf(R,'E \\(銷貨淨額\\)','銷貨淨額','net'),
+    country:kf(R,'國家','country')};
+    
   return rows.map(r=>{
     const date=normDate(r[K.date]);
-    return{brand:(r[K.brand]||'').trim(),date,month:date?date.slice(0,7):null,
+    return{brand:(r[K.brand]||'').trim(),
+      country:(r[K.country]||'').trim().toUpperCase(), 
+      date,month:date?date.slice(0,7):null,
       gross:parseFloat(String(r[K.gross]||'0').replace(/,/g,''))||0,
       disc:parseFloat(String(r[K.disc]||'0').replace(/,/g,''))||0,
       ret:parseFloat(String(r[K.ret]||'0').replace(/,/g,''))||0,
@@ -816,15 +881,18 @@ function parseSales(rows){
 /* Aggregate Engine */
 function aggData(dFrom, dTo){
   const inD=r=>r.date>=dFrom&&r.date<=dTo;
-  const inB=r=>F.brand==='all'||r.brand===F.brand;
-  const inCm=r=>F.country==='all'||r.country===F.country;
-  const inCg=r=>F.country==='all'||(r.countries?r.countries.includes(F.country):r.country.includes(F.country));
+  
+  // 支援多選過濾
+  const inB=r=>F.brand.includes('all')||F.brand.includes(r.brand);
+  const inCm=r=>F.country.includes('all')||F.country.includes(r.country);
+  const inCg=r=>F.country.includes('all')||(r.countries?r.countries.some(c=>F.country.includes(c)):F.country.includes(r.country));
+  const inCs=r=>F.country.includes('all')||F.country.includes(r.country);
 
   const meta=RAW.meta.filter(r=>inD(r)&&inB(r)&&inCm(r));
   const gads=RAW.gads.filter(r=>inD(r)&&inB(r)&&inCg(r));
-  const sales=RAW.sales.filter(r=>inD(r)&&inB(r)); // 註：Sales 無 Country 標籤，不受 Country 過濾器影響
+  const sales=RAW.sales.filter(r=>inD(r)&&inB(r)&&inCs(r)); 
   
-  const targetBrands=F.brand==='all'?BRANDS:[F.brand];
+  const targetBrands=F.brand.includes('all')?BRANDS:F.brand;
 
   const ms=meta.reduce((s,r)=>s+r.spend,0), gs=gads.reduce((s,r)=>s+r.spend,0), sp=ms+gs;
   const mr=meta.reduce((s,r)=>s+r.rev,0), gr=gads.reduce((s,r)=>s+r.rev,0);
@@ -884,8 +952,7 @@ function aggData(dFrom, dTo){
   targetBrands.forEach(bn=>bBuckets[bn]={});
 
   const getBucketKey = dt => {
-    if(dayCount<=31) return dt; // Daily mode
-    // WEEKLY MODE
+    if(dayCount<=31) return dt; 
     const d = new Date(dt);
     const day = d.getDay() || 7; 
     d.setDate(d.getDate() - (day - 1)); 
@@ -916,7 +983,6 @@ function aggData(dFrom, dTo){
     ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0?tsBuckets[k].net/tsBuckets[k].spend:0
   }));
 
-  // Heatmap & Stacked charts dynamic data
   const bStack={}, heat=[];
   targetBrands.forEach(bn=>{
     bStack[bn]=tsKeys.map(k=>bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0);
@@ -969,7 +1035,6 @@ function render(){
     p = aggData(pFromD.toISOString().slice(0,10), pToD.toISOString().slice(0,10));
   }
   
-  // KPI 單月檢查邏輯
   const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
   const monthKey = F.dateFrom ? F.dateFrom.substring(0,7) : '';
   const currentMonthKpi = getMonthKpi(monthKey);
@@ -1017,17 +1082,12 @@ function render(){
     return zhe % 10 === 0 ? (zhe / 10) + '折' : zhe + '折';
   };
   const zheTxt = getZheText(currDiscP);
-  if (zheTxt) {
-    $('disc-mini').innerHTML += `<span style="font-size:14px;color:var(--ink3);font-weight:600;margin-left:6px">(約 ${zheTxt})</span>`;
-  }
+  if (zheTxt) $('disc-mini').innerHTML += `<span style="font-size:14px;color:var(--ink3);font-weight:600;margin-left:6px">(約 ${zheTxt})</span>`;
 
-  // Business Performance
   renderVal('k-net', d.net, p?.net, fmtN, 1);
   renderVal('k-gross', d.gross, p?.gross, fmtN, 1);
   renderVal('k-disc', Math.abs(d.disc), p?Math.abs(p.disc):null, fmtN, -1);
   renderVal('k-ret', Math.abs(d.ret), p?Math.abs(p.ret):null, fmtN, -1);
-
-  // Ad Performance
   renderVal('k-sp', d.sp, p?.sp, fmtN, 0);
   renderVal('k-roas', d.roas, p?.roas, fmtR, 1);
   renderVal('k-purch', d.purch, p?.purch, fmtI, 1);
@@ -1049,21 +1109,19 @@ function render(){
   setKs('k-ret-s', d.gross?`<span class="dn">${fmtP(currRetP)} of gross</span>`:'');
   setKs('k-sp-s', `Meta ${fmtN(d.ms)} + Google ${fmtN(d.gs)}`);
 
-  // --- KPI Net Revenue 進度條運算 (只在選擇單一月份時觸發) ---
+  // KPI Progress
   const netProgWrap = $('k-net-prog');
   let totKpiRev = 0;
   
-  // 依據篩選的品牌準確加總對應月份 KPI 目標
-  if (F.brand === 'all') {
+  if (F.brand.includes('all')) {
     totKpiRev = BRANDS.reduce((sum, bn) => sum + (currentMonthKpi[bn]?.rev || 0), 0);
   } else {
-    totKpiRev = currentMonthKpi[F.brand]?.rev || 0;
+    totKpiRev = F.brand.reduce((sum, bn) => sum + (currentMonthKpi[bn]?.rev || 0), 0);
   }
 
   if (isSingleMonth && totKpiRev > 0) {
     const overallPct = Math.min(100, (d.net / totKpiRev) * 100);
     const gap = totKpiRev - d.net;
-    // 依據當月已經過的天數判定是否有跟上進度（Pacing）
     const expectedPct = d.dayCount / monthDays;
     const pacingRate = d.net / totKpiRev;
     const isOnTrack = pacingRate >= expectedPct;
@@ -1080,10 +1138,9 @@ function render(){
   } else {
     netProgWrap.innerHTML = '';
   }
-  // -----------------------------------------------------
 
-  // --- ROI by Brand 更新 (整合切換與 KPI 與 前期比較) ---
-  const metric = window.brandMetric; // 'roi' 或 'roas'
+  // ROI by Brand
+  const metric = window.brandMetric; 
   const maxV = Math.max(...d.brandRows.map(b => b[metric]), 0.1);
   
   $('roi-bars').innerHTML = [...d.brandRows].sort((a,b2) => b2[metric] - a[metric]).map(b => {
@@ -1092,7 +1149,6 @@ function render(){
     const col = val >= 5 ? 'var(--ok)' : val >= 2 ? 'var(--warn)' : 'var(--red)';
     const vc = val >= 5 ? 'color:var(--ok)' : val >= 2 ? 'color:var(--warn)' : 'color:var(--red)';
     
-    // 與前期比較邏輯
     let diffHtml = '';
     const pVal = p ? p.brandRows.find(x => x.brand === b.brand)?.[metric] : null;
     if (F.comparePrev && pVal !== null) {
@@ -1104,7 +1160,6 @@ function render(){
       }
     }
 
-    // 當月 KPI 是否達標判斷 (僅針對 ROI)
     let kpiHtml = '';
     if (isSingleMonth && metric === 'roi') {
       const targetRoi = currentMonthKpi[b.brand]?.roi || 0;
@@ -1130,7 +1185,6 @@ function render(){
     <div class="sum-item">Lowest <strong>${botBrand?.brand||'—'}</strong> ${botBrand?.[metric]>0?botBrand[metric].toFixed(2)+'×':'—'}</div>
     <div class="sum-item">Avg ${metric.toUpperCase()} <strong>${avgVal>0?avgVal.toFixed(2)+'×':'—'}</strong></div>
   `;
-  // -----------------------------------------------------
 
   renderTrend(d.tsSeries);
   renderStack(d.brandRows, d.targetBrands);
@@ -1237,7 +1291,6 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
     tbody.innerHTML=sorted.map(b=>{
       const rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
       
-      // 動態更新 Status 欄位 (根據當月 KPI)
       let statusHtml = '';
       if (isSingleMonth) {
         const bKpi = currentMonthKpi[b.brand] || {rev:0, roi:0};
@@ -1405,7 +1458,6 @@ function saveSettings() {
 
 /* KPI Settings Actions */
 function openKpiSettings() {
-  // 自動帶入當前篩選器的月份，或是當下真實月份
   const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
   const currentM = isSingleMonth ? F.dateFrom.substring(0,7) : new Date().toISOString().substring(0,7);
   
@@ -1466,7 +1518,7 @@ function saveKpiSettings() {
   if(RAW.meta.length) render();
 }
 
-/* Load */
+/* Load & Data Mapping */
 async function loadData(){
   showStatus('loading','Syncing Meta, Google & Sales sheets simultaneously...');
   
@@ -1482,9 +1534,34 @@ async function loadData(){
       showStatus('error',`Parsed 0 records. Meta rows: ${rM.length}, Google: ${rG.length}, Sales: ${rS.length}`);
       return;
     }
+    
+    // --- 動態建立 Brand <-> Market 關聯表 ---
+    brandToCountries = {};
+    countryToBrands = {};
+    const allData = [...RAW.meta, ...RAW.gads, ...RAW.sales];
+    
+    allData.forEach(r => {
+      if (!r.brand || !r.country) return;
+      const cList = r.countries || [r.country];
+      cList.forEach(c => {
+        if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) {
+          if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set();
+          brandToCountries[r.brand].add(c);
+          
+          if (!countryToBrands[c]) countryToBrands[c] = new Set();
+          countryToBrands[c].add(r.brand);
+        }
+      });
+    });
+    
+    for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
+    for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
+    // ----------------------------------------
+    
     const now=new Date().toLocaleString('zh-TW');
     $('last-upd').textContent=now;$('footer-ts').textContent='Last sync  '+now;
     showStatus('ok',`✅ 成功同步！ Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
+    
     render();
     if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
   }catch(e){showStatus('error','Load failed: '+e.message);}
