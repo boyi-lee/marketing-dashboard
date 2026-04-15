@@ -41,7 +41,7 @@
 *{box-sizing:border-box;margin:0;padding:0; -webkit-tap-highlight-color: transparent;}
 body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;min-height:100vh;overflow-x:hidden;}
 
-/* ── 強制防護：高對比 Tooltip ── */
+/* ── 強制防護:高對比 Tooltip ── */
 [data-tip]{position:relative;cursor:help}
 [data-tip]::after{
   content:attr(data-tip);
@@ -98,201 +98,157 @@ header{background:#ffffff;border-bottom:1px solid var(--rule);padding:0 28px;hei
 .btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;border-radius:var(--r);border:1px solid var(--rule2);background:#fff;color:var(--ink2);cursor:pointer;transition:all .15s}
 .btn:hover{background:var(--paper2);color:var(--ink);border-color:var(--ink4)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.pri:hover{background:var(--accent2);border-color:var(--accent2);box-shadow:0 2px 6px rgba(15,58,94,0.2)}
+.btn.pri:hover{background:var(--accent2)}
 
-#sbar{display:none;padding:10px 28px;font-size:12px;align-items:center;gap:8px;font-weight:600;}
-#sbar.loading{display:flex;background:var(--accent-l);color:var(--accent-m)}
-#sbar.error{display:flex;background:var(--red-bg);color:var(--red)}
-#sbar.ok{display:flex;background:var(--ok-bg);color:var(--ok)}
+/* Status bar */
+#sbar{padding:8px 28px;background:var(--paper2);border-bottom:1px solid var(--rule);font-size:12px;display:none}
+#sbar.ok{background:var(--ok-bg);color:#064e3b;display:block}
+#sbar.err{background:var(--red-bg);color:#7f1d1d;display:block}
+#sbar.loading{background:var(--warn-bg);color:#78350f;display:flex;align-items:center;gap:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:12px;height:12px;border:2px solid transparent;border-top-color:#d97706;border-radius:50%;animation:spin .6s linear infinite}
 
-/* RESPONSIVE FILTER BAR */
-.ctrlbar{background:#ffffff;border-bottom:1px solid var(--rule);padding:14px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.cg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
-
-/* 動態提示列 */
-#dynamic-warning-bar{display:none; background:var(--warn-bg); color:var(--warn); padding:10px 28px; font-size:12px; font-weight:500; border-bottom:1px solid #fde68a; line-height:1.6;}
-
-/* ── 強制防護：按鈕設計 ── */
-.chip{
+/* 動態防呆提示列樣式 */
+#dynamic-warning-bar{
+  display:none;
+  padding:12px 28px;
+  background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom:1px solid #fbbf24;
   font-size:12px;
-  padding:6px 14px;
-  border-radius:20px;
-  border:1px solid #cbd5e0 !important;
-  background-color:#ffffff !important;
-  color:#475569 !important;
-  cursor:pointer;
-  transition:all .15s;
-  white-space:nowrap;
-  font-weight:500;
-  outline:none;
+  line-height:1.6;
+  color:#78350f;
 }
-.chip:hover{
-  border-color:#3b82f6 !important;
-  color:#3b82f6 !important;
-  background-color:#eff6ff !important;
-}
-.chip.on{
-  background-color:#0f3a5e !important; 
-  border-color:#0f3a5e !important;
-  color:#ffffff !important;            
-  font-weight:600 !important;
-  box-shadow:0 2px 6px rgba(15,58,94,0.2) !important;
+#dynamic-warning-bar strong{
+  color:#92400e;
+  font-weight:700;
 }
 
-.cdiv{width:1px;height:24px;background:var(--rule);flex-shrink:0}
+/* Control bar */
+.ctrlbar{padding:16px 28px;background:#fff;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:16px 20px;align-items:center}
+.cg{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cl{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.6px;margin-right:4px}
+.chip{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:5px 14px;border-radius:var(--r);border:1px solid var(--rule2);background:#fff;color:var(--ink2);cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--ink3);background:var(--paper)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.on:hover{background:var(--accent2)}
 .custom-range{display:none;align-items:center;gap:6px}
 .custom-range.show{display:flex}
-.custom-range input{font-family:'DM Sans',sans-serif;font-size:12px;background:#fff;border:1px solid #cbd5e0;color:var(--ink);border-radius:var(--r);padding:5px 10px;outline:none;transition:border-color .2s;font-weight:500}
-.custom-range input:focus{border-color:var(--accent-m);box-shadow:0 0 0 3px var(--accent-l)}
-.cnote{font-size:10px;color:var(--ink4);font-style:italic}
+.custom-range input[type=date]{font-family:'DM Mono',monospace;font-size:11px;padding:4px 8px;border:1px solid var(--rule2);border-radius:var(--r);background:#fff}
+.cdiv{width:1px;height:20px;background:var(--rule)}
+.cnote{font-size:10px;color:var(--ink4);margin-left:4px}
 
-main{padding:24px 28px;max-width:1480px;margin: 0 auto;}
-.sec{display:flex;align-items:center;gap:14px;margin:32px 0 16px}
-.sec:first-child{margin-top:0}
-.sec-n{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
-.sec-r{flex:1;height:1px;background:var(--rule)}
+main{padding:24px 28px 80px;max-width:1600px;margin:0 auto}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:32px 0 16px}
+.sec-n{font-size:14px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px}
+.sec-r{display:flex;gap:8px}
 
-/* ROI HERO */
-.roi-hero{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:24px 28px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(15,58,94,0.04)}
-.roi-hero-left{display:flex;align-items:baseline;gap:20px;flex-wrap:wrap}
-.roi-big{font-size:56px;font-weight:300;letter-spacing:-2px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums;display:flex;align-items:baseline}
-.roi-big.warn{color:var(--warn)}
-.roi-big.bad{color:var(--red)}
-.roi-label{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);align-self:flex-end;padding-bottom:10px}
-.roi-meta{display:flex;flex-direction:column;gap:5px;align-self:flex-end;padding-bottom:8px}
-.roi-meta span{font-size:12px;color:var(--ink2);font-weight:500}
-.roi-meta strong{color:var(--accent);font-weight:700;display:inline-flex;align-items:baseline}
-.roi-right{display:flex;gap:24px;flex-wrap:wrap}
-.roi-mini{display:flex;flex-direction:column;gap:4px;min-width:100px}
-.roi-mini-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3)}
-.roi-mini-val{font-size:24px;font-weight:300;letter-spacing:-.5px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;color:var(--accent)}
+/* ROI Hero */
+.roi-hero{background:#fff;border-radius:var(--r2);border:1px solid var(--rule);padding:24px;display:flex;gap:24px;margin-bottom:16px}
+.roi-hero-left{flex:1;display:flex;gap:20px;align-items:center}
+.roi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3);margin-bottom:6px}
+.roi-big{font-size:52px;font-weight:700;font-family:'DM Mono',monospace;line-height:1}
+.roi-meta{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink3)}
+.roi-meta strong{color:var(--ink);font-weight:700}
+.roi-right{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.roi-mini{background:var(--paper2);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:4px}
+.roi-mini-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--ink3)}
+.roi-mini-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink)}
 
-/* KPI TIERS */
-.tier1{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}
-.tier3{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;margin-bottom:16px}
-.kcard{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:20px;transition:all .2s ease-out;box-shadow:0 1px 4px rgba(15,58,94,0.03); display:flex; flex-direction:column;}
-.kcard:hover{border-color:var(--accent-m);box-shadow:0 6px 16px rgba(15,58,94,0.08);transform:translateY(-2px)}
-.kl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
-.kv{font-size:26px;font-weight:300;letter-spacing:-.5px;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;color:var(--accent)}
-.kv.ac{color:var(--accent-m);font-weight:400}
-.kv.rd{color:var(--red)}
-.ks{font-size:11px;color:var(--ink3);font-weight:500}
-.up{color:var(--ok)}.dn{color:var(--red)}.nt{color:var(--ink3)}
+/* KPI Cards */
+.tier1,.tier3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.kcard{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:16px;display:flex;flex-direction:column;gap:4px}
+.kl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--ink3)}
+.kv{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink);line-height:1.2}
+.kv.ac{color:var(--accent)}
+.ks{font-size:11px;color:var(--ink3);margin-top:2px}
+.up{color:var(--ok)}
+.dn{color:var(--red)}
+.nt{color:var(--ink4)}
 
-/* KPI PROGRESS BAR */
-.kpi-prog-wrap { width: 100%; height: 6px; background: var(--paper3); border-radius: 3px; margin-top: 12px; overflow: hidden; }
-.kpi-prog-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.kpi-prog-text { font-size: 11px; color: var(--ink3); margin-top: 4px; display: flex; justify-content: space-between; align-items:center; }
+/* KPI Progress Bar */
+.kpi-prog{
+  margin-top:12px;
+  background:var(--paper2);
+  border-radius:4px;
+  height:6px;
+  overflow:hidden;
+  position:relative;
+}
+.kpi-prog-bar{
+  height:100%;
+  background:linear-gradient(90deg, var(--accent) 0%, var(--accent-m) 100%);
+  border-radius:4px;
+  transition:width 0.4s ease;
+}
+.kpi-prog-label{
+  font-size:10px;
+  color:var(--ink3);
+  margin-top:4px;
+  display:flex;
+  justify-content:space-between;
+  font-weight:600;
+}
 
-/* CHART GRID */
-.row2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
-.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
-.card{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:24px;box-shadow:0 2px 8px rgba(15,58,94,0.04)}
-.ct{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.ct-n{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--accent)}
-.ct-b{font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px}
-.ct-b.g{background:var(--accent-l);color:var(--accent-m)}
-.ct-b.n{background:var(--paper3);color:var(--ink2)}
-.cw{position:relative;width:100%}
-.legr{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
-.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);font-weight:600}
-.leg-sq{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.leg-line{width:20px;height:4px;border-radius:2px;flex-shrink:0}
+/* Charts */
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);padding:20px}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-t{font-size:13px;font-weight:700;color:var(--accent)}
+.card-body{min-height:240px}
+canvas{max-height:240px}
 
-/* ROI BARS */
-.roi-list{display:flex;flex-direction:column;gap:10px}
-.roi-row{display:grid;grid-template-columns:95px 1fr 65px;align-items:center;gap:10px}
-.roi-b{font-size:12px;color:var(--accent);font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;justify-content:flex-end;align-items:center;gap:4px;}
-.roi-track{height:6px;background:var(--paper3);border-radius:3px;overflow:hidden}
-.roi-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.roi-v{font-size:13px;font-weight:600;text-align:right;font-family:'DM Mono',monospace; display:flex; align-items:center; justify-content:flex-end;}
-
-/* SUMMARY ROW */
-.sum-row{display:flex;gap:16px;padding:12px 0 4px;border-top:1px solid var(--rule);margin-top:16px;flex-wrap:wrap}
-.sum-item{font-size:12px;color:var(--ink3);font-weight:500}
-.sum-item strong{color:var(--accent);font-weight:700}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+/* Table */
+.tbl-wrap{background:#fff;border:1px solid var(--rule);border-radius:var(--r2);overflow:hidden;margin-bottom:16px}
+.tbl-hdr{padding:16px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+.tbl-t{font-size:13px;font-weight:700;color:var(--accent)}
+.dim-btns{display:flex;gap:6px}
+.dim-btn{font-size:11px;font-weight:600;padding:4px 12px;border-radius:var(--r);border:1px solid var(--rule2);background:#fff;color:var(--ink3);cursor:pointer;transition:all .15s}
+.dim-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tbl-body{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);padding:12px 14px;border-bottom:2px solid var(--rule);white-space:nowrap;cursor:pointer;user-select:none;transition:color .2s;background:#fff;position:sticky;top:0;z-index:10;}
-thead th:first-child{position:sticky;left:0;z-index:20;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
-thead th:hover{color:var(--accent)}
-thead th.sa::after{content:' ↑';color:var(--accent-m)}
-thead th.sd::after{content:' ↓';color:var(--accent-m)}
-tbody td{padding:12px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;color:var(--ink2);font-weight:500}
-tbody td:first-child{position:sticky;left:0;background:#fff;z-index:5;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
-tbody tr:nth-child(even) td{background:var(--paper)}
-tbody tr:nth-child(even) td:first-child{background:var(--paper)}
-tbody tr:nth-child(odd) td:first-child{background:#fff}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:var(--accent-l)}
-tbody tr:hover td:first-child{background:var(--accent-l)}
-tfoot td{padding:14px 14px;border-top:3px solid var(--accent);background:var(--accent-l);font-weight:700;color:var(--accent);white-space:nowrap}
-tfoot td:first-child{position:sticky;left:0;z-index:5;box-shadow:2px 0 4px rgba(0,0,0,0.08)}
-.tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;display:inline-block}
-.tm{background:var(--accent-l);color:var(--accent-m)}
-.tg{background:var(--paper3);color:var(--ink2)}
-.tok{background:var(--ok-bg);color:var(--ok)}
-.twarn{background:var(--warn-bg);color:var(--warn)}
-.tbad{background:var(--red-bg);color:var(--red)}
-.num{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;color:var(--accent)}
+thead{background:var(--paper2);position:sticky;top:0;z-index:2}
+th{padding:10px 12px;text-align:left;font-weight:700;color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{background:var(--paper3)}
+th.sa::after{content:'▲';margin-left:4px;font-size:9px}
+th.sd::after{content:'▼';margin-left:4px;font-size:9px}
+td{padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td.num{text-align:right;font-family:'DM Mono',monospace}
+tfoot{background:var(--paper);font-weight:700;border-top:2px solid var(--accent)}
+tfoot td{border:none}
+.tag{display:inline-block;padding:3px 8px;border-radius:var(--r);font-size:11px;font-weight:600;font-family:'DM Mono',monospace}
+.tag.tm{background:#e0f2fe;color:#075985}
+.tag.tg{background:#fef3c7;color:#854d0e}
+.tbl-sum{padding:12px 20px;background:var(--paper2);border-top:1px solid var(--rule);display:flex;gap:24px;font-size:12px;color:var(--ink3)}
+.sum-item strong{color:var(--ink);font-weight:700;margin-left:6px;font-family:'DM Mono',monospace}
 
-/* TABLE DIMENSION TOGGLE */
-.dim-toggle{display:flex;gap:8px;margin-bottom:16px}
-.dim-btn{font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;border:1px solid var(--rule2);background:transparent;color:var(--ink2);cursor:pointer;transition:all .12s}
-.dim-btn:hover{border-color:var(--accent);color:var(--accent)}
-.dim-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+/* Brand Metric Selector */
+.met-sel{display:flex;gap:6px;margin-bottom:12px}
+.met-btn{font-size:11px;font-weight:600;padding:4px 12px;border-radius:var(--r);border:1px solid var(--rule2);background:#fff;color:var(--ink3);cursor:pointer;transition:all .15s}
+.met-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
 
-footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fff;}
-.ft-c{font-size:12px;color:var(--ink3);font-weight:600;}
-.ft-t{font-size:12px;font-family:'DM Mono',monospace;color:var(--ink4);text-align:right;font-weight:500}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:var(--r2);max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
+.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+.modal-t{font-size:16px;font-weight:700;color:var(--accent)}
+.modal-x{background:none;border:none;font-size:20px;color:var(--ink3);cursor:pointer;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:var(--r)}
+.modal-x:hover{background:var(--paper2)}
+.modal-body{padding:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+.form-group input[type=text],.form-group input[type=number]{width:100%;padding:8px 12px;border:1px solid var(--rule2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;background:#fff;transition:all .15s}
+.form-group input:focus{outline:none;border-color:var(--accent-m);box-shadow:0 0 0 3px var(--accent-l)}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--rule);display:flex;gap:8px;justify-content:flex-end}
 
-/* MODAL */
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,58,94,0.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
-.modal.show{display:flex;opacity:1;}
-.modal-box{background:#fff;border-radius:12px;width:90%;max-width:520px;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden; max-height: 90vh;}
-.modal-header{padding:20px 28px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--accent);color:#fff;}
-.modal-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.modal-close{background:transparent;border:none;font-size:24px;color:rgba(255,255,255,0.7);cursor:pointer;line-height:1;transition:color .2s;}
-.modal-close:hover{color:#fff;}
-.modal-content{padding:28px;display:flex;flex-direction:column;gap:20px; overflow-y:auto;}
-.form-group{display:flex;flex-direction:column;gap:8px;}
-.form-group label{font-size:12px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;}
-.form-group input{font-family:'DM Mono',monospace;font-size:13px;padding:12px 14px;border:1px solid var(--rule2);border-radius:var(--r);background:var(--paper);color:var(--accent);outline:none;transition:all 0.2s;box-shadow:inset 0 1px 2px rgba(0,0,0,0.02);font-weight:500; width:100%;}
-.form-group input:focus{border-color:var(--accent-m);box-shadow:0 0 0 3px var(--accent-l);}
-.modal-footer{padding:16px 28px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;gap:12px;background:var(--paper);}
+/* Footer */
+footer{background:#fff;border-top:1px solid var(--rule);padding:16px 28px;text-align:center;font-size:11px;color:var(--ink3)}
 
-/* --- RESPONSIVE DESIGN (RWD) --- */
-@media(max-width:1180px){
-  .tier1{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .tier3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .row2, .row3{grid-template-columns:1fr}
-}
 @media(max-width:768px){
-  main, header, .ctrlbar, footer{padding-left:20px;padding-right:20px}
-  .ctrlbar{gap:12px;}
-  .cdiv{display:none;}
-  .roi-big{font-size:44px}
-  .tier3{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:480px){
-  main, header, .ctrlbar, footer{padding-left:16px;padding-right:16px}
-  .wm-n{font-size:15px}
-  .hdr-r{gap:6px}
-  .roi-hero{padding:20px 20px;}
-  .roi-hero-left{gap:12px;}
-  .roi-big{font-size:40px}
-  .roi-right{width:100%;justify-content:space-between;padding-top:16px;border-top:1px solid var(--rule);margin-top:8px}
-  .roi-mini{min-width:auto;align-items:center;}
-  .roi-mini-val{font-size:20px;}
-  .tier1, .tier3{grid-template-columns:1fr; gap:12px;}
-  .kcard{padding:16px;}
-  .kv{font-size:24px;}
-  .cg{width:100%;}
-  .cg .cl{width:100%;margin-bottom:4px;}
-  .sum-row{flex-direction:column;gap:8px;}
+  .roi-hero{flex-direction:column}
+  .roi-right{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr}
+  .tier1,.tier3{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -498,205 +454,164 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 <div class="sec"><span class="sec-n">Trends</span><div class="sec-r"></div></div>
 <div class="row2">
   <div class="card">
-    <div class="ct">
-      <span class="ct-n" data-tip="ROI = Net Revenue ÷ Ad Spend. X-axis adjusts to selected period.">Spend &amp; ROI Trend</span>
-      <span class="ct-b g" id="trend-badge">7 days</span>
+    <div class="card-h">
+      <div class="card-t">Spend &amp; Revenue Trend</div>
     </div>
-    <!-- 強制綁定圖例色碼 -->
-    <div class="legr">
-      <div class="leg"><div class="leg-line" style="background-color:#3b82f6 !important"></div>Spend (TWD)</div>
-      <div class="leg"><div class="leg-sq" style="background-color:#0f3a5e !important; border-radius:50%"></div>ROI</div>
-    </div>
-    <div class="cw" style="height:220px"><canvas id="trendC" role="img" aria-label="Spend and ROI trend"></canvas></div>
+    <div class="card-body"><canvas id="ch1"></canvas></div>
   </div>
   <div class="card">
-    <div class="ct">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span class="ct-n" data-tip="Performance for selected brand(s). Can switch between ROI and ROAS.">Performance by Brand</span>
-        <!-- ROI / ROAS 切換選項 -->
-        <div class="dim-toggle" style="margin-bottom:0">
-          <button class="dim-btn on" id="btn-met-roi" onclick="setBrandMetric('roi')" style="padding:2px 10px;font-size:10px">ROI</button>
-          <button class="dim-btn" id="btn-met-roas" onclick="setBrandMetric('roas')" style="padding:2px 10px;font-size:10px">ROAS</button>
-        </div>
-      </div>
-      <span class="ct-b g" id="roi-brand-badge">7 days</span>
+    <div class="card-h">
+      <div class="card-t">ROI Heatmap by Brand</div>
     </div>
-    <div class="roi-list" id="roi-bars"></div>
-    <div class="sum-row" id="roi-sum"></div>
+    <div class="card-body"><canvas id="ch-heat"></canvas></div>
   </div>
 </div>
 
 <!-- CHARTS ROW 2 -->
-<div class="row3">
+<div class="row2">
   <div class="card">
-    <div class="ct">
-      <span class="ct-n" data-tip="Net Revenue (after discounts &amp; returns) stacked by selected brand(s). X-axis matches selected period.">Net Revenue by Brand</span>
-      <span class="ct-b n" id="rev-period-badge">dynamic</span>
+    <div class="card-h">
+      <div class="card-t">Revenue Stack by Brand</div>
+      <div class="met-sel">
+        <button class="met-btn on" id="btn-met-roi" onclick="setBrandMetric('roi')">ROI</button>
+        <button class="met-btn" id="btn-met-roas" onclick="setBrandMetric('roas')">ROAS</button>
+      </div>
     </div>
-    <div class="cw" style="height:220px"><canvas id="stackC" role="img" aria-label="Net revenue by brand"></canvas></div>
+    <div class="card-body"><canvas id="ch2"></canvas></div>
   </div>
   <div class="card">
-    <div class="ct">
-      <span class="ct-n" data-tip="Meta vs Google ad spend for selected brand(s). X-axis matches selected period.">Ad Spend by Channel</span>
-      <span class="ct-b n" id="spend-period-badge">dynamic</span>
+    <div class="card-h">
+      <div class="card-t">Channel Spend</div>
     </div>
-    <!-- 強制綁定圖例色碼 -->
-    <div class="legr">
-      <div class="leg"><div class="leg-sq" style="background-color:#0f3a5e !important"></div>Meta</div>
-      <div class="leg"><div class="leg-sq" style="background-color:#3b82f6 !important"></div>Google</div>
-    </div>
-    <div class="cw" style="height:220px"><canvas id="spendC" role="img" aria-label="Ad spend by channel"></canvas></div>
-  </div>
-  <div class="card">
-    <div class="ct">
-      <span class="ct-n" data-tip="ROI (Net Revenue ÷ Ad Spend) for each selected brand over time. Color intensity = ROI level. Green = good (&gt;5×), amber = review (2–5×), red = stop (&lt;2×).">ROI Heatmap</span>
-      <span class="ct-b n">brand × period</span>
-    </div>
-    <div id="heat-table" style="overflow-x:auto;max-height:240px;-webkit-overflow-scrolling:touch;"></div>
-    <div class="sum-row" id="heat-sum"></div>
+    <div class="card-body"><canvas id="ch3"></canvas></div>
   </div>
 </div>
 
-<!-- TABLE -->
-<div class="sec"><span class="sec-n">Brand Breakdown</span><div class="sec-r"></div></div>
-<div class="card">
-  <div class="ct">
-    <span class="ct-n">Full KPI Table — click header to sort</span>
-    <span class="ct-b g" id="tbl-badge">7 days</span>
+<!-- DATA TABLE -->
+<div class="sec"><span class="sec-n">Detailed Breakdown</span><div class="sec-r"></div></div>
+<div class="tbl-wrap">
+  <div class="tbl-hdr">
+    <div class="tbl-t" id="tbl-title">Performance by Brand</div>
+    <div class="dim-btns">
+      <button class="dim-btn on" onclick="setDim('brand',this)">Brand</button>
+      <button class="dim-btn" onclick="setDim('day',this)">Day</button>
+    </div>
   </div>
-  <div class="dim-toggle">
-    <button class="dim-btn on" onclick="setDim('brand',this)">By Brand</button>
-    <button class="dim-btn" onclick="setDim('day',this)">By Day</button>
-  </div>
-  <div class="sum-row" id="tbl-sum" style="margin-top:0;margin-bottom:10px;padding-top:0;border-top:none;border-bottom:1px solid var(--rule);padding-bottom:10px"></div>
-  <div class="tbl-wrap">
+  <div class="tbl-body">
     <table id="main-table">
       <thead id="tbl-head"></thead>
       <tbody id="tbl-body"></tbody>
       <tfoot id="tbl-foot"></tfoot>
     </table>
   </div>
+  <div class="tbl-sum" id="tbl-sum"></div>
 </div>
 
 </main>
 
 <footer>
-  <span class="ft-c">© Emers Group · Ad &amp; Revenue Report</span>
-  <span class="ft-t" id="footer-ts">—</span>
+  <div id="footer-ts">Last sync —</div>
 </footer>
 
-<!-- SETTINGS MODAL (Data Sources) -->
-<div id="settings-modal" class="modal">
+<!-- Settings Modal -->
+<div class="modal" id="settings-modal">
   <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">⚙️ Data Source Settings (Sheet IDs)</span>
-      <button class="modal-close" onclick="closeSettings()">×</button>
+    <div class="modal-hdr">
+      <div class="modal-t">⚙️ Configure Data Sources</div>
+      <button class="modal-x" onclick="closeSettings()">×</button>
     </div>
-    <div class="modal-content">
+    <div class="modal-body">
       <div class="form-group">
-        <label>Meta Ads Sheet ID <span class="tag tm" style="font-size:9px">Tab: metaads_by_brand_contry</span></label>
-        <input type="text" id="inp-meta" placeholder="e.g., 16XYjr0e7MwAyCdJ...">
+        <label>Meta Sheet ID</label>
+        <input type="text" id="inp-meta" placeholder="Enter Google Sheets ID">
       </div>
       <div class="form-group">
-        <label>Google Ads Sheet ID <span class="tag tg" style="font-size:9px">Tab: gads_by+brand_contry</span></label>
-        <input type="text" id="inp-gads" placeholder="e.g., 16XYjr0e7MwAyCdJ...">
+        <label>Google Ads Sheet ID</label>
+        <input type="text" id="inp-gads" placeholder="Enter Google Sheets ID">
       </div>
       <div class="form-group">
-        <label>Shopify Sales Sheet ID <span class="tag tok" style="font-size:9px">Tab: all+brand+sale</span></label>
-        <input type="text" id="inp-sales" placeholder="e.g., 16XYjr0e7MwAyCdJ...">
+        <label>Sales Sheet ID</label>
+        <input type="text" id="inp-sales" placeholder="Enter Google Sheets ID">
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeSettings()" style="color:var(--ink)">Cancel</button>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
       <button class="btn pri" onclick="saveSettings()">Save &amp; Sync</button>
     </div>
   </div>
 </div>
 
-<!-- KPI 設定模組 (依月份儲存) -->
-<div id="kpi-modal" class="modal">
+<!-- KPI Settings Modal -->
+<div class="modal" id="kpi-modal">
   <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">🎯 當月 KPI 目標設定</span>
-      <button class="modal-close" onclick="closeKpiSettings()">×</button>
+    <div class="modal-hdr">
+      <div class="modal-t">🎯 設定月度 KPI 目標</div>
+      <button class="modal-x" onclick="closeKpiSettings()">×</button>
     </div>
-    <div class="modal-content" style="padding-top:16px;">
-      <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px dashed var(--rule2); display:flex; align-items:center; gap:12px;">
-        <label style="font-size:13px; font-weight:700; color:var(--accent)">選擇設定月份</label>
-        <input type="month" id="kpi-month-selector" onchange="changeKpiMonth()" style="padding:6px 12px; border:1px solid var(--rule2); border-radius:var(--r); font-family:'DM Mono', monospace; font-size:13px; outline:none;">
+    <div class="modal-body">
+      <div class="form-group">
+        <label>選擇月份</label>
+        <input type="month" id="kpi-month-selector" onchange="changeKpiMonth()">
       </div>
       <div id="kpi-form-content"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeKpiSettings()" style="color:var(--ink)">取消</button>
-      <button class="btn pri" onclick="saveKpiSettings()">儲存 KPI 設定</button>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeKpiSettings()">Cancel</button>
+      <button class="btn pri" onclick="saveKpiSettings()">Save KPI</button>
     </div>
   </div>
 </div>
 
 <script>
-// --- Chart.js 全局 Tooltip 強制深色設定 ---
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 58, 94, 0.95)';
-Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
-Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
-Chart.defaults.plugins.tooltip.padding = 10;
-Chart.defaults.plugins.tooltip.cornerRadius = 6;
-Chart.defaults.plugins.tooltip.displayColors = true;
-
-const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
-const KNOWN_COUNTRIES = ['TW', 'HK', 'SG', 'MY'];
-const BCOLORS=['#0f3a5e','#185a90','#2b7bc4','#3b82f6','#60a5fa','#93c5fd','#bae6fd','#e0f2fe'];
-
-let CONFIG = {
-  metaId: localStorage.getItem('emers_meta_id') || '16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE',
-  gadsId: localStorage.getItem('emers_gads_id') || '16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE',
-  salesId: localStorage.getItem('emers_sales_id') || '16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE'
+const $=id=>document.getElementById(id);
+const CONFIG = {
+  metaId: localStorage.getItem('emers_meta_id') || '',
+  gadsId: localStorage.getItem('emers_gads_id') || '',
+  salesId: localStorage.getItem('emers_sales_id') || ''
 };
 
-// --- KPI 儲存初始化 ---
-const DEFAULT_KPI = {};
-BRANDS.forEach(b => DEFAULT_KPI[b] = { rev: 1000000, roi: 5 });
-
-let KPI_DATA = JSON.parse(localStorage.getItem('emers_kpis_v2'));
-if (!KPI_DATA) {
-    KPI_DATA = {};
-    const d = new Date();
-    const currM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const oldKpi = JSON.parse(localStorage.getItem('emers_kpis'));
-    if (oldKpi) KPI_DATA[currM] = oldKpi;
-    else KPI_DATA[currM] = DEFAULT_KPI;
-    localStorage.setItem('emers_kpis_v2', JSON.stringify(KPI_DATA));
-}
+// KPI Data Structure
+let KPI_DATA = {};
+try {
+  const stored = localStorage.getItem('emers_kpis_v2');
+  if (stored) KPI_DATA = JSON.parse(stored);
+} catch(e) {}
 
 function getMonthKpi(monthStr) {
-    return KPI_DATA[monthStr] || DEFAULT_KPI;
+  return KPI_DATA[monthStr] || {};
 }
 
+function setMonthKpi(monthStr, brandKpis) {
+  KPI_DATA[monthStr] = brandKpis;
+}
+
+const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU TW','2XU HK','K-SWISS','Palladium'];
+const KNOWN_COUNTRIES=['TW','HK','SG','MY'];
+
+// 🔥 新增:跨區廣告品牌設定
+const CROSS_REGION_ADS_BRANDS = {
+  'ASH GOLF': { ads: ['TW', 'HK'], sales: ['TW'] }  // 廣告混雜 TW+HK,Sales 僅 TW
+};
+
 let RAW={meta:[],gads:[],sales:[]};
-let brandToCountries={};
-let countryToBrands={};
+let F={dateFrom:'',dateTo:'',brand:['all'],country:['all'],comparePrev:false};
+let brandToCountries={}, countryToBrands={};
+let timer,dimMode='brand',sortKey='brand',sortDir=1;
+window.brandMetric = 'roi';
 
-// 注意：F.brand 與 F.country 為陣列型態，實作多選與聯動機制
-let F={brand:['all'],country:['all'],dateFrom:'',dateTo:'',comparePrev:false};
-let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
-window.brandMetric = 'roi'; 
+function showStatus(type,msg){
+  const s=$('sbar');s.className='';s.textContent='';
+  if(type==='ok'){s.className='ok';s.textContent=msg;}
+  else if(type==='error'){s.className='err';s.textContent=msg;}
+  else if(type==='loading'){s.className='loading';s.innerHTML=`<div class="spinner"></div>${msg}`;}
+}
 
-const $=id=>document.getElementById(id);
-const getLocalD=(d)=>{const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10);};
-const today=()=>getLocalD(new Date());
-const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return getLocalD(d);};
-
-// Format helpers
-function fmtN(n){if(n===null||n===undefined||isNaN(n))return'—';return'$'+Math.round(Math.abs(n)).toLocaleString();}
-function fmtI(n){if(n===null||n===undefined||isNaN(n))return'—';return Math.round(Math.abs(n)).toLocaleString();}
-function fmtR(n,d=2){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(d)+'×';}
-function fmtP(n){if(n===null||n===undefined||isNaN(n))return'—';return n.toFixed(2)+'%';}
-function showStatus(t,m){const el=$("sbar");el.className=t;el.textContent=m;}
-
-function normDate(raw){
-  if(!raw)return null;
-  const s=String(raw).trim();
-  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
+/* Date helpers */
+function today(){return new Date().toISOString().slice(0,10);}
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
+function getLocalD(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
+function normDate(s){
+  if(!s)return null;
   const a=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(a)return`${a[3]}-${a[1].padStart(2,'0')}-${a[2].padStart(2,'0')}`;
   const b=s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
@@ -755,11 +670,11 @@ function toggleC(c) {
   } else {
     if (F.country.includes('all')) F.country = [];
     
-    // 強制聯動：MY 與 SG 作為同一戰區共同開關
+    // 強制聯動:MY 與 SG 作為同一戰區共同開關
     const isMySg = c === 'MY' || c === 'SG';
     if (isMySg) {
       const hasEither = F.country.includes('MY') || F.country.includes('SG');
-      if (hasEither) { // 如果已經有任一個，表示這次點擊是要把它們關掉
+      if (hasEither) { // 如果已經有任一個,表示這次點擊是要把它們關掉
         F.country = F.country.filter(x => x !== 'MY' && x !== 'SG');
       } else { // 把它們一起打開
         F.country.push('MY', 'SG');
@@ -939,23 +854,32 @@ function aggData(dFrom, dTo){
     const bimpr=bm.reduce((s,r)=>s+r.impr,0)+bg.reduce((s,r)=>s+r.impr,0);
     const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
     
-    // 跨境特別邏輯：若檢視 ASH 但過濾器中未包含 TW (例如單看 HK)，將後端銷售資料轉為 null
-    const isAshCrossBorder = (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
+    // 🔥 優化後邏輯:跨境品牌檢查 (以 Sales 數據為準)
+    const crossRegionConfig = CROSS_REGION_ADS_BRANDS[bn];
+    let isCrossBorder = false;
+    if (crossRegionConfig) {
+      // 如果當前選擇的 Market 不包含該品牌的 Sales 國家
+      const salesCountries = crossRegionConfig.sales;
+      const hasAnySalesCountry = F.country.includes('all') || salesCountries.some(c => F.country.includes(c));
+      isCrossBorder = !hasAnySalesCountry;
+    }
 
     return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,
-      gross:isAshCrossBorder ? null : bg2,
-      disc:isAshCrossBorder ? null : bd,
-      ret:isAshCrossBorder ? null : br,
-      net:isAshCrossBorder ? null : bn2,
-      disc_pct:isAshCrossBorder||bg2===0?0:Math.abs((bd/bg2)*100),
-      ret_pct:isAshCrossBorder||bg2===0?0:Math.abs((br/bg2)*100),
+      gross:isCrossBorder ? null : bg2,
+      disc:isCrossBorder ? null : bd,
+      ret:isCrossBorder ? null : br,
+      net:isCrossBorder ? null : bn2,
+      disc_pct:isCrossBorder||bg2===0?0:Math.abs((bd/bg2)*100),
+      ret_pct:isCrossBorder||bg2===0?0:Math.abs((br/bg2)*100),
       clicks:bclk,
-      purchases:isAshCrossBorder ? null : bpch,
+      purchases:isCrossBorder ? null : bpch,
       cpc:bclk>0?bsp/bclk:0,ctr:bimpr>0?bclk/bimpr*100:0,
-      cvr:isAshCrossBorder ? null : (bclk>0?bpch/bclk*100:0),
+      cvr:isCrossBorder ? null : (bclk>0?bpch/bclk*100:0),
       atc:bm.reduce((s,r)=>s+r.atc,0),impr:bimpr,
-      roi:isAshCrossBorder ? null : (bsp>0?bn2/bsp:0),
-      roas:isAshCrossBorder ? null : (bsp>0?(bmr+bgr)/bsp:0)};
+      roi:isCrossBorder ? null : (bsp>0?bn2/bsp:0),
+      roas:isCrossBorder ? null : (bsp>0?(bmr+bgr)/bsp:0),
+      isCrossBorder: isCrossBorder  // 新增標記
+    };
   });
 
   // Daily dimension
@@ -1012,8 +936,18 @@ function aggData(dFrom, dTo){
     ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0?tsBuckets[k].net/tsBuckets[k].spend:0
   }));
 
-  // 全局跨境指標覆寫 (若僅單獨選擇了 ASH GOLF 且未包含 TW)
-  let topLevelCrossBorder = (F.brand.length === 1 && F.brand[0] === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
+  // 🔥 全局跨境指標覆寫優化
+  let topLevelCrossBorder = false;
+  if (F.brand.length === 1) {
+    const singleBrand = F.brand[0];
+    const config = CROSS_REGION_ADS_BRANDS[singleBrand];
+    if (config) {
+      const salesCountries = config.sales;
+      const hasAnySalesCountry = F.country.includes('all') || salesCountries.some(c => F.country.includes(c));
+      topLevelCrossBorder = !hasAnySalesCountry;
+    }
+  }
+
   if (topLevelCrossBorder) {
       net = null; gross = null; disc = null; ret = null; roi = null; roas = null; purch = null; cvr = null;
       tsSeries.forEach(s => { s.net = null; s.roi = null; });
@@ -1022,12 +956,15 @@ function aggData(dFrom, dTo){
 
   const bStack={}, heat=[];
   targetBrands.forEach(bn=>{
+    const brandRow = brandRows.find(b => b.brand === bn);
+    const isCrossBorder = brandRow?.isCrossBorder || false;
+    
     bStack[bn]=tsKeys.map(k=>{
-      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return 0;
+      if (isCrossBorder) return 0;
       return bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0;
     });
     heat.push({brand:bn, vals:tsKeys.map(k=>{
-      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return null;
+      if (isCrossBorder) return null;
       const b=bBuckets[bn][k]; return (b&&b.spend>0)?b.net/b.spend:null;
     })});
   });
@@ -1080,18 +1017,37 @@ function render(){
     p = aggData(pFromD.toISOString().slice(0,10), pToD.toISOString().slice(0,10));
   }
   
-  // 動態防呆提示列處理
+  // 🔥 優化後的動態防呆提示列處理
   let warnings = [];
-  const hasAsh = F.brand.includes('all') || F.brand.includes('ASH GOLF');
-  const hasHk = F.country.includes('all') || F.country.includes('HK');
-  if (hasAsh && hasHk && (!F.country.includes('all') && !F.country.includes('TW'))) {
-      warnings.push("💡 <strong>ASH GOLF：</strong> 跨境銷售數據統一歸屬 TW 區。單看 HK 市場時僅展示廣告前端指標（若未手動取消勾選，其花費將拉低當前視圖的整體 ROI）。");
-  }
+  
+  // 檢查跨區廣告品牌
+  Object.keys(CROSS_REGION_ADS_BRANDS).forEach(brandName => {
+    const config = CROSS_REGION_ADS_BRANDS[brandName];
+    const isBrandSelected = F.brand.includes('all') || F.brand.includes(brandName);
+    
+    if (isBrandSelected) {
+      const salesCountries = config.sales;
+      const adsCountries = config.ads;
+      
+      // 檢查是否選擇了廣告國家但沒有選擇 Sales 國家
+      const hasAnyAdsCountry = F.country.includes('all') || adsCountries.some(c => F.country.includes(c));
+      const hasAnySalesCountry = F.country.includes('all') || salesCountries.some(c => F.country.includes(c));
+      
+      if (hasAnyAdsCountry && !hasAnySalesCountry) {
+        const adsCountryList = adsCountries.join('+');
+        const salesCountryList = salesCountries.join('+');
+        warnings.push(`💡 <strong>${brandName}:</strong> 廣告數據含跨區投放 (${adsCountryList}),Sales 數據僅限 ${salesCountryList}。當前僅顯示廣告前端指標。`);
+      }
+    }
+  });
+  
+  // K-SWISS / Palladium 提示
   const hasKsPal = F.brand.includes('all') || F.brand.includes('K-SWISS') || F.brand.includes('Palladium');
   const hasMySg = F.country.includes('all') || F.country.includes('MY') || F.country.includes('SG');
   if (hasKsPal && hasMySg) {
-      warnings.push("💡 <strong>K-SWISS / Palladium：</strong> 銷售與廣告數據為 MY 與 SG 跨國合併計算。");
+      warnings.push("💡 <strong>K-SWISS / Palladium:</strong> 銷售與廣告數據為 MY 與 SG 跨國合併計算。");
   }
+  
   const warnBar = $('dynamic-warning-bar');
   if (warnings.length > 0) {
       warnBar.innerHTML = warnings.join('<br>');
@@ -1100,355 +1056,293 @@ function render(){
       warnBar.style.display = 'none';
   }
 
-  const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
-  const monthKey = F.dateFrom ? F.dateFrom.substring(0,7) : '';
-  const currentMonthKpi = getMonthKpi(monthKey);
-
-  const yearStr = F.dateFrom ? parseInt(F.dateFrom.slice(0,4)) : 0;
-  const monthStr = F.dateFrom ? parseInt(F.dateFrom.slice(5,7)) : 0;
-  const monthDays = isSingleMonth ? new Date(yearStr, monthStr, 0).getDate() : 30;
-
-  const pl=periodLabel();
-  $('trend-badge').textContent=pl; $('roi-brand-badge').textContent=pl; $('tbl-badge').textContent=pl;
-  $('rev-period-badge').textContent=pl;  
-  $('spend-period-badge').textContent=d.dayCount<=31?'daily':'weekly';
-
-  // ROI HERO
-  let roiHtml = (d.roi!==null && d.roi>0) ? d.roi.toFixed(2)+'×' : '—';
-  if(p && d.roi!==null && p.roi!==null){
-    const rDiff=d.roi-p.roi;
-    if(Math.abs(rDiff)>0.001){
-      const cls=rDiff>0?'up':'dn', sign=rDiff>0?'↑':'↓';
-      roiHtml+=`<span class="${cls}" style="font-size:24px;margin-left:14px;font-weight:500;">${sign} ${Math.abs(rDiff).toFixed(2)}×</span>`;
-    }
-  }
-  $('roi-big').innerHTML=roiHtml;
-  $('roi-big').className='roi-big'+(d.roi>=5?'':d.roi>=2?' warn':' bad');
+  // ROI Hero
+  const roiBig = d.roi !== null ? d.roi.toFixed(2) : '—';
+  const roiColor = d.roi !== null ? (d.roi >= 5 ? 'var(--ok)' : d.roi >= 2 ? 'var(--warn)' : 'var(--red)') : 'var(--ink4)';
+  const roiStatus = d.roi !== null ? (d.roi >= 5 ? '✅ 優秀表現' : d.roi >= 2 ? '⚠️ 需要優化' : '🛑 立即調整') : '';
   
-  if (d.roi === null) {
-      $('roi-status-text').textContent = 'Cross-border Ad Only';
-      $('roi-status-text').style.color = 'var(--ink4)';
-  } else {
-      $('roi-status-text').textContent=d.roi>=5?'Healthy ROI':d.roi>=2?'Needs Review':d.roi>0?'Critical Action Required':'';
-      $('roi-status-text').style.color=d.roi>=5?'var(--ok)':d.roi>=2?'var(--warn)':'var(--red)';
-  }
-
-  renderVal('roi-net', d.net, p?.net, fmtN, 1);
-  renderVal('roi-sp', d.sp, p?.sp, fmtN, 0);
-  renderVal('roas-mini', d.roas, p?.roas, fmtR, 1);
-  renderVal('cvr-mini', d.cvr, p?.cvr, fmtP, 1);
+  $('roi-big').textContent = roiBig + (d.roi !== null ? '×' : '');
+  $('roi-big').style.color = roiColor;
+  $('roi-net').textContent = d.net !== null ? '$' + Math.round(d.net).toLocaleString() : '—';
+  $('roi-sp').textContent = '$' + Math.round(d.sp).toLocaleString();
+  $('roi-status-text').textContent = roiStatus;
+  $('roi-status-text').style.color = roiColor;
   
-  const currRetP = d.gross>0 && d.gross!==null ? Math.abs((d.ret/d.gross)*100) : (d.gross===null ? null : 0);
-  const prevRetP = (p&&p.gross>0)?Math.abs((p.ret/p.gross)*100):null;
-  renderVal('ret-mini', currRetP, prevRetP, fmtP, -1);
+  renderVal('roas-mini', d.roas, p?.roas, v => v.toFixed(2) + '×', 1);
+  renderVal('cvr-mini', d.cvr, p?.cvr, v => v.toFixed(2) + '%', 1);
+  renderVal('ret-mini', d.gross > 0 ? Math.abs(d.ret / d.gross * 100) : 0, p ? (p.gross > 0 ? Math.abs(p.ret / p.gross * 100) : 0) : null, v => v.toFixed(2) + '%', -1);
+  renderVal('disc-mini', d.gross > 0 ? Math.abs(d.disc / d.gross * 100) : 0, p ? (p.gross > 0 ? Math.abs(p.disc / p.gross * 100) : 0) : null, v => v.toFixed(2) + '%', -1);
 
-  const currDiscP = d.gross>0 && d.gross!==null ? Math.abs((d.disc/d.gross)*100) : (d.gross===null ? null : 0);
-  const prevDiscP = (p&&p.gross>0)?Math.abs((p.disc/p.gross)*100):null;
-  renderVal('disc-mini', currDiscP, prevDiscP, fmtP, -1);
-
-  const getZheText = (pct) => {
-    if (!pct || isNaN(pct) || pct <= 0) return '';
-    const zhe = Math.round(100 - pct);
-    if (zhe >= 100) return ''; 
-    return zhe % 10 === 0 ? (zhe / 10) + '折' : zhe + '折';
-  };
-  const zheTxt = getZheText(currDiscP);
-  if (zheTxt) $('disc-mini').innerHTML += `<span style="font-size:14px;color:var(--ink3);font-weight:600;margin-left:6px">(約 ${zheTxt})</span>`;
-
-  renderVal('k-net', d.net, p?.net, fmtN, 1);
-  renderVal('k-gross', d.gross, p?.gross, fmtN, 1);
-  renderVal('k-disc', d.disc!==null ? Math.abs(d.disc) : null, p&&p.disc!==null?Math.abs(p.disc):null, fmtN, -1);
-  renderVal('k-ret', d.ret!==null ? Math.abs(d.ret) : null, p&&p.ret!==null?Math.abs(p.ret):null, fmtN, -1);
-  renderVal('k-sp', d.sp, p?.sp, fmtN, 0);
-  renderVal('k-roas', d.roas, p?.roas, fmtR, 1);
-  renderVal('k-purch', d.purch, p?.purch, fmtI, 1);
-  renderVal('k-clk', d.clicks, p?.clicks, fmtI, 1);
-  renderVal('k-cvr', d.cvr, p?.cvr, fmtP, 1);
-  renderVal('k-ctr', d.ctr, p?.ctr, fmtP, 1);
-  renderVal('k-cpc', d.cpc, p?.cpc, v=>'$'+v.toFixed(1), -1);
-  renderVal('k-impr', d.impr, p?.impr, fmtI, 1);
-  renderVal('k-ms', d.ms, p?.ms, fmtN, 0);
-  renderVal('k-gs', d.gs, p?.gs, fmtN, 0);
-  renderVal('k-atc', d.atc, p?.atc, fmtI, 1);
-  const mp=d.sp>0?Math.round(d.ms/d.sp*100):0;
-  $('k-split').textContent=d.sp>0?`${mp}% / ${100-mp}%`:'—';
-
-  const setKs=(id, orig)=>$(id).innerHTML=orig + (F.comparePrev?' <span style="color:var(--ink4);font-size:10px">vs 前期</span>':'');
-  setKs('k-net-s', 'After discounts & returns');
-  setKs('k-gross-s', 'Gross before deductions');
-  setKs('k-disc-s', d.gross?`<span class="dn">${fmtP(currDiscP)} of gross ${zheTxt ? `(約 ${zheTxt})` : ''}</span>`:'');
-  setKs('k-ret-s', d.gross?`<span class="dn">${fmtP(currRetP)} of gross</span>`:'');
-  setKs('k-sp-s', `Meta ${fmtN(d.ms)} + Google ${fmtN(d.gs)}`);
-
-  // KPI Progress
-  const netProgWrap = $('k-net-prog');
-  let totKpiRev = 0;
+  // Business Performance Cards + KPI Progress
+  const currentMonth = F.dateFrom.substring(0, 7);
+  const isSingleMonth = F.dateFrom.substring(0, 7) === F.dateTo.substring(0, 7);
+  const monthKpis = getMonthKpi(currentMonth);
   
-  if (F.brand.includes('all')) {
-    totKpiRev = BRANDS.reduce((sum, bn) => sum + (currentMonthKpi[bn]?.rev || 0), 0);
-  } else {
-    totKpiRev = F.brand.reduce((sum, bn) => sum + (currentMonthKpi[bn]?.rev || 0), 0);
-  }
-
-  if (isSingleMonth && totKpiRev > 0 && d.net !== null) {
-    const overallPct = Math.min(100, (d.net / totKpiRev) * 100);
-    const gap = totKpiRev - d.net;
-    const expectedPct = d.dayCount / monthDays;
-    const pacingRate = d.net / totKpiRev;
-    const isOnTrack = pacingRate >= expectedPct;
-    const trackStatus = isOnTrack ? '✅ 進度達標' : '⚠️ 進度落後';
-    const barCol = isOnTrack ? 'var(--ok)' : 'var(--warn)';
-
-    netProgWrap.innerHTML = `
-      <div class="kpi-prog-wrap"><div class="kpi-prog-fill" style="width:${overallPct}%;background:${barCol}"></div></div>
-      <div class="kpi-prog-text">
-        <span>KPI 差距: $${Math.max(0, gap).toLocaleString()} (達成率 ${overallPct.toFixed(1)}%)</span>
-        <span style="color:${barCol};font-weight:700">${trackStatus}</span>
+  let totalKpiRev = 0;
+  const activeBrands = F.brand.includes('all') ? BRANDS : F.brand;
+  activeBrands.forEach(b => {
+    const kpi = monthKpis[b];
+    if (kpi && kpi.rev) totalKpiRev += parseFloat(kpi.rev);
+  });
+  
+  if (isSingleMonth && totalKpiRev > 0 && d.net !== null) {
+    const progress = (d.net / totalKpiRev) * 100;
+    const progColor = progress >= 100 ? 'var(--ok)' : progress >= 80 ? 'var(--accent-m)' : 'var(--warn)';
+    $('k-net-prog').innerHTML = `
+      <div class="kpi-prog">
+        <div class="kpi-prog-bar" style="width:${Math.min(progress, 100)}%;background:${progColor}"></div>
+      </div>
+      <div class="kpi-prog-label">
+        <span>Goal: $${Math.round(totalKpiRev).toLocaleString()}</span>
+        <span style="color:${progColor};font-weight:700">${progress.toFixed(1)}%</span>
       </div>
     `;
-  } else if (d.net === null) {
-    netProgWrap.innerHTML = `<span style="font-size:11px;color:var(--ink3);margin-top:6px;display:block;">跨境廣告無直接銷售數據比對</span>`;
   } else {
-    netProgWrap.innerHTML = '';
+    $('k-net-prog').innerHTML = '';
   }
 
-  // ROI by Brand
-  const metric = window.brandMetric; 
-  const maxV = Math.max(...d.brandRows.map(b => b[metric] || 0), 0.1);
+  renderVal('k-net', d.net, p?.net, v => '$' + Math.round(v).toLocaleString(), 1);
+  renderVal('k-gross', d.gross, p?.gross, v => '$' + Math.round(v).toLocaleString(), 1);
+  renderVal('k-disc', Math.abs(d.disc), p ? Math.abs(p.disc) : null, v => '$' + Math.round(v).toLocaleString(), -1);
+  renderVal('k-ret', Math.abs(d.ret), p ? Math.abs(p.ret) : null, v => '$' + Math.round(v).toLocaleString(), -1);
   
-  $('roi-bars').innerHTML = [...d.brandRows].sort((a,b2) => (b2[metric]||0) - (a[metric]||0)).map(b => {
-    const val = b[metric];
-    if (val === null) return `<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:0%;background:var(--paper3)"></div></div><span class="roi-v" style="color:var(--ink4)">—</span></div>`;
+  $('k-net-s').textContent = periodLabel();
+  $('k-gross-s').textContent = periodLabel();
+  $('k-disc-s').textContent = d.gross > 0 ? (Math.abs(d.disc / d.gross * 100)).toFixed(2) + '% of Gross' : '—';
+  $('k-ret-s').textContent = d.gross > 0 ? (Math.abs(d.ret / d.gross * 100)).toFixed(2) + '% of Gross' : '—';
 
-    const pct = Math.round((val / maxV) * 100);
-    const col = val >= 5 ? 'var(--ok)' : val >= 2 ? 'var(--warn)' : 'var(--red)';
-    const vc = val >= 5 ? 'color:var(--ok)' : val >= 2 ? 'color:var(--warn)' : 'color:var(--red)';
+  // Ad Performance Cards
+  renderVal('k-sp', d.sp, p?.sp, v => '$' + Math.round(v).toLocaleString(), -1);
+  renderVal('k-roas', d.roas, p?.roas, v => v.toFixed(2) + '×', 1);
+  renderVal('k-purch', d.purch, p?.purch, v => Math.round(v).toLocaleString(), 1);
+  renderVal('k-clk', d.clicks, p?.clicks, v => Math.round(v).toLocaleString(), 1);
+  renderVal('k-cvr', d.cvr, p?.cvr, v => v.toFixed(2) + '%', 1);
+  renderVal('k-ctr', d.ctr, p?.ctr, v => v.toFixed(2) + '%', 1);
+  renderVal('k-cpc', d.cpc, p?.cpc, v => '$' + v.toFixed(2), -1);
+  renderVal('k-impr', d.impr, p?.impr, v => Math.round(v).toLocaleString(), 1);
+  renderVal('k-ms', d.ms, p?.ms, v => '$' + Math.round(v).toLocaleString(), -1);
+  renderVal('k-gs', d.gs, p?.gs, v => '$' + Math.round(v).toLocaleString(), -1);
+  renderVal('k-atc', d.atc, p?.atc, v => Math.round(v).toLocaleString(), 1);
+  
+  $('k-sp-s').textContent = periodLabel();
+  $('k-ms-s').textContent = d.sp > 0 ? ((d.ms / d.sp * 100).toFixed(1) + '%') : '—';
+  $('k-gs-s').textContent = d.sp > 0 ? ((d.gs / d.sp * 100).toFixed(1) + '%') : '—';
+  $('k-split').textContent = d.sp > 0 ? `${(d.ms / d.sp * 100).toFixed(0)}% / ${(d.gs / d.sp * 100).toFixed(0)}%` : '—';
+  $('k-split-s').textContent = 'Meta / Google';
+
+  // Charts
+  renderCharts(d);
+  
+  // Table
+  renderTable(d.brandRows, d.dayRows);
+}
+
+function renderCharts(d) {
+  const {tsSeries, tsKeys, bStack, heat, targetBrands} = d;
+  
+  // Chart 1: Spend & Revenue Trend
+  const ctx1 = $('ch1').getContext('2d');
+  if (window.chart1) window.chart1.destroy();
+  window.chart1 = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: tsSeries.map(s => s.label),
+      datasets: [
+        {label: 'Ad Spend', data: tsSeries.map(s => Math.round(s.spend)), backgroundColor: 'rgba(15,58,94,0.8)', order: 2},
+        {label: 'Net Revenue', data: tsSeries.map(s => s.net !== null ? Math.round(s.net) : 0), backgroundColor: 'rgba(59,130,246,0.8)', order: 1}
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {display: true, position: 'top'}},
+      scales: {y: {beginAtZero: true, ticks: {callback: v => '$' + v.toLocaleString()}}}
+    }
+  });
+
+  // Chart 2: Brand Stack (ROI or ROAS metric)
+  const ctx2 = $('ch2').getContext('2d');
+  if (window.chart2) window.chart2.destroy();
+  
+  const metricData = targetBrands.map(bn => {
+    const br = d.brandRows.find(b => b.brand === bn);
+    if (!br) return tsKeys.map(() => 0);
     
-    let diffHtml = '';
-    const pVal = p ? p.brandRows.find(x => x.brand === b.brand)?.[metric] : null;
-    if (F.comparePrev && pVal !== null) {
-      const diff = val - pVal;
-      if (Math.abs(diff) >= 0.01) {
-        const dCls = diff > 0 ? 'up' : 'dn';
-        const dSign = diff > 0 ? '↑' : '↓';
-        diffHtml = `<span class="${dCls}" style="font-size:10px;margin-left:6px;font-weight:700">${dSign}${Math.abs(diff).toFixed(2)}</span>`;
+    // 如果是跨境品牌且沒有 Sales 數據,返回 0
+    if (br.isCrossBorder) return tsKeys.map(() => 0);
+    
+    if (window.brandMetric === 'roas') {
+      return bStack[bn] || tsKeys.map(() => 0);
+    } else {
+      return bStack[bn] || tsKeys.map(() => 0);
+    }
+  });
+
+  const colors = [
+    'rgba(15,58,94,0.9)', 'rgba(59,130,246,0.9)', 'rgba(16,185,129,0.9)',
+    'rgba(245,158,11,0.9)', 'rgba(239,68,68,0.9)', 'rgba(139,92,246,0.9)',
+    'rgba(236,72,153,0.9)', 'rgba(20,184,166,0.9)'
+  ];
+
+  window.chart2 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: tsSeries.map(s => s.label),
+      datasets: targetBrands.map((bn, i) => ({
+        label: bn,
+        data: metricData[i],
+        backgroundColor: colors[i % colors.length]
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend: {display: true, position: 'top'}},
+      scales: {
+        x: {stacked: true},
+        y: {stacked: true, beginAtZero: true, ticks: {callback: v => '$' + v.toLocaleString()}}
       }
     }
+  });
 
-    let kpiHtml = '';
-    if (isSingleMonth && metric === 'roi') {
-      const targetRoi = currentMonthKpi[b.brand]?.roi || 0;
-      if (targetRoi > 0) {
-        kpiHtml = val >= targetRoi ? ' <span title="ROI 達標" style="font-size:11px;margin-left:4px">🎯</span>' : ' <span title="ROI 落後" style="font-size:11px;margin-left:4px">⚠️</span>';
+  // Chart 3: Channel Spend
+  const ctx3 = $('ch3').getContext('2d');
+  if (window.chart3) window.chart3.destroy();
+  window.chart3 = new Chart(ctx3, {
+    type: 'doughnut',
+    data: {
+      labels: ['Meta', 'Google'],
+      datasets: [{
+        data: [Math.round(d.ms), Math.round(d.gs)],
+        backgroundColor: ['rgba(15,58,94,0.9)', 'rgba(245,158,11,0.9)']
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: true, position: 'bottom'},
+        tooltip: {callbacks: {label: ctx => `${ctx.label}: $${ctx.parsed.toLocaleString()}`}}
       }
     }
+  });
 
-    return `<div class="roi-row">
-      <span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}${kpiHtml}</span>
-      <div class="roi-track"><div class="roi-fill" style="width:${pct}%;background:${col}"></div></div>
-      <span class="roi-v" style="${vc}">${val>0?val.toFixed(2)+'×':'—'}${diffHtml}</span>
-    </div>`;
-  }).join('');
+  // Chart Heat: ROI Heatmap
+  const ctxHeat = $('ch-heat').getContext('2d');
+  if (window.chartHeat) window.chartHeat.destroy();
   
-  const sortedMetric = [...d.brandRows].filter(b => b.sp > 0 && b[metric] !== null).sort((a,b2) => b2[metric] - a[metric]);
-  const topBrand = sortedMetric[0];
-  const botBrand = sortedMetric[sortedMetric.length - 1];
-  const avgVal = d[metric] || 0;
-  
-  $('roi-sum').innerHTML=`
-    <div class="sum-item">Best <strong>${topBrand?.brand||'—'}</strong> ${topBrand?.[metric]>0?topBrand[metric].toFixed(2)+'×':'—'}</div>
-    <div class="sum-item">Lowest <strong>${botBrand?.brand||'—'}</strong> ${botBrand?.[metric]>0?botBrand[metric].toFixed(2)+'×':'—'}</div>
-    <div class="sum-item">Avg ${metric.toUpperCase()} <strong>${avgVal>0?avgVal.toFixed(2)+'×':'—'}</strong></div>
-  `;
+  const heatData = heat.map(h => h.vals);
+  const flatVals = heatData.flat().filter(v => v !== null);
+  const minVal = flatVals.length > 0 ? Math.min(...flatVals) : 0;
+  const maxVal = flatVals.length > 0 ? Math.max(...flatVals) : 5;
 
-  renderTrend(d.tsSeries);
-  renderStack(d.brandRows, d.targetBrands);
-  renderSpend(d.tsSeries);
-  renderHeat(d.heat, d.tsKeys, d.dayCount);
-  renderTable(d.brandRows, d.dayRows, isSingleMonth, monthDays, d.dayCount, currentMonthKpi);
-}
-
-/* Charts */
-const tc='rgba(30,41,59,.6)',gc='rgba(30,41,59,.05)';
-function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-
-function renderTrend(series){
-  dc('trend');
-  charts.trend=new Chart($('trendC'),{
-    data:{labels:series.map(s=>s.label),datasets:[
-      {type:'bar',label:'Spend (TWD)',data:series.map(s=>Math.round(s.spend)),backgroundColor:'rgba(59,130,246,.15)',borderRadius:2,yAxisID:'y'},
-      {type:'line',label:'ROI',data:series.map(s=>s.roi!==null?Math.round(s.roi*10)/10:null),borderColor:'#0f3a5e',backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:3,pointBackgroundColor:'#0f3a5e',yAxisID:'y2',spanGaps:true}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return' Spend: $'+ctx.raw.toLocaleString();return' ROI: '+ctx.raw.toFixed(1)+'×';}}}},
-      scales:{
-        y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc},position:'left'},
-        y2:{ticks:{color:'#0f3a5e',font:{size:10,weight:700},callback:v=>v.toFixed(1)+'×'},grid:{display:false},position:'right'}
-      }}
+  window.chartHeat = new Chart(ctxHeat, {
+    type: 'bar',
+    data: {
+      labels: tsKeys.map(k => k.slice(5).replace('-', '/')),
+      datasets: heat.map((h, i) => ({
+        label: h.brand,
+        data: h.vals,
+        backgroundColor: h.vals.map(v => {
+          if (v === null) return 'rgba(200,200,200,0.3)';
+          const norm = (v - minVal) / (maxVal - minVal || 1);
+          if (v >= 5) return `rgba(5,150,105,${0.5 + norm * 0.5})`;
+          if (v >= 2) return `rgba(217,119,6,${0.5 + norm * 0.5})`;
+          return `rgba(220,38,38,${0.5 + norm * 0.5})`;
+        }),
+        borderColor: colors[i % colors.length],
+        borderWidth: 1
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: true, position: 'top'},
+        tooltip: {callbacks: {label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) + '×' : 'N/A'}`}}
+      },
+      scales: {
+        x: {stacked: false},
+        y: {beginAtZero: true, ticks: {callback: v => v.toFixed(1) + '×'}}
+      }
+    }
   });
 }
 
-function renderStack(brandRows, targetBrands){
-  dc('stack');
-  const labels = targetBrands;
-  const data = targetBrands.map(bn => {
-    const brand = brandRows.find(b => b.brand === bn);
-    return brand && brand.net !== null ? Math.round(brand.net) : 0;
-  });
+function renderTable(brandRows, dayRows) {
+  const head = $('tbl-head'), tbody = $('tbl-body'), tfoot = $('tbl-foot');
   
-  charts.stack=new Chart($('stackC'),{type:'bar',data:{
-    labels,
-    datasets:[{
-      label:'Net Revenue',
-      data: data,
-      backgroundColor: BCOLORS.slice(0, targetBrands.length),
-      borderRadius:3
-    }]
-  },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' Net Revenue: $'+ctx.raw.toLocaleString()}}},
-      scales:{x:{ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc}}}}});
-}
-
-function renderSpend(series){
-  dc('spend');
-  const labels=series.map(s=>s.label);
-  charts.spend=new Chart($('spendC'),{type:'bar',data:{labels,datasets:[
-    {label:'Meta',data:series.map(s=>Math.round(s.ms)),backgroundColor:'#0f3a5e',borderRadius:3,stack:'s'},
-    {label:'Google',data:series.map(s=>Math.round(s.gs)),backgroundColor:'#3b82f6',borderRadius:3,stack:'s'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw.toLocaleString()}}},
-    scales:{x:{stacked:true,ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc}}}}});
-}
-
-function renderHeat(hd, tsKeys, dayCount){
-  const hc=v=>{
-    if(v===null)return'background:#f1f5f9;color:#94a3b8';
-    if(v>=10)return'background:rgba(5,150,105,.2);color:#065f46';
-    if(v>=6)return'background:rgba(5,150,105,.1);color:#059669';
-    if(v>=3)return'background:rgba(217,119,6,.15);color:#b45309';
-    if(v>=1)return'background:rgba(217,119,6,.06);color:#d97706';
-    return'background:rgba(220,38,38,.12);color:#b91c1c';
-  };
-  const th='padding:8px 10px;color:var(--ink3);text-align:center;border-bottom:2px solid var(--rule);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;min-width:50px';
-  let h=`<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="${th};text-align:left;position:sticky;left:0;background:#fff;z-index:10;">Brand</th>`;
-  
-  tsKeys.forEach(k=>{
-    const lbl = dayCount <= 31 ? k.slice(5).replace('-','/') : k.slice(5).replace('-','/') + '週';
-    h+=`<th style="${th}">${lbl}</th>`;
-  });
-  
-  h+='</tr></thead><tbody>';
-  hd.forEach(row=>{
-    h+=`<tr><td style="padding:8px 10px;color:var(--ink);font-weight:600;font-size:11px;white-space:nowrap;position:sticky;left:0;background:#fff;border-right:1px solid var(--rule);z-index:5;">${row.brand}</td>`;
-    row.vals.forEach(v=>{h+=`<td style="padding:5px 5px;text-align:center;border-bottom:1px solid var(--rule)"><div style="border-radius:4px;${hc(v)};font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:4px 0">${v!==null?v.toFixed(1)+'×':'—'}</div></td>`;});
-    h+='</tr>';
-  });
-  $('heat-table').innerHTML=h+'</tbody></table>';
-  
-  const allVals=hd.flatMap(r=>r.vals.filter(v=>v!==null));
-  const avg=allVals.length?allVals.reduce((s,v)=>s+v,0)/allVals.length:0;
-  const best=hd.reduce((b,r)=>{const mx=Math.max(...r.vals.filter(v=>v!==null),-Infinity);return mx>b.val?{brand:r.brand,val:mx}:b;},{brand:'',val:-Infinity});
-  $('heat-sum').innerHTML=`<div class="sum-item">Avg period ROI <strong>${avg>0?avg.toFixed(1)+'×':'—'}</strong></div><div class="sum-item">Best period <strong>${best.val>-Infinity?best.brand+' '+best.val.toFixed(1)+'×':'—'}</strong></div>`;
-}
-
-function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, currentMonthKpi){
-  const isBrand=dimMode==='brand';
-  const head=$('tbl-head'), tbody=$('tbl-body'), tfoot=$('tbl-foot');
-
-  if(isBrand){
-    head.innerHTML=`<tr>
-      <th onclick="srt('brand')">Brand</th><th onclick="srt('days')">Days</th><th onclick="srt('clicks')">Clicks</th>
-      <th onclick="srt('cpc')">CPC</th><th onclick="srt('ctr')">CTR%</th><th onclick="srt('purchases')">Purchases</th>
-      <th onclick="srt('cvr')">CVR%</th><th onclick="srt('ms')">Meta $</th><th onclick="srt('gs')">Google $</th>
-      <th onclick="srt('sp')">Total Spend</th><th onclick="srt('roi')">ROI</th><th onclick="srt('roas')">ROAS</th>
-      <th onclick="srt('net')">Net Rev (E)</th><th onclick="srt('gross')">Gross (B)</th><th onclick="srt('disc')">Discount (C)</th>
-      <th onclick="srt('disc_pct')">Disc%</th><th onclick="srt('ret')">Returns (D)</th><th onclick="srt('ret_pct')">Ret%</th><th>Status</th>
-    </tr>`;
-    const sorted=[...brandRows].sort((a,b2)=>{
-        const vA = a[sortKey] === null ? -1 : a[sortKey];
-        const vB = b2[sortKey] === null ? -1 : b2[sortKey];
-        return (vA<vB?-1:1)*sortDir;
+  if (dimMode === 'brand') {
+    head.innerHTML = `<tr>
+      <th onclick="srt('brand')">Brand</th><th onclick="srt('days')">Days</th><th onclick="srt('clicks')">Clicks</th><th onclick="srt('cpc')">CPC</th>
+      <th onclick="srt('ctr')">CTR%</th><th onclick="srt('purchases')">Purchases</th><th onclick="srt('cvr')">CVR%</th>
+      <th onclick="srt('ms')">Meta $</th><th onclick="srt('gs')">Google $</th><th onclick="srt('sp')">Total Spend</th>
+      <th onclick="srt('roi')">ROI</th><th onclick="srt('roas')">ROAS</th><th onclick="srt('net')">Net Rev (E)</th><th onclick="srt('gross')">Gross (B)</th>
+      <th onclick="srt('disc')">Disc (C)</th><th onclick="srt('disc_pct')">Disc%</th><th onclick="srt('ret')">Return (D)</th><th onclick="srt('ret_pct')">Return%</th>
+      <th>Status</th></tr>`;
+    const sorted = [...brandRows].sort((a, b) => {
+      const vA = a[sortKey] === null ? -1 : a[sortKey];
+      const vB = b[sortKey] === null ? -1 : b[sortKey];
+      return (vA < vB ? -1 : 1) * sortDir;
     });
-    tbody.innerHTML=sorted.map(b=>{
-      const rv=b.roi!==null ? (b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)') : 'var(--ink4)';
+    tbody.innerHTML = sorted.map(b => {
+      const rv = b.roi !== null ? (b.roi >= 5 ? 'var(--ok)' : b.roi >= 2 ? 'var(--warn)' : 'var(--red)') : 'var(--ink4)';
+      const statusHtml = b.roi !== null ? (b.roi >= 5 ? '<span style="color:var(--ok)">✅ Good</span>' : b.roi >= 2 ? '<span style="color:var(--warn)">⚠️ Review</span>' : '<span style="color:var(--red)">🛑 Stop</span>') : '<span style="color:var(--ink4)">—</span>';
       
-      let statusHtml = '';
-      if (b.net === null) {
-          statusHtml = `<span class="tag tg">跨境前端指標</span>`;
-      } else if (isSingleMonth) {
-        const bKpi = currentMonthKpi[b.brand] || {rev:0, roi:0};
-        if (bKpi.rev > 0 || bKpi.roi > 0) {
-          const expectedPct = periodDays / monthDays;
-          const revOnTrack = (b.net / bKpi.rev) >= expectedPct;
-          const roiOnTrack = b.roi >= bKpi.roi;
-          
-          const revTag = revOnTrack ? 'tok' : 'tbad';
-          const roiTag = roiOnTrack ? 'tok' : 'tbad';
-          
-          statusHtml = `
-            <div style="display:flex;gap:4px;flex-direction:column;align-items:flex-start">
-              <span class="tag ${revTag}" style="font-size:9px;padding:2px 6px">Rev ${revOnTrack?'達標':'落後'}</span>
-              <span class="tag ${roiTag}" style="font-size:9px;padding:2px 6px">ROI ${roiOnTrack?'達標':'落後'}</span>
-            </div>
-          `;
-        } else {
-          statusHtml = `<span class="tag tg">無 KPI</span>`;
-        }
-      } else {
-        const rc=b.roi>=5?'tok':b.roi>=2?'twarn':'tbad', rl=b.roi>=5?'Good':b.roi>=2?'Review':'Stop';
-        statusHtml = `<span class="tag ${rc}">${rl}</span>`;
+      // 🔥 新增:跨境品牌標註
+      let brandLabel = b.brand;
+      if (b.isCrossBorder) {
+        brandLabel += ' <span style="font-size:10px;color:var(--warn);margin-left:4px">📢</span>';
       }
-
-      return`<tr><td style="font-weight:700;color:var(--accent)">${b.brand}</td><td class="num" style="color:var(--ink2)">${b.days}</td>
-        <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
-        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
-        <td class="num">${b.purchases!==null?Math.round(b.purchases).toLocaleString():'—'}</td>
-        <td class="num">${b.cvr!==null&&b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+      
+      return `<tr><td style="font-weight:700;color:var(--accent)">${brandLabel}</td><td class="num" style="color:var(--ink2)">${b.days}</td>
+        <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc > 0 ? '$' + b.cpc.toFixed(1) : '—'}</td>
+        <td class="num">${b.ctr > 0 ? b.ctr.toFixed(2) + '%' : '—'}</td>
+        <td class="num">${b.purchases !== null ? Math.round(b.purchases).toLocaleString() : '—'}</td>
+        <td class="num">${b.cvr !== null && b.cvr > 0 ? b.cvr.toFixed(2) + '%' : '—'}</td>
         <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
         <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td><td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.sp).toLocaleString()}</td>
-        <td class="num" style="color:${rv};font-weight:700">${b.roi!==null&&b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
-        <td class="num">${b.roas!==null&&b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
-        <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
-        <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--warn)">${b.disc!==null?'$'+Math.round(Math.abs(b.disc)).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--warn)">${b.disc_pct!==null?b.disc_pct.toFixed(2)+'%':'—'}</td>
-        <td class="num" style="color:var(--red)">${b.ret!==null?'$'+Math.round(Math.abs(b.ret)).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--red)">${b.ret_pct!==null?b.ret_pct.toFixed(2)+'%':'—'}</td>
+        <td class="num" style="color:${rv};font-weight:700">${b.roi !== null && b.roi > 0 ? b.roi.toFixed(2) + '×' : '—'}</td>
+        <td class="num">${b.roas !== null && b.roas > 0 ? b.roas.toFixed(2) + '×' : '—'}</td>
+        <td class="num" style="font-weight:600;color:var(--accent)">${b.net !== null ? '$' + Math.round(b.net).toLocaleString() : '—'}</td>
+        <td class="num">${b.gross !== null ? '$' + Math.round(b.gross).toLocaleString() : '—'}</td>
+        <td class="num" style="color:var(--warn)">${b.disc !== null ? '$' + Math.round(Math.abs(b.disc)).toLocaleString() : '—'}</td>
+        <td class="num" style="color:var(--warn)">${b.disc_pct !== null ? b.disc_pct.toFixed(2) + '%' : '—'}</td>
+        <td class="num" style="color:var(--red)">${b.ret !== null ? '$' + Math.round(Math.abs(b.ret)).toLocaleString() : '—'}</td>
+        <td class="num" style="color:var(--red)">${b.ret_pct !== null ? b.ret_pct.toFixed(2) + '%' : '—'}</td>
         <td>${statusHtml}</td></tr>`;
     }).join('');
     
-    const totClicks = brandRows.reduce((s,b)=>s+b.clicks,0);
-    const totPurchases = brandRows.reduce((s,b)=>s+(b.purchases||0),0);
-    const totMs = brandRows.reduce((s,b)=>s+b.ms,0);
-    const totGs = brandRows.reduce((s,b)=>s+b.gs,0);
-    const totSp = brandRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = brandRows.reduce((s,b)=>s+(b.net||0),0);
-    const totGross = brandRows.reduce((s,b)=>s+(b.gross||0),0);
-    const totDisc = brandRows.reduce((s,b)=>s+(b.disc||0),0);
-    const totRet = brandRows.reduce((s,b)=>s+(b.ret||0),0);
+    const totClicks = brandRows.reduce((s, b) => s + b.clicks, 0);
+    const totPurchases = brandRows.reduce((s, b) => s + (b.purchases || 0), 0);
+    const totMs = brandRows.reduce((s, b) => s + b.ms, 0);
+    const totGs = brandRows.reduce((s, b) => s + b.gs, 0);
+    const totSp = brandRows.reduce((s, b) => s + b.sp, 0);
+    const totNet = brandRows.reduce((s, b) => s + (b.net || 0), 0);
+    const totGross = brandRows.reduce((s, b) => s + (b.gross || 0), 0);
+    const totDisc = brandRows.reduce((s, b) => s + (b.disc || 0), 0);
+    const totRet = brandRows.reduce((s, b) => s + (b.ret || 0), 0);
     
-    const totImpr = brandRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
-    const avgCpc = totClicks>0 ? totSp/totClicks : 0;
-    const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
-    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
-    const avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgRoas = totSp>0 ? totNet/totSp : 0;
-    const avgDiscPct = totGross>0 ? (Math.abs(totDisc)/totGross)*100 : 0;
-    const avgRetPct = totGross>0 ? (Math.abs(totRet)/totGross)*100 : 0;
+    const totImpr = brandRows.reduce((s, b) => s + (b.clicks / (b.ctr / 100)), 0);
+    const avgCpc = totClicks > 0 ? totSp / totClicks : 0;
+    const avgCtr = totImpr > 0 ? (totClicks / totImpr) * 100 : 0;
+    const avgCvr = totClicks > 0 ? (totPurchases / totClicks) * 100 : 0;
+    const avgRoi = totSp > 0 ? totNet / totSp : 0;
+    const avgRoas = totSp > 0 ? totNet / totSp : 0;
+    const avgDiscPct = totGross > 0 ? (Math.abs(totDisc) / totGross) * 100 : 0;
+    const avgRetPct = totGross > 0 ? (Math.abs(totRet) / totGross) * 100 : 0;
     
-    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
+    const totRv = avgRoi >= 5 ? 'var(--ok)' : avgRoi >= 2 ? 'var(--warn)' : 'var(--red)';
     
-    tfoot.innerHTML=`<tr>
+    tfoot.innerHTML = `<tr>
       <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
       <td class="num">${brandRows.length}</td>
       <td class="num">${Math.round(totClicks).toLocaleString()}</td>
-      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td>
-      <td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${avgCpc > 0 ? '$' + avgCpc.toFixed(1) : '—'}</td>
+      <td class="num">${avgCtr > 0 ? avgCtr.toFixed(2) + '%' : '—'}</td>
       <td class="num">${Math.round(totPurchases).toLocaleString()}</td>
-      <td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${avgCvr > 0 ? avgCvr.toFixed(2) + '%' : '—'}</td>
       <td class="num">$${Math.round(totMs).toLocaleString()}</td>
       <td class="num">$${Math.round(totGs).toLocaleString()}</td>
       <td class="num">$${Math.round(totSp).toLocaleString()}</td>
-      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
-      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
+      <td class="num" style="color:${totRv};font-weight:700">${avgRoi > 0 ? avgRoi.toFixed(2) + '×' : '—'}</td>
+      <td class="num">${avgRoas > 0 ? avgRoas.toFixed(2) + '×' : '—'}</td>
       <td class="num">$${Math.round(totNet).toLocaleString()}</td>
       <td class="num">$${Math.round(totGross).toLocaleString()}</td>
       <td class="num">$${Math.round(Math.abs(totDisc)).toLocaleString()}</td>
@@ -1458,74 +1352,89 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
       <td></td>
     </tr>`;
     
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(brandRows.reduce((s,b)=>s+(b.net||0),0)).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(brandRows.reduce((s,b)=>s+b.sp,0)).toLocaleString()}</strong></div>`;
+    $('tbl-sum').innerHTML = `<div class="sum-item">Total Net Rev <strong>$${Math.round(brandRows.reduce((s, b) => s + (b.net || 0), 0)).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(brandRows.reduce((s, b) => s + b.sp, 0)).toLocaleString()}</strong></div>`;
   } else {
-    head.innerHTML=`<tr>
+    head.innerHTML = `<tr>
       <th onclick="srtD('date')">Date</th><th onclick="srtD('clicks')">Clicks</th><th onclick="srtD('cpc')">CPC</th>
       <th onclick="srtD('ctr')">CTR%</th><th onclick="srtD('purchases')">Purchases</th><th onclick="srtD('cvr')">CVR%</th>
       <th onclick="srtD('ms')">Meta $</th><th onclick="srtD('gs')">Google $</th><th onclick="srtD('sp')">Total Spend</th>
       <th onclick="srtD('roi')">ROI</th><th onclick="srtD('roas')">ROAS</th><th onclick="srtD('net')">Net Rev (E)</th><th onclick="srtD('gross')">Gross (B)</th>
     </tr>`;
-    const sortedD=[...dayRows].sort((a,b2)=>{
-        const vA = a[sortKey] === null ? -1 : a[sortKey];
-        const vB = b2[sortKey] === null ? -1 : b2[sortKey];
-        return (vA<vB?-1:1)*sortDir;
+    const sortedD = [...dayRows].sort((a, b2) => {
+      const vA = a[sortKey] === null ? -1 : a[sortKey];
+      const vB = b2[sortKey] === null ? -1 : b2[sortKey];
+      return (vA < vB ? -1 : 1) * sortDir;
     });
-    tbody.innerHTML=sortedD.map(b=>{
-      const rv=b.roi!==null ? (b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)') : 'var(--ink4)';
-      return`<tr><td style="font-weight:600;font-family:'DM Mono',monospace;color:var(--accent)">${b.date}</td>
-        <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
-        <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td>
-        <td class="num">${b.purchases!==null?Math.round(b.purchases).toLocaleString():'—'}</td>
-        <td class="num">${b.cvr!==null&&b.cvr>0?b.cvr.toFixed(2)+'%':'—'}</td>
+    tbody.innerHTML = sortedD.map(b => {
+      const rv = b.roi !== null ? (b.roi >= 5 ? 'var(--ok)' : b.roi >= 2 ? 'var(--warn)' : 'var(--red)') : 'var(--ink4)';
+      return `<tr><td style="font-weight:600;font-family:'DM Mono',monospace;color:var(--accent)">${b.date}</td>
+        <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc > 0 ? '$' + b.cpc.toFixed(1) : '—'}</td>
+        <td class="num">${b.ctr > 0 ? b.ctr.toFixed(2) + '%' : '—'}</td>
+        <td class="num">${b.purchases !== null ? Math.round(b.purchases).toLocaleString() : '—'}</td>
+        <td class="num">${b.cvr !== null && b.cvr > 0 ? b.cvr.toFixed(2) + '%' : '—'}</td>
         <td><span class="tag tm">$${Math.round(b.ms).toLocaleString()}</span></td>
         <td><span class="tag tg">$${Math.round(b.gs).toLocaleString()}</span></td><td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.sp).toLocaleString()}</td>
-        <td class="num" style="color:${rv};font-weight:700">${b.roi!==null&&b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
-        <td class="num">${b.roas!==null&&b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
-        <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
-        <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td></tr>`;
+        <td class="num" style="color:${rv};font-weight:700">${b.roi !== null && b.roi > 0 ? b.roi.toFixed(2) + '×' : '—'}</td>
+        <td class="num">${b.roas !== null && b.roas > 0 ? b.roas.toFixed(2) + '×' : '—'}</td>
+        <td class="num" style="font-weight:600;color:var(--accent)">${b.net !== null ? '$' + Math.round(b.net).toLocaleString() : '—'}</td>
+        <td class="num">${b.gross !== null ? '$' + Math.round(b.gross).toLocaleString() : '—'}</td></tr>`;
     }).join('');
     
-    const totClicks = dayRows.reduce((s,b)=>s+b.clicks,0);
-    const totPurchases = dayRows.reduce((s,b)=>s+(b.purchases||0),0);
-    const totMs = dayRows.reduce((s,b)=>s+b.ms,0);
-    const totGs = dayRows.reduce((s,b)=>s+b.gs,0);
-    const totSp = dayRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = dayRows.reduce((s,b)=>s+(b.net||0),0);
-    const totGross = dayRows.reduce((s,b)=>s+(b.gross||0),0);
+    const totClicks = dayRows.reduce((s, b) => s + b.clicks, 0);
+    const totPurchases = dayRows.reduce((s, b) => s + (b.purchases || 0), 0);
+    const totMs = dayRows.reduce((s, b) => s + b.ms, 0);
+    const totGs = dayRows.reduce((s, b) => s + b.gs, 0);
+    const totSp = dayRows.reduce((s, b) => s + b.sp, 0);
+    const totNet = dayRows.reduce((s, b) => s + (b.net || 0), 0);
+    const totGross = dayRows.reduce((s, b) => s + (b.gross || 0), 0);
     
-    const totImpr = dayRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
-    const avgCpc = totClicks>0 ? totSp/totClicks : 0;
-    const avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
-    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0;
-    const avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgRoas = totSp>0 ? totNet/totSp : 0;
+    const totImpr = dayRows.reduce((s, b) => s + (b.clicks / (b.ctr / 100)), 0);
+    const avgCpc = totClicks > 0 ? totSp / totClicks : 0;
+    const avgCtr = totImpr > 0 ? (totClicks / totImpr) * 100 : 0;
+    const avgCvr = totClicks > 0 ? (totPurchases / totClicks) * 100 : 0;
+    const avgRoi = totSp > 0 ? totNet / totSp : 0;
+    const avgRoas = totSp > 0 ? totNet / totSp : 0;
     
-    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
+    const totRv = avgRoi >= 5 ? 'var(--ok)' : avgRoi >= 2 ? 'var(--warn)' : 'var(--red)';
     
-    tfoot.innerHTML=`<tr>
+    tfoot.innerHTML = `<tr>
       <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
       <td class="num">${Math.round(totClicks).toLocaleString()}</td>
-      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td>
-      <td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${avgCpc > 0 ? '$' + avgCpc.toFixed(1) : '—'}</td>
+      <td class="num">${avgCtr > 0 ? avgCtr.toFixed(2) + '%' : '—'}</td>
       <td class="num">${Math.round(totPurchases).toLocaleString()}</td>
-      <td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
+      <td class="num">${avgCvr > 0 ? avgCvr.toFixed(2) + '%' : '—'}</td>
       <td class="num">$${Math.round(totMs).toLocaleString()}</td>
       <td class="num">$${Math.round(totGs).toLocaleString()}</td>
       <td class="num">$${Math.round(totSp).toLocaleString()}</td>
-      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
-      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
+      <td class="num" style="color:${totRv};font-weight:700">${avgRoi > 0 ? avgRoi.toFixed(2) + '×' : '—'}</td>
+      <td class="num">${avgRoas > 0 ? avgRoas.toFixed(2) + '×' : '—'}</td>
       <td class="num">$${Math.round(totNet).toLocaleString()}</td>
       <td class="num">$${Math.round(totGross).toLocaleString()}</td>
     </tr>`;
     
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(dayRows.reduce((s,b)=>s+(b.net||0),0)).toLocaleString()}</strong></div>`;
+    $('tbl-sum').innerHTML = `<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(dayRows.reduce((s, b) => s + (b.net || 0), 0)).toLocaleString()}</strong></div>`;
   }
-  document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
+  document.querySelectorAll('#main-table thead th').forEach(th => th.classList.remove('sa', 'sd'));
 }
 
-function srt(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
-function srtD(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
+function srt(key) {
+  if (sortKey === key) sortDir *= -1;
+  else {
+    sortKey = key;
+    sortDir = -1;
+  }
+  render();
+}
+
+function srtD(key) {
+  if (sortKey === key) sortDir *= -1;
+  else {
+    sortKey = key;
+    sortDir = -1;
+  }
+  render();
+}
 
 /* Configuration Modal Actions */
 function openSettings() {
@@ -1534,9 +1443,11 @@ function openSettings() {
   $('inp-sales').value = CONFIG.salesId;
   $('settings-modal').classList.add('show');
 }
+
 function closeSettings() {
   $('settings-modal').classList.remove('show');
 }
+
 function saveSettings() {
   CONFIG.metaId = $('inp-meta').value.trim();
   CONFIG.gadsId = $('inp-gads').value.trim();
@@ -1552,8 +1463,8 @@ function saveSettings() {
 
 /* KPI Settings Actions */
 function openKpiSettings() {
-  const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
-  const currentM = isSingleMonth ? F.dateFrom.substring(0,7) : new Date().toISOString().substring(0,7);
+  const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0, 7) === F.dateTo.substring(0, 7));
+  const currentM = isSingleMonth ? F.dateFrom.substring(0, 7) : new Date().toISOString().substring(0, 7);
   
   $('kpi-month-selector').value = currentM;
   renderKpiForm(currentM);
@@ -1577,11 +1488,11 @@ function renderKpiForm(monthStr) {
         <div style="display:flex;gap:12px;">
           <div class="form-group" style="flex:1">
             <label style="font-size:10px;color:var(--ink3)">Net Revenue KPI ($)</label>
-            <input type="number" id="kpi-rev-${b.replace(/[\/ ]/g,'_')}" value="${rev}">
+            <input type="number" id="kpi-rev-${b.replace(/[\/ ]/g, '_')}" value="${rev}">
           </div>
           <div class="form-group" style="flex:1">
             <label style="font-size:10px;color:var(--ink3)">ROI KPI (×)</label>
-            <input type="number" step="0.1" id="kpi-roi-${b.replace(/[\/ ]/g,'_')}" value="${roi}">
+            <input type="number" step="0.1" id="kpi-roi-${b.replace(/[\/ ]/g, '_')}" value="${roi}">
           </div>
         </div>
       </div>
@@ -1598,70 +1509,73 @@ function saveKpiSettings() {
   const m = $('kpi-month-selector').value;
   if (!m) return;
   
-  if (!KPI_DATA[m]) KPI_DATA[m] = {};
-  
+  const brandKpis = {};
   BRANDS.forEach(b => {
-    KPI_DATA[m][b] = {
-      rev: parseFloat($(`kpi-rev-${b.replace(/[\/ ]/g,'_')}`).value) || 0,
-      roi: parseFloat($(`kpi-roi-${b.replace(/[\/ ]/g,'_')}`).value) || 0
-    };
+    const safeName = b.replace(/[\/ ]/g, '_');
+    const rev = parseFloat($('kpi-rev-' + safeName).value) || 0;
+    const roi = parseFloat($('kpi-roi-' + safeName).value) || 0;
+    brandKpis[b] = {rev, roi};
   });
   
+  setMonthKpi(m, brandKpis);
   localStorage.setItem('emers_kpis_v2', JSON.stringify(KPI_DATA));
   closeKpiSettings();
-  if(RAW.meta.length) render();
+  if (RAW.meta.length) render();
 }
 
 /* Load & Data Mapping */
-async function loadData(){
-  showStatus('loading','Syncing Meta, Google & Sales sheets simultaneously...');
+async function loadData() {
+  showStatus('loading', 'Syncing Meta, Google & Sales sheets simultaneously...');
   
   const urlMeta = `https://docs.google.com/spreadsheets/d/${CONFIG.metaId}/gviz/tq?tqx=out:csv&sheet=metaads_by_brand_contry`;
   const urlGads = `https://docs.google.com/spreadsheets/d/${CONFIG.gadsId}/gviz/tq?tqx=out:csv&sheet=gads_by+brand_contry`;
   const urlSales = `https://docs.google.com/spreadsheets/d/${CONFIG.salesId}/gviz/tq?tqx=out:csv&sheet=all+brand+sale`;
 
-  try{
-    const [rM,rG,rS]=await Promise.all([csv(urlMeta),csv(urlGads),csv(urlSales)]);
-    RAW.meta=parseMeta(rM);RAW.gads=parseGads(rG);RAW.sales=parseSales(rS);
-    const total=RAW.meta.length+RAW.gads.length+RAW.sales.length;
-    if(total===0){
-      showStatus('error',`Parsed 0 records. Meta rows: ${rM.length}, Google: ${rG.length}, Sales: ${rS.length}`);
+  try {
+    const [rM, rG, rS] = await Promise.all([csv(urlMeta), csv(urlGads), csv(urlSales)]);
+    RAW.meta = parseMeta(rM);
+    RAW.gads = parseGads(rG);
+    RAW.sales = parseSales(rS);
+    const total = RAW.meta.length + RAW.gads.length + RAW.sales.length;
+    if (total === 0) {
+      showStatus('error', `Parsed 0 records. Meta rows: ${rM.length}, Google: ${rG.length}, Sales: ${rS.length}`);
       return;
     }
     
-    // --- 動態建立 Brand <-> Market 關聯表 ---
+    // 🔥 優化後的動態建立 Brand <-> Market 關聯表 (以 Sales 為準)
     brandToCountries = {};
     countryToBrands = {};
-    const allData = [...RAW.meta, ...RAW.gads, ...RAW.sales];
     
-    allData.forEach(r => {
+    // 只從 Sales 數據建立映射關係
+    RAW.sales.forEach(r => {
       if (!r.brand || !r.country) return;
-      const cList = r.countries || [r.country];
-      cList.forEach(c => {
-        if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) {
-          if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set();
-          brandToCountries[r.brand].add(c);
-          
-          if (!countryToBrands[c]) countryToBrands[c] = new Set();
-          countryToBrands[c].add(r.brand);
-        }
-      });
+      if (KNOWN_COUNTRIES.includes(r.country) && BRANDS.includes(r.brand)) {
+        if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set();
+        brandToCountries[r.brand].add(r.country);
+        
+        if (!countryToBrands[r.country]) countryToBrands[r.country] = new Set();
+        countryToBrands[r.country].add(r.brand);
+      }
     });
     
-    for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
-    for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
-    // ----------------------------------------
+    for (let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
+    for (let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
     
-    const now=new Date().toLocaleString('zh-TW');
-    $('last-upd').textContent=now;$('footer-ts').textContent='Last sync  '+now;
-    showStatus('ok',`✅ 成功同步！ Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
+    const now = new Date().toLocaleString('zh-TW');
+    $('last-upd').textContent = now;
+    $('footer-ts').textContent = 'Last sync  ' + now;
+    showStatus('ok', `✅ 成功同步! Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
     
     render();
-    if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
-  }catch(e){showStatus('error','Load failed: '+e.message);}
+    if (timer) clearInterval(timer);
+    timer = setInterval(loadData, 5 * 60 * 1000);
+  } catch (e) {
+    showStatus('error', 'Load failed: ' + e.message);
+  }
 }
 
-F.dateFrom=daysAgo(7);F.dateTo=daysAgo(1);
+F.dateFrom = daysAgo(7);
+F.dateTo = daysAgo(1);
 loadData();
 </script>
 </body>
