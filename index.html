@@ -256,23 +256,6 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 .form-group input:focus{border-color:var(--accent-m);box-shadow:0 0 0 3px var(--accent-l);}
 .modal-footer{padding:16px 28px;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;gap:12px;background:var(--paper);}
 
-/* Progress Bar & KPI Styles */
-.progress-container{margin-top:8px}
-.progress-bar{width:100%;height:8px;background:var(--paper3);border-radius:4px;overflow:hidden}
-.progress-fill{height:100%;border-radius:4px;transition:width .3s ease}
-.progress-fill.tok{background:var(--ok)}
-.progress-fill.twarn{background:var(--warn)}
-.progress-fill.tbad{background:var(--red)}
-.progress-label{font-size:10px;color:var(--ink3);margin-top:4px;display:flex;justify-content:space-between;font-weight:600}
-.kpi-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px}
-.kpi-badge.tok{background:var(--ok-bg);color:var(--ok)}
-.kpi-badge.twarn{background:var(--warn-bg);color:var(--warn)}
-.kpi-badge.tbad{background:var(--red-bg);color:var(--red)}
-.kpi-badge.na{background:var(--paper3);color:var(--ink3)}
-#kpi-table-body input{width:100%;padding:6px 10px;border:1px solid var(--rule2);border-radius:var(--r);font-size:12px;font-family:'DM Mono',monospace}
-#kpi-table-body input:focus{outline:none;border-color:var(--accent-m);box-shadow:0 0 0 2px var(--accent-l)}
-#kpi-table-body td{padding:8px 10px;border-bottom:1px solid var(--rule)}
-
 /* --- RESPONSIVE DESIGN (RWD) --- */
 @media(max-width:1180px){
   .tier1{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -317,7 +300,6 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <div class="sdot"></div>
     <span class="sts" id="last-upd">—</span>
     <button class="btn" onclick="openSettings()">⚙️ Data Sources</button>
-    <button class="btn" onclick="openKpiModal()">📊 KPI Settings</button>
     <button class="btn pri" onclick="loadData()">Sync Data</button>
   </div>
 </header>
@@ -514,13 +496,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   <div class="card">
     <div class="ct">
       <span class="ct-n" data-tip="ROI = Net Revenue ÷ Ad Spend for selected brand(s) in the selected period. Sorted highest to lowest.">ROI by Brand</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div style="display:flex;gap:4px">
-          <button class="chip on" id="roi-metric-roi" onclick="setRoiMetric('roi')" style="padding:4px 10px;font-size:11px">ROI</button>
-          <button class="chip" id="roi-metric-roas" onclick="setRoiMetric('roas')" style="padding:4px 10px;font-size:11px">ROAS</button>
-        </div>
-        <span class="ct-b g" id="roi-brand-badge">7 days</span>
-      </div>
+      <span class="ct-b g" id="roi-brand-badge">7 days</span>
     </div>
     <div class="roi-list" id="roi-bars"></div>
     <div class="sum-row" id="roi-sum"></div>
@@ -614,39 +590,6 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
-<!-- KPI SETTINGS MODAL -->
-<div id="kpi-modal" class="modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">📊 Monthly KPI Settings</span>
-      <button class="modal-close" onclick="closeKpiModal()">×</button>
-    </div>
-    <div class="modal-content">
-      <div class="form-group">
-        <label>Select Month</label>
-        <input type="month" id="kpi-month" onchange="loadKpiForMonth()" style="width:100%;padding:10px;border:1px solid var(--rule2);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px">
-      </div>
-      
-      <table style="width:100%;margin-top:16px;border-collapse:collapse">
-        <thead>
-          <tr style="background:var(--paper2)">
-            <th style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3)">Brand</th>
-            <th style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3)">Net Revenue Target ($)</th>
-            <th style="padding:10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink3)">ROI Target (×)</th>
-          </tr>
-        </thead>
-        <tbody id="kpi-table-body">
-          <!-- Dynamically populated -->
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeKpiModal()">Cancel</button>
-      <button class="btn pri" onclick="saveKpi()">Save KPI</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // --- Chart.js 全局 Tooltip 強制深色設定 ---
 Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 58, 94, 0.95)'; // 強制深藍底色
@@ -667,8 +610,6 @@ let CONFIG = {
 
 let RAW={meta:[],gads:[],sales:[]};
 let F={brand:'all',country:'all',dateFrom:'',dateTo:'',comparePrev:false};
-let KPIS={};  // KPI storage
-let roiMetric='roi';  // Default to ROI
 let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
 
 const $=id=>document.getElementById(id);
@@ -998,39 +939,6 @@ function render(){
   renderVal('k-gross', d.gross, p?.gross, fmtN, 1);
   renderVal('k-disc', Math.abs(d.disc), p?Math.abs(p.disc):null, fmtN, -1);
   renderVal('k-ret', Math.abs(d.ret), p?Math.abs(p.ret):null, fmtN, -1);
-  
-  // Add KPI Progress to Net Revenue card
-  const month=getMonthFromDateRange();
-  const netCard=document.querySelector('[data-tip*="Net sales after all discounts"]').parentElement;
-  let progressDiv=netCard.querySelector('.progress-container');
-  if(!progressDiv){
-    progressDiv=document.createElement('div');
-    progressDiv.className='progress-container';
-    netCard.appendChild(progressDiv);
-  }
-  
-  if(month&&KPIS[month]){
-    const totalKpi=Object.values(KPIS[month]).reduce((s,k)=>s+(k.revenue||0),0);
-    if(totalKpi>0){
-      const daysInMonth=getDaysInMonth(month);
-      const to=new Date(F.dateTo);
-      const daysElapsed=to.getDate();
-      const prog=calculateProgress(d.net,totalKpi,daysElapsed,daysInMonth);
-      progressDiv.innerHTML=`
-        <div class="progress-bar">
-          <div class="progress-fill ${prog.status}" style="width:${prog.percent}%"></div>
-        </div>
-        <div class="progress-label">
-          <span>${prog.percent.toFixed(1)}% of KPI</span>
-          <span>Gap: $${Math.round(prog.gap).toLocaleString()}</span>
-        </div>
-      `;
-    }else{
-      progressDiv.innerHTML='';
-    }
-  }else{
-    progressDiv.innerHTML='';
-  }
 
   // Ad Performance
   renderVal('k-sp', d.sp, p?.sp, fmtN, 0);
@@ -1058,58 +966,18 @@ function render(){
   setKs('k-ret-s', d.gross?`<span class="dn">${fmtP(currRetP)} of gross</span>`:'');
   setKs('k-sp-s', `Meta ${fmtN(d.ms)} + Google ${fmtN(d.gs)}`);
 
-  // ROI bars with ROI/ROAS toggle and KPI targets
-  const metric=roiMetric;
-  const metricLabel=metric==='roi'?'ROI':'ROAS';
-  const metricValues=d.brandRows.map(b=>metric==='roi'?b.roi:b.roas);
-  const maxR=Math.max(...metricValues,0.1);
-  
-  // Get KPI targets if available
-  const month=getMonthFromDateRange();
-  const kpiTargets={};
-  if(month&&KPIS[month]){
-    Object.keys(KPIS[month]).forEach(brand=>{
-      if(KPIS[month][brand].roi>0){
-        kpiTargets[brand]=KPIS[month][brand].roi;
-      }
-    });
-  }
-  
-  $('roi-bars').innerHTML=[...d.brandRows].sort((a,b2)=>{
-    const aVal=metric==='roi'?a.roi:a.roas;
-    const bVal=metric==='roi'?b2.roi:b2.roas;
-    return bVal-aVal;
-  }).map(b=>{
-    const val=metric==='roi'?b.roi:b.roas;
-    const p2=Math.round(val/maxR*100);
-    const col=val>=5?'var(--ok)':val>=2?'var(--warn)':'var(--red)';
-    const vc=val>=5?'color:var(--ok)':val>=2?'color:var(--warn)':'color:var(--red)';
-    
-    // Add KPI target indicator if exists
-    let kpiIndicator='';
-    if(kpiTargets[b.brand]){
-      const targetPct=Math.round(kpiTargets[b.brand]/maxR*100);
-      kpiIndicator=`<div style="position:absolute;left:${targetPct}%;top:0;bottom:0;width:2px;background:var(--red);z-index:1" data-tip="KPI Target: ${kpiTargets[b.brand].toFixed(2)}×"></div>`;
-    }
-    
-    return`<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track" style="position:relative">${kpiIndicator}<div class="roi-fill" style="width:${p2}%;background:${col}"></div></div><span class="roi-v" style="${vc}">${val>0?val.toFixed(2)+'×':'—'}</span></div>`;
+  // ROI bars
+  const maxR=Math.max(...d.brandRows.map(b=>b.roi),0.1);
+  $('roi-bars').innerHTML=[...d.brandRows].sort((a,b2)=>b2.roi-a.roi).map(b=>{
+    const p2=Math.round(b.roi/maxR*100);
+    const col=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
+    const vc=b.roi>=5?'color:var(--ok)':b.roi>=2?'color:var(--warn)':'color:var(--red)';
+    return`<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:${p2}%;background:${col}"></div></div><span class="roi-v" style="${vc}">${b.roi>0?b.roi.toFixed(2)+'×':'—'}</span></div>`;
   }).join('');
   
-  const topBrand=[...d.brandRows].sort((a,b2)=>{
-    const aVal=metric==='roi'?a.roi:a.roas;
-    const bVal=metric==='roi'?b2.roi:b2.roas;
-    return bVal-aVal;
-  })[0];
-  const botBrand=[...d.brandRows].filter(b=>b.sp>0).sort((a,b2)=>{
-    const aVal=metric==='roi'?a.roi:a.roas;
-    const bVal=metric==='roi'?b2.roi:b2.roas;
-    return aVal-bVal;
-  })[0];
-  const topVal=metric==='roi'?topBrand?.roi:topBrand?.roas;
-  const botVal=metric==='roi'?botBrand?.roi:botBrand?.roas;
-  const avgVal=metric==='roi'?d.roi:d.roas;
-  
-  $('roi-sum').innerHTML=`<div class="sum-item">Best <strong>${topBrand?.brand||'—'}</strong> ${topVal>0?topVal.toFixed(2)+'×':'—'}</div><div class="sum-item">Lowest <strong>${botBrand?.brand||'—'}</strong> ${botVal>0?botVal.toFixed(2)+'×':'—'}</div><div class="sum-item">Avg ${metricLabel} <strong>${avgVal>0?avgVal.toFixed(2)+'×':'—'}</strong></div>`;
+  const topBrand=[...d.brandRows].sort((a,b2)=>b2.roi-a.roi)[0];
+  const botBrand=[...d.brandRows].filter(b=>b.sp>0).sort((a,b2)=>a.roi-b2.roi)[0];
+  $('roi-sum').innerHTML=`<div class="sum-item">Best <strong>${topBrand?.brand||'—'}</strong> ${topBrand?.roi>0?topBrand.roi.toFixed(2)+'×':'—'}</div><div class="sum-item">Lowest <strong>${botBrand?.brand||'—'}</strong> ${botBrand?.roi>0?botBrand.roi.toFixed(2)+'×':'—'}</div><div class="sum-item">Avg ROI <strong>${d.roi>0?d.roi.toFixed(2)+'×':'—'}</strong></div>`;
 
   renderTrend(d.tsSeries);
   renderStack(d.brandRows, d.targetBrands);
@@ -1213,44 +1081,9 @@ function renderTable(brandRows,dayRows){
       <th onclick="srt('net')">Net Rev (E)</th><th onclick="srt('gross')">Gross (B)</th><th onclick="srt('disc')">Discount (C)</th>
       <th onclick="srt('disc_pct')">Disc%</th><th onclick="srt('ret')">Returns (D)</th><th onclick="srt('ret_pct')">Ret%</th><th>Status</th>
     </tr>`;
-    
-    const month=getMonthFromDateRange();
     const sorted=[...brandRows].sort((a,b2)=>(a[sortKey]<b2[sortKey]?-1:1)*sortDir);
-    
     tbody.innerHTML=sorted.map(b=>{
       const rc=b.roi>=5?'tok':b.roi>=2?'twarn':'tbad', rl=b.roi>=5?'Good':b.roi>=2?'Review':'Stop', rv=b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)';
-      
-      // KPI Status calculation
-      let statusBadge='<span class="tag '+rc+'">'+rl+'</span>';
-      if(month&&KPIS[month]&&KPIS[month][b.brand]){
-        const kpi=KPIS[month][b.brand];
-        const daysInMonth=getDaysInMonth(month);
-        const to=new Date(F.dateTo);
-        const daysElapsed=to.getDate();
-        
-        let revStatus='na';
-        let roiStatus='na';
-        
-        if(kpi.revenue>0){
-          const revProg=calculateProgress(b.net,kpi.revenue,daysElapsed,daysInMonth);
-          revStatus=revProg.status;
-        }
-        
-        if(kpi.roi>0){
-          roiStatus=b.roi>=kpi.roi?'tok':'tbad';
-        }
-        
-        const overallStatus=revStatus==='tbad'||roiStatus==='tbad'?'tbad':
-                            revStatus==='twarn'||roiStatus==='twarn'?'twarn':
-                            revStatus==='tok'&&roiStatus==='tok'?'tok':'na';
-        
-        const statusText=overallStatus==='tok'?'On Track':
-                        overallStatus==='twarn'?'At Risk':
-                        overallStatus==='tbad'?'Behind':'N/A';
-        
-        statusBadge=`<span class="kpi-badge ${overallStatus}">${statusText}</span>`;
-      }
-      
       return`<tr><td style="font-weight:700;color:var(--accent)">${b.brand}</td><td class="num" style="color:var(--ink2)">${b.days}</td>
         <td class="num">${Math.round(b.clicks).toLocaleString()}</td><td class="num">${b.cpc>0?'$'+b.cpc.toFixed(1):'—'}</td>
         <td class="num">${b.ctr>0?b.ctr.toFixed(2)+'%':'—'}</td><td class="num">${Math.round(b.purchases).toLocaleString()}</td>
@@ -1260,7 +1093,7 @@ function renderTable(brandRows,dayRows){
         <td class="num" style="font-weight:600;color:var(--accent)">$${Math.round(b.net).toLocaleString()}</td><td class="num">$${Math.round(b.gross).toLocaleString()}</td>
         <td class="num" style="color:var(--warn)">$${Math.round(Math.abs(b.disc)).toLocaleString()}</td><td class="num" style="color:var(--warn)">${b.disc_pct.toFixed(2)}%</td>
         <td class="num" style="color:var(--red)">$${Math.round(Math.abs(b.ret)).toLocaleString()}</td><td class="num" style="color:var(--red)">${b.ret_pct.toFixed(2)}%</td>
-        <td>${statusBadge}</td></tr>`;
+        <td><span class="tag ${rc}">${rl}</span></td></tr>`;
     }).join('');
     
     // Calculate totals
@@ -1418,126 +1251,6 @@ async function loadData(){
 }
 
 F.dateFrom=daysAgo(7);F.dateTo=daysAgo(1);
-
-/* ========== KPI MANAGEMENT ========== */
-function loadAllKpis(){
-  KPIS={};
-  for(let i=0;i<24;i++){
-    const d=new Date();
-    d.setMonth(d.getMonth()-i);
-    const key=d.toISOString().slice(0,7);
-    const stored=localStorage.getItem('emers_kpi_'+key);
-    if(stored){
-      KPIS[key]=JSON.parse(stored);
-    }
-  }
-}
-
-function openKpiModal(){
-  const now=new Date().toISOString().slice(0,7);
-  document.getElementById('kpi-month').value=now;
-  
-  // Get all unique brands from current data
-  const brands=new Set();
-  RAW.meta.forEach(r=>r.brand&&brands.add(r.brand));
-  RAW.gads.forEach(r=>r.brand&&brands.add(r.brand));
-  RAW.sales.forEach(r=>r.brand&&brands.add(r.brand));
-  
-  const tbody=document.getElementById('kpi-table-body');
-  tbody.innerHTML=Array.from(brands).sort().map(brand=>`
-    <tr>
-      <td style="font-weight:600;color:var(--accent)">${brand}</td>
-      <td><input type="number" id="kpi-${brand.replace(/\s+/g,'_')}-revenue" placeholder="0"></td>
-      <td><input type="number" step="0.1" id="kpi-${brand.replace(/\s+/g,'_')}-roi" placeholder="0.0"></td>
-    </tr>
-  `).join('');
-  
-  loadKpiForMonth();
-  document.getElementById('kpi-modal').classList.add('show');
-}
-
-function closeKpiModal(){
-  document.getElementById('kpi-modal').classList.remove('show');
-}
-
-function loadKpiForMonth(){
-  const month=document.getElementById('kpi-month').value;
-  if(!month)return;
-  const stored=localStorage.getItem('emers_kpi_'+month);
-  const kpi=stored?JSON.parse(stored):{};
-  
-  // Load values for each brand
-  const inputs=document.querySelectorAll('#kpi-table-body input');
-  inputs.forEach(input=>{
-    const match=input.id.match(/kpi-(.+)-(revenue|roi)/);
-    if(match){
-      const brand=match[1].replace(/_/g,' ');
-      const field=match[2];
-      input.value=kpi[brand]?kpi[brand][field]||'':'';
-    }
-  });
-}
-
-function saveKpi(){
-  const month=document.getElementById('kpi-month').value;
-  if(!month){
-    alert('Please select a month');
-    return;
-  }
-  
-  const kpi={};
-  const inputs=document.querySelectorAll('#kpi-table-body input');
-  inputs.forEach(input=>{
-    const match=input.id.match(/kpi-(.+)-(revenue|roi)/);
-    if(match){
-      const brand=match[1].replace(/_/g,' ');
-      const field=match[2];
-      const value=parseFloat(input.value)||0;
-      if(!kpi[brand])kpi[brand]={};
-      kpi[brand][field]=value;
-    }
-  });
-  
-  localStorage.setItem('emers_kpi_'+month,JSON.stringify(kpi));
-  closeKpiModal();
-  loadAllKpis();
-  render();
-}
-
-function getMonthFromDateRange(){
-  const from=new Date(F.dateFrom);
-  const to=new Date(F.dateTo);
-  if(from.getMonth()===to.getMonth()&&from.getFullYear()===to.getFullYear()){
-    return from.toISOString().slice(0,7);
-  }
-  return null;
-}
-
-function getDaysInMonth(month){
-  const[y,m]=month.split('-').map(Number);
-  return new Date(y,m,0).getDate();
-}
-
-function calculateProgress(current,target,daysElapsed,totalDays){
-  if(target===0)return{percent:0,status:'na'};
-  const expected=(target/totalDays)*daysElapsed;
-  const percent=(current/target)*100;
-  const onTrack=current>=expected;
-  return{
-    percent:Math.min(percent,100),
-    gap:target-current,
-    status:onTrack?'tok':percent>66?'twarn':'tbad'
-  };
-}
-
-function setRoiMetric(metric){
-  roiMetric=metric;
-  document.getElementById('roi-metric-roi').classList.toggle('on',metric==='roi');
-  document.getElementById('roi-metric-roas').classList.toggle('on',metric==='roas');
-  render();
-}
-
-loadAllKpis();
 loadData();
 </script>
 </body>
