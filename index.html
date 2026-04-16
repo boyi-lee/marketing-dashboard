@@ -298,16 +298,6 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 </head>
 <body>
 
-<div id="login-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--paper);z-index:10000;align-items:center;justify-content:center;">
-  <div style="background:#fff;padding:40px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-width:400px;width:90%;text-align:center;">
-    <h2 style="color:var(--accent);margin-bottom:10px;">Emers Dashboard</h2>
-    <p style="color:var(--ink3);margin-bottom:24px;font-size:13px;">請輸入您的 Email 驗證並載入報表</p>
-    <input type="email" id="login-email" placeholder="name@company.com" style="width:100%;padding:12px;border:1px solid var(--rule2);border-radius:8px;margin-bottom:16px;outline:none;font-family:'DM Mono',monospace;">
-    <button class="btn pri" onclick="doLogin()" style="width:100%;padding:12px;font-size:14px;">安全登入 / Login</button>
-    <p id="login-error" style="color:var(--red);font-size:12px;margin-top:12px;display:none;font-weight:600;"></p>
-  </div>
-</div>
-
 <header>
   <div class="wm">
     <span class="wm-n">Emers</span>
@@ -317,14 +307,14 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   <div class="hdr-r">
     <div class="sdot"></div>
     <span class="sts" id="last-upd">—</span>
-    <button class="btn" id="btn-settings" onclick="openSettings()">⚙️ Data Sources</button>
+    <button class="btn" onclick="openSettings()">⚙️ Data Sources</button>
     <button class="btn" onclick="openKpiSettings()">🎯 設定 KPI</button>
     <button class="btn pri" onclick="loadData()">Sync Data</button>
-    <button class="btn" onclick="doLogout()" style="color:var(--red);border-color:var(--red-bg);background:var(--red-bg);">登出</button>
   </div>
 </header>
 
 <div id="sbar"></div>
+<!-- 動態防呆提示列 -->
 <div id="dynamic-warning-bar"></div>
 
 <div class="ctrlbar">
@@ -334,6 +324,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <button class="chip on" data-t="7"   onclick="setTime('7',this)">7 days</button>
     <button class="chip" data-t="30"     onclick="setTime('30',this)">30 days</button>
     <button class="chip" data-t="90"     onclick="setTime('90',this)">90 days</button>
+    <!-- 新增 This Month 按鈕 -->
     <button class="chip" data-t="thisMonth" onclick="setTime('thisMonth',this)">This Month</button>
     <button class="chip" data-t="custom" onclick="setTime('custom',this)">Custom</button>
     <div class="custom-range" id="cr">
@@ -350,6 +341,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     </label>
   </div>
   <div class="cdiv"></div>
+  <!-- 動態多選綁定 -->
   <div class="cg" id="market-filters">
     <span class="cl">Market</span>
     <button class="chip on" data-c="all" onclick="toggleC('all')">All</button>
@@ -360,6 +352,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <span class="cnote">* 確保 Sales 表內含「國家」欄位以啟用過濾</span>
   </div>
   <div class="cdiv"></div>
+  <!-- 動態多選綁定 -->
   <div class="cg" id="brand-filters">
     <span class="cl">Brand</span>
     <button class="chip on" data-b="all" onclick="toggleB('all')">All</button>
@@ -376,6 +369,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
 
 <main>
 
+<!-- ROI HERO -->
 <div class="sec" style="margin-top:0"><span class="sec-n">ROI Overview</span><div class="sec-r"></div></div>
 <div class="roi-hero">
   <div class="roi-hero-left">
@@ -409,13 +403,15 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- BUSINESS PERFORMANCE -->
 <div class="sec"><span class="sec-n">Business Performance</span><div class="sec-r"></div></div>
 <div class="tier1">
   <div class="kcard">
     <div class="kl" data-tip="Net sales after all discounts and returns (Shopify E column)">Net Revenue (E)</div>
     <div class="kv ac" id="k-net">—</div>
     <div class="ks" id="k-net-s">After discounts &amp; returns</div>
-    <div id="k-net-prog"></div> </div>
+    <div id="k-net-prog"></div> <!-- KPI 進度條 -->
+  </div>
   <div class="kcard">
     <div class="kl" data-tip="Total gross sales before any deductions (Shopify B column)">Gross Sales (B)</div>
     <div class="kv" id="k-gross">—</div>
@@ -433,6 +429,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- AD PERFORMANCE -->
 <div class="sec"><span class="sec-n">Ad Performance</span><div class="sec-r"></div></div>
 <div class="tier3">
   <div class="kcard">
@@ -497,6 +494,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- CHARTS ROW 1 -->
 <div class="sec"><span class="sec-n">Trends</span><div class="sec-r"></div></div>
 <div class="row2">
   <div class="card">
@@ -504,6 +502,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
       <span class="ct-n" data-tip="ROI = Net Revenue ÷ Ad Spend. X-axis adjusts to selected period.">Spend &amp; ROI Trend</span>
       <span class="ct-b g" id="trend-badge">7 days</span>
     </div>
+    <!-- 強制綁定圖例色碼 -->
     <div class="legr">
       <div class="leg"><div class="leg-line" style="background-color:#3b82f6 !important"></div>Spend (TWD)</div>
       <div class="leg"><div class="leg-sq" style="background-color:#0f3a5e !important; border-radius:50%"></div>ROI</div>
@@ -514,6 +513,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
     <div class="ct">
       <div style="display:flex;align-items:center;gap:12px">
         <span class="ct-n" data-tip="Performance for selected brand(s). Can switch between ROI and ROAS.">Performance by Brand</span>
+        <!-- ROI / ROAS 切換選項 -->
         <div class="dim-toggle" style="margin-bottom:0">
           <button class="dim-btn on" id="btn-met-roi" onclick="setBrandMetric('roi')" style="padding:2px 10px;font-size:10px">ROI</button>
           <button class="dim-btn" id="btn-met-roas" onclick="setBrandMetric('roas')" style="padding:2px 10px;font-size:10px">ROAS</button>
@@ -526,6 +526,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- CHARTS ROW 2 -->
 <div class="row3">
   <div class="card">
     <div class="ct">
@@ -539,6 +540,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
       <span class="ct-n" data-tip="Meta vs Google ad spend for selected brand(s). X-axis matches selected period.">Ad Spend by Channel</span>
       <span class="ct-b n" id="spend-period-badge">dynamic</span>
     </div>
+    <!-- 強制綁定圖例色碼 -->
     <div class="legr">
       <div class="leg"><div class="leg-sq" style="background-color:#0f3a5e !important"></div>Meta</div>
       <div class="leg"><div class="leg-sq" style="background-color:#3b82f6 !important"></div>Google</div>
@@ -555,6 +557,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- TABLE -->
 <div class="sec"><span class="sec-n">Brand Breakdown</span><div class="sec-r"></div></div>
 <div class="card">
   <div class="ct">
@@ -582,6 +585,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   <span class="ft-t" id="footer-ts">—</span>
 </footer>
 
+<!-- SETTINGS MODAL (Data Sources) -->
 <div id="settings-modal" class="modal">
   <div class="modal-box">
     <div class="modal-header">
@@ -609,6 +613,7 @@ footer{margin-top:40px;padding:24px 28px;border-top:1px solid var(--rule);displa
   </div>
 </div>
 
+<!-- KPI 設定模組 (依月份儲存) -->
 <div id="kpi-modal" class="modal">
   <div class="modal-box">
     <div class="modal-header">
@@ -637,14 +642,6 @@ Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
 Chart.defaults.plugins.tooltip.padding = 10;
 Chart.defaults.plugins.tooltip.cornerRadius = 6;
 Chart.defaults.plugins.tooltip.displayColors = true;
-
-// ==========================================
-// API & 登入狀態設定
-// ==========================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbzAyX0HDv058VPIgEtTxDvUbaxMZL4vL6Zr22xo4wrSSkUYRImaA9HzHaXgGa46GVx6HQ/exec';
-let USER_EMAIL = localStorage.getItem('emers_user_email');
-let USER_ROLE = 'admin';
-let ALLOWED_BRANDS = [];
 
 const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
 const KNOWN_COUNTRIES = ['TW', 'HK', 'SG', 'MY'];
@@ -706,60 +703,6 @@ function normDate(raw){
   if(b)return`${b[1]}-${b[2].padStart(2,'0')}-${b[3].padStart(2,'0')}`;
   try{const d=new Date(s);if(!isNaN(d.getTime()))return d.toISOString().slice(0,10);}catch(e){}
   return null;
-}
-
-// ==========================================
-// 登入驗證與登出機制
-// ==========================================
-function checkLogin() {
-  USER_EMAIL = localStorage.getItem('emers_user_email');
-  if (!USER_EMAIL) {
-    $('login-overlay').style.display = 'flex';
-  } else {
-    $('login-overlay').style.display = 'none';
-    loadData();
-  }
-}
-
-function doLogin() {
-  const email = $('login-email').value.trim();
-  if (!email) return;
-  
-  $('login-error').style.display = 'none';
-  const btn = document.querySelector('#login-overlay .btn.pri');
-  btn.textContent = '驗證中...';
-  btn.disabled = true;
-
-  fetch(`${API_URL}?email=${encodeURIComponent(email)}`)
-    .then(r => r.json())
-    .then(res => {
-      if (res.success) {
-        localStorage.setItem('emers_user_email', email);
-        USER_EMAIL = email;
-        USER_ROLE = res.role;
-        ALLOWED_BRANDS = res.brands;
-        $('login-overlay').style.display = 'none';
-        
-        // 成功後直接處理回傳的資料
-        processApiData(res);
-      } else {
-        $('login-error').textContent = res.error || '登入失敗，請檢查權限';
-        $('login-error').style.display = 'block';
-      }
-    })
-    .catch(err => {
-      $('login-error').textContent = '網路連線錯誤：' + err.message;
-      $('login-error').style.display = 'block';
-    })
-    .finally(() => {
-      btn.textContent = '安全登入 / Login';
-      btn.disabled = false;
-    });
-}
-
-function doLogout() {
-  localStorage.removeItem('emers_user_email');
-  location.reload();
 }
 
 /* UI Filters & Data Linking (防呆與多選機制) */
@@ -881,7 +824,6 @@ function setBrandMetric(m){
 }
 
 /* Fetch + Parse */
-// 保留原始 fetchCsv 用於擴充，但現已改由 fetch API_URL 取代
 async function fetchCsv(url){
   const bustUrl = url + '&_t=' + Date.now();
   try{const r=await fetch(bustUrl,{mode:'cors', cache:'no-store'});if(r.ok)return await r.text();}catch(e){}
@@ -1750,94 +1692,57 @@ function saveKpiSettings() {
   if(RAW.meta.length) render();
 }
 
-// 獨立的 API 資料處理函數
-function processApiData(res) {
-  // 權限控制 UI 呈現
-  if (USER_ROLE === 'agency') {
-    $('btn-settings').style.display = 'none';
-    $('market-filters').style.display = 'none';
-    $('brand-filters').style.display = 'none';
-    // 強制覆寫底層過濾器狀態
-    F.brand = ALLOWED_BRANDS;
-    F.country = ['all'];
-  } else {
-    $('btn-settings').style.display = 'inline-block';
-    $('market-filters').style.display = 'flex';
-    $('brand-filters').style.display = 'flex';
-  }
-
-  // 透過原本的 Parse 函數對 API JSON 資料做轉換 (日期格式化、字串轉數字等)
-  RAW.meta = parseMeta(res.data.meta || []);
-  RAW.gads = parseGads(res.data.gads || []);
-  RAW.sales = parseSales(res.data.sales || []);
-
-  const total = RAW.meta.length + RAW.gads.length + RAW.sales.length;
-  if (total === 0) {
-    showStatus('error', `此帳號目前沒有可觀看的資料。`);
-    return;
-  }
-  
-  // --- 動態建立 Brand <-> Market 關聯表 ---
-  brandToCountries = {};
-  countryToBrands = {};
-  const allData = [...RAW.meta, ...RAW.gads, ...RAW.sales];
-  
-  allData.forEach(r => {
-    if (!r.brand || !r.country) return;
-    const cList = r.countries || [r.country];
-    cList.forEach(c => {
-      if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) {
-        if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set();
-        brandToCountries[r.brand].add(c);
-        
-        if (!countryToBrands[c]) countryToBrands[c] = new Set();
-        countryToBrands[c].add(r.brand);
-      }
-    });
-  });
-  
-  for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
-  for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
-  // ----------------------------------------
-  
-  const now = new Date().toLocaleString('zh-TW');
-  $('last-upd').textContent = now;
-  $('footer-ts').textContent = 'Last sync  ' + now;
-  showStatus('ok', `✅ 同步成功！ Meta: ${RAW.meta.length} 筆 · Google: ${RAW.gads.length} 筆 · Sales: ${RAW.sales.length} 筆`);
-  
-  render();
-  if(timer) clearInterval(timer);
-  timer = setInterval(loadData, 5 * 60 * 1000);
-}
-
 /* Load & Data Mapping */
-async function loadData() {
-  if (!USER_EMAIL) return; // 確保有 Email 才執行
+async function loadData(){
+  showStatus('loading','Syncing Meta, Google & Sales sheets simultaneously...');
   
-  showStatus('loading','Verifying & Syncing securely from server...');
-  
-  try {
-    const r = await fetch(`${API_URL}?email=${encodeURIComponent(USER_EMAIL)}`);
-    const res = await r.json();
-    
-    if (!res.success) {
-      showStatus('error', res.error);
-      if (res.error.includes('無效')) doLogout(); // 權限被移除時強制登出
+  const urlMeta = `https://docs.google.com/spreadsheets/d/${CONFIG.metaId}/gviz/tq?tqx=out:csv&sheet=metaads_by_brand_contry`;
+  const urlGads = `https://docs.google.com/spreadsheets/d/${CONFIG.gadsId}/gviz/tq?tqx=out:csv&sheet=gads_by+brand_contry`;
+  const urlSales = `https://docs.google.com/spreadsheets/d/${CONFIG.salesId}/gviz/tq?tqx=out:csv&sheet=all+brand+sale`;
+
+  try{
+    const [rM,rG,rS]=await Promise.all([csv(urlMeta),csv(urlGads),csv(urlSales)]);
+    RAW.meta=parseMeta(rM);RAW.gads=parseGads(rG);RAW.sales=parseSales(rS);
+    const total=RAW.meta.length+RAW.gads.length+RAW.sales.length;
+    if(total===0){
+      showStatus('error',`Parsed 0 records. Meta rows: ${rM.length}, Google: ${rG.length}, Sales: ${rS.length}`);
       return;
     }
     
-    processApiData(res);
-  } catch(e) {
-    showStatus('error', 'Load failed: ' + e.message);
-  }
+    // --- 動態建立 Brand <-> Market 關聯表 ---
+    brandToCountries = {};
+    countryToBrands = {};
+    const allData = [...RAW.meta, ...RAW.gads, ...RAW.sales];
+    
+    allData.forEach(r => {
+      if (!r.brand || !r.country) return;
+      const cList = r.countries || [r.country];
+      cList.forEach(c => {
+        if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) {
+          if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set();
+          brandToCountries[r.brand].add(c);
+          
+          if (!countryToBrands[c]) countryToBrands[c] = new Set();
+          countryToBrands[c].add(r.brand);
+        }
+      });
+    });
+    
+    for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
+    for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
+    // ----------------------------------------
+    
+    const now=new Date().toLocaleString('zh-TW');
+    $('last-upd').textContent=now;$('footer-ts').textContent='Last sync  '+now;
+    showStatus('ok',`✅ 成功同步！ Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
+    
+    render();
+    if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
+  }catch(e){showStatus('error','Load failed: '+e.message);}
 }
 
-F.dateFrom = daysAgo(7);
-F.dateTo = daysAgo(1);
-
-// 取代原本直接呼叫 loadData()，改為先檢查登入狀態
-checkLogin();
-
+F.dateFrom=daysAgo(7);F.dateTo=daysAgo(1);
+loadData();
 </script>
 </body>
 </html>
