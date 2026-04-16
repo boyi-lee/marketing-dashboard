@@ -1750,23 +1750,38 @@ function saveKpiSettings() {
   if(RAW.meta.length) render();
 }
 
-// 獨立的 API 資料處理函數
+// ==========================================
+// 獨立的 API 資料處理函數 (整合版)
+// ==========================================
 function processApiData(res) {
-  // 權限控制 UI 呈現
-  if (USER_ROLE === 'agency') {
-    $('btn-settings').style.display = 'none';
-    $('market-filters').style.display = 'none';
-    $('brand-filters').style.display = 'none';
-    // 強制覆寫底層過濾器狀態
-    F.brand = ALLOWED_BRANDS;
-    F.country = ['all'];
-  } else {
+  USER_ROLE = res.role;
+  ALLOWED_BRANDS = res.brands;
+
+  // 1. 權限控制 UI 呈現
+  if (USER_ROLE === 'admin') {
+    // 管理員 (boyi_lee)：看到所有功能與設定
     $('btn-settings').style.display = 'inline-block';
     $('market-filters').style.display = 'flex';
     $('brand-filters').style.display = 'flex';
+  } 
+  else if (USER_ROLE === 'user') {
+    // 一般員工 (@emers.com)：隱藏設定鈕，保留過濾功能
+    $('btn-settings').style.display = 'none';
+    $('market-filters').style.display = 'flex';
+    $('brand-filters').style.display = 'flex';
+    F.brand = ['all']; 
+    F.country = ['all'];
+  }
+  else if (USER_ROLE === 'agency') {
+    // 代理商 (asiapac.tw)：完全鎖定 UI
+    $('btn-settings').style.display = 'none';
+    $('market-filters').style.display = 'none';
+    $('brand-filters').style.display = 'none';
+    F.brand = ALLOWED_BRANDS;
+    F.country = ['all'];
   }
 
-  // 透過原本的 Parse 函數對 API JSON 資料做轉換 (日期格式化、字串轉數字等)
+  // 2. 解析資料
   RAW.meta = parseMeta(res.data.meta || []);
   RAW.gads = parseGads(res.data.gads || []);
   RAW.sales = parseSales(res.data.sales || []);
@@ -1777,7 +1792,7 @@ function processApiData(res) {
     return;
   }
   
-  // --- 動態建立 Brand <-> Market 關聯表 ---
+  // 3. 動態建立 Brand <-> Market 關聯表
   brandToCountries = {};
   countryToBrands = {};
   const allData = [...RAW.meta, ...RAW.gads, ...RAW.sales];
@@ -1798,23 +1813,26 @@ function processApiData(res) {
   
   for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
   for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
-  // ----------------------------------------
-  
+
+  // 4. 更新畫面
   const now = new Date().toLocaleString('zh-TW');
   $('last-upd').textContent = now;
   $('footer-ts').textContent = 'Last sync  ' + now;
   showStatus('ok', `✅ 同步成功！ Meta: ${RAW.meta.length} 筆 · Google: ${RAW.gads.length} 筆 · Sales: ${RAW.sales.length} 筆`);
   
   render();
+  
+  // 每 5 分鐘自動刷新
   if(timer) clearInterval(timer);
   timer = setInterval(loadData, 5 * 60 * 1000);
 }
 
-/* Load & Data Mapping */
+// ==========================================
+// 啟動連線：向 GAS 請求資料
+// ==========================================
 async function loadData() {
-  if (!USER_EMAIL) return; // 確保有 Email 才執行
-  
-  showStatus('loading','Verifying & Syncing securely from server...');
+  if (!USER_EMAIL) return; 
+  showStatus('loading', '正在從伺服器安全載入數據...');
   
   try {
     const r = await fetch(`${API_URL}?email=${encodeURIComponent(USER_EMAIL)}`);
@@ -1822,20 +1840,20 @@ async function loadData() {
     
     if (!res.success) {
       showStatus('error', res.error);
-      if (res.error.includes('無效')) doLogout(); // 權限被移除時強制登出
+      if (res.error.includes('無效')) doLogout(); 
       return;
     }
-    
     processApiData(res);
   } catch(e) {
-    showStatus('error', 'Load failed: ' + e.message);
+    showStatus('error', '連線失敗: ' + e.message);
   }
 }
 
+// ==========================================
+// 初始化設定
+// ==========================================
 F.dateFrom = daysAgo(7);
 F.dateTo = daysAgo(1);
-
-// 取代原本直接呼叫 loadData()，改為先檢查登入狀態
 checkLogin();
 
 </script>
