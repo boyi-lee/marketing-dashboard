@@ -834,6 +834,45 @@ async function fetchCsv(url){
 function csv(url){return fetchCsv(url).then(t=>Papa.parse(t,{header:true,skipEmptyLines:true}).data);}
 function kf(row,...pts){const keys=Object.keys(row);for(const p of pts){const k=keys.find(k=>new RegExp(p,'i').test(k));if(k)return k;}return pts[pts.length-1];}
 
+// 標準化國家代碼 (支援中文和英文完整名稱)
+function normalizeCountry(rawCountry) {
+  if (!rawCountry) return '';
+  
+  // 字典全部改用小寫 key
+  const countryMap = {
+    'taiwan': 'TW',
+    '台灣': 'TW',
+    'hong kong': 'HK',
+    'hongkong': 'HK',
+    '香港': 'HK',
+    'macao': 'HK',  
+    'macau': 'HK',
+    '澳門': 'HK',
+    'singapore': 'SG',
+    '新加坡': 'SG',
+    'malaysia': 'MY',
+    '馬來西亞': 'MY'
+  };
+  
+  const normalized = rawCountry.trim().toUpperCase();
+  if (['TW', 'HK', 'SG', 'MY'].includes(normalized)) return normalized;
+  
+  // 統一轉小寫查表
+  return countryMap[rawCountry.trim().toLowerCase()] || normalized;
+}
+
+// 依品牌推斷預設國家（用於空值回補）
+function inferCountryByBrand(brand) {
+  if (['Descente', 'G/FORE', 'Callaway', '2XU TW', 'ASH GOLF'].includes(brand)) {
+    return 'TW';
+  } else if (brand === '2XU HK') {
+    return 'HK';
+  } else if (['K-SWISS', 'Palladium'].includes(brand)) {
+    return 'MY+SG';
+  }
+  return '';
+}
+
 function parseMeta(rows){
   if(!rows.length)return[];
   const R=rows[0],K={media:kf(R,'媒體','media'),brand:kf(R,'^品牌$','brand'),country:kf(R,'國家','country'),
@@ -841,14 +880,26 @@ function parseMeta(rows){
     rev:kf(R,'購買轉換值','revenue','value'),clicks:kf(R,'連結點擊','link.click','clicks'),
     purch:kf(R,'購買次數','purchases'),cpc:kf(R,'CPC','單次點擊'),
     ctr:kf(R,'CTR','點閱率'),impr:kf(R,'曝光次數','impressions'),atc:kf(R,'加到購物車','add.to.cart')};
+    
   return rows.filter(r=>/meta/i.test(r[K.media]||'')).map(r=>{
     const date=normDate(r[K.date]);
+    const brand=(r[K.brand]||'').trim();
+    
+    // 讀取並標準化國家欄位
+    let rawC = (r[K.country]||'').trim();
+    rawC = normalizeCountry(rawC);
+    
+    // 若欄位為空，依品牌回補
+    if (!rawC) {
+      rawC = inferCountryByBrand(brand);
+    }
+    
     const spend=parseFloat(String(r[K.spend]||'0').replace(/,/g,''))||0;
     const clicks=parseFloat(String(r[K.clicks]||'0').replace(/,/g,''))||0;
     const impr=parseFloat(String(r[K.impr]||'0').replace(/,/g,''))||0;
     const ctr_raw=parseFloat(String(r[K.ctr]||'0').replace(/,/g,''))||0;
     const ctr=impr>0?(clicks/impr*100):ctr_raw;
-    return{brand:(r[K.brand]||'').trim(),country:(r[K.country]||'').trim().toUpperCase(),
+    return{brand,country:rawC,
       date,month:date?date.slice(0,7):null,spend,rev:parseFloat(String(r[K.rev]||'0').replace(/,/g,''))||0,
       clicks,purchases:parseFloat(String(r[K.purch]||'0').replace(/,/g,''))||0,
       cpc:parseFloat(String(r[K.cpc]||'0').replace(/,/g,''))||0,ctr,impr,atc:parseFloat(String(r[K.atc]||'0').replace(/,/g,''))||0};
@@ -861,15 +912,27 @@ function parseGads(rows){
     date:kf(R,'^日期$','^date$'),spend:kf(R,'費用','cost','spend'),rev:kf(R,'購買價值','purchase.value','revenue'),
     clicks:kf(R,'^點擊$','^clicks$'),purch:kf(R,'^購買$','^purchases$'),
     ctr:kf(R,'點閱率','ctr'),impr:kf(R,'^曝光$','impressions')};
+    
   return rows.filter(r=>/google/i.test(r[K.media]||'')).map(r=>{
     const date=normDate(r[K.date]);
+    const brand=(r[K.brand]||'').trim();
+    
+    // 讀取並標準化國家欄位
+    let rawC = (r[K.country]||'').trim();
+    rawC = normalizeCountry(rawC);
+    
+    // 若欄位為空，依品牌回補
+    if (!rawC) {
+      rawC = inferCountryByBrand(brand);
+    }
+    
     const spend=parseFloat(String(r[K.spend]||'0').replace(/,/g,''))||0;
     const clicks=parseFloat(String(r[K.clicks]||'0').replace(/,/g,''))||0;
     const impr=parseFloat(String(r[K.impr]||'0').replace(/,/g,''))||0;
     const ctr_raw=parseFloat(String(r[K.ctr]||'0').replace(/,/g,''))||0;
     const ctr=impr>0?(clicks/impr*100):(ctr_raw*100);
-    const rawC=(r[K.country]||'').trim().toUpperCase();
-    return{brand:(r[K.brand]||'').trim(),country:rawC,countries:rawC.includes('+')?rawC.split('+'):[rawC],
+    
+    return{brand,country:rawC,countries:rawC.includes('+')?rawC.split('+'):[rawC],
       date,month:date?date.slice(0,7):null,spend,rev:parseFloat(String(r[K.rev]||'0').replace(/,/g,''))||0,
       clicks,purchases:parseFloat(String(r[K.purch]||'0').replace(/,/g,''))||0,
       cpc:clicks>0?spend/clicks:0,ctr,impr};
@@ -885,17 +948,18 @@ function parseSales(rows){
     
   return rows.map(r=>{
     const date=normDate(r[K.date]);
-    const bn = (r[K.brand]||'').trim();
-    let rawC = (r[K.country]||'').trim().toUpperCase();
+    const brand = (r[K.brand]||'').trim();
     
-    // 強制回補：若 Sales 表單沒有填寫國家，或欄位解析失敗，依照品牌自動判定對應國家
+    // 第一優先：讀取 country 欄位並標準化
+    let rawC = (r[K.country]||'').trim();
+    rawC = normalizeCountry(rawC);
+    
+    // 第二優先：若欄位為空，依品牌回補（向下相容舊資料）
     if (!rawC) {
-        if (['Descente', 'G/FORE', 'Callaway', '2XU TW', 'ASH GOLF'].includes(bn)) rawC = 'TW';
-        else if (bn === '2XU HK') rawC = 'HK';
-        else if (['K-SWISS', 'Palladium'].includes(bn)) rawC = 'MY+SG';
+      rawC = inferCountryByBrand(brand);
     }
     
-    return{brand:bn,
+    return{brand,
       country:rawC, 
       countries: rawC.includes('+') ? rawC.split('+') : [rawC],
       date,month:date?date.slice(0,7):null,
@@ -951,24 +1015,21 @@ function aggData(dFrom, dTo){
     const bpch=bm.reduce((s,r)=>s+r.purchases,0)+bg.reduce((s,r)=>s+r.purchases,0);
     const bimpr=bm.reduce((s,r)=>s+r.impr,0)+bg.reduce((s,r)=>s+r.impr,0);
     const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
-    
-    // 跨境特別邏輯：若檢視 ASH 但過濾器中未包含 TW (例如單看 HK)，將後端銷售資料轉為 null
-    const isAshCrossBorder = (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
 
     return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,
-      gross:isAshCrossBorder ? null : bg2,
-      disc:isAshCrossBorder ? null : bd,
-      ret:isAshCrossBorder ? null : br,
-      net:isAshCrossBorder ? null : bn2,
-      disc_pct:isAshCrossBorder||bg2===0?0:Math.abs((bd/bg2)*100),
-      ret_pct:isAshCrossBorder||bg2===0?0:Math.abs((br/bg2)*100),
+      gross:bg2,
+      disc:bd,
+      ret:br,
+      net:bn2,
+      disc_pct:bg2===0?0:Math.abs((bd/bg2)*100),
+      ret_pct:bg2===0?0:Math.abs((br/bg2)*100),
       clicks:bclk,
-      purchases:isAshCrossBorder ? null : bpch,
+      purchases:bpch,
       cpc:bclk>0?bsp/bclk:0,ctr:bimpr>0?bclk/bimpr*100:0,
-      cvr:isAshCrossBorder ? null : (bclk>0?bpch/bclk*100:0),
+      cvr:bclk>0?bpch/bclk*100:0,
       atc:bm.reduce((s,r)=>s+r.atc,0),impr:bimpr,
-      roi:isAshCrossBorder ? null : (bsp>0?bn2/bsp:0),
-      roas:isAshCrossBorder ? null : (bsp>0?(bmr+bgr)/bsp:0)};
+      roi:bsp>0?bn2/bsp:0,
+      roas:bsp>0?(bmr+bgr)/bsp:0};
   });
 
   // Daily dimension
@@ -1025,22 +1086,12 @@ function aggData(dFrom, dTo){
     ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0?tsBuckets[k].net/tsBuckets[k].spend:0
   }));
 
-  // 全局跨境指標覆寫 (若僅單獨選擇了 ASH GOLF 且未包含 TW)
-  let topLevelCrossBorder = (F.brand.length === 1 && F.brand[0] === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW'));
-  if (topLevelCrossBorder) {
-      net = null; gross = null; disc = null; ret = null; roi = null; roas = null; purch = null; cvr = null;
-      tsSeries.forEach(s => { s.net = null; s.roi = null; });
-      dayRows.forEach(r => { r.net = null; r.gross = null; r.disc = null; r.ret = null; r.roi = null; r.roas = null; r.purchases = null; r.cvr = null; });
-  }
-
   const bStack={}, heat=[];
   targetBrands.forEach(bn=>{
     bStack[bn]=tsKeys.map(k=>{
-      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return 0;
       return bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0;
     });
     heat.push({brand:bn, vals:tsKeys.map(k=>{
-      if (bn === 'ASH GOLF' && !F.country.includes('all') && !F.country.includes('TW')) return null;
       const b=bBuckets[bn][k]; return (b&&b.spend>0)?b.net/b.spend:null;
     })});
   });
@@ -1093,18 +1144,14 @@ function render(){
     p = aggData(pFromD.toISOString().slice(0,10), pToD.toISOString().slice(0,10));
   }
   
-  // 動態防呆提示列處理
+  // 動態防呆提示列處理（簡化版 - 只保留 K-SWISS/Palladium）
   let warnings = [];
-  const hasAsh = F.brand.includes('all') || F.brand.includes('ASH GOLF');
-  const hasHk = F.country.includes('all') || F.country.includes('HK');
-  if (hasAsh && hasHk && (!F.country.includes('all') && !F.country.includes('TW'))) {
-      warnings.push("💡 <strong>ASH GOLF：</strong> 跨境銷售數據統一歸屬 TW 區。單看 HK 市場時僅展示廣告前端指標（若未手動取消勾選，其花費將拉低當前視圖的整體 ROI）。");
-  }
   const hasKsPal = F.brand.includes('all') || F.brand.includes('K-SWISS') || F.brand.includes('Palladium');
   const hasMySg = F.country.includes('all') || F.country.includes('MY') || F.country.includes('SG');
   if (hasKsPal && hasMySg) {
       warnings.push("💡 <strong>K-SWISS / Palladium：</strong> 銷售與廣告數據為 MY 與 SG 跨國合併計算。");
   }
+  
   const warnBar = $('dynamic-warning-bar');
   if (warnings.length > 0) {
       warnBar.innerHTML = warnings.join('<br>');
