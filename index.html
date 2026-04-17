@@ -1142,14 +1142,20 @@ function render(){
     const pToD=new Date(d1.getTime()-86400000);
     const pFromD=new Date(pToD.getTime()-diffMs);
     p = aggData(pFromD.toISOString().slice(0,10), pToD.toISOString().slice(0,10));
-  }
+ }
   
-  // 動態防呆提示列處理（簡化版 - 只保留 K-SWISS/Palladium）
+  // 動態防呆提示列處理（已拿掉 K-SWISS/Palladium 提示）
   let warnings = [];
-  const hasKsPal = F.brand.includes('all') || F.brand.includes('K-SWISS') || F.brand.includes('Palladium');
-  const hasMySg = F.country.includes('all') || F.country.includes('MY') || F.country.includes('SG');
-  if (hasKsPal && hasMySg) {
-      warnings.push("💡 <strong>K-SWISS / Palladium：</strong> 銷售與廣告數據為 MY 與 SG 跨國合併計算。");
+  
+  // 後面通常會接這一段，請確保它還在：
+  const warnBar = $('dynamic-warning-bar');
+  if (warnBar) {
+      if (warnings.length > 0) {
+          warnBar.innerHTML = warnings.join('<br>');
+          warnBar.style.display = 'block';
+      } else {
+          warnBar.style.display = 'none';
+      }
   }
   
   const warnBar = $('dynamic-warning-bar');
