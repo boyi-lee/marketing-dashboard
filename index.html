@@ -84,7 +84,7 @@ header{background:#ffffff;border-bottom:var(--bw) solid var(--rule);padding:0 32
 #sbar.error{display:flex;background:var(--red-bg);color:var(--red)}
 #sbar.ok{display:flex;background:var(--ok-bg);color:var(--ok)}
 
-/* FILTER BAR (Sticky & Clean Pill Chips) */
+/* FILTER BAR (Sticky) */
 .ctrlbar {
   background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(8px);
   border-bottom: var(--bw) solid var(--rule); padding: 16px 32px;
@@ -98,7 +98,6 @@ header{background:#ffffff;border-bottom:var(--bw) solid var(--rule);padding:0 32
 .cl { font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--ink4); white-space: nowrap; margin-right: 4px; }
 .toggle-icon { display: none; margin-left: 4px; font-size: 10px; transition: transform 0.2s; }
 
-/* Scrolled (Collapsed) State Logic */
 .ctrlbar.scrolled .toggle-icon { display: inline-block; }
 .ctrlbar.scrolled .chip-group { 
   display: none; position: absolute; top: calc(100% + 12px); left: 0; 
@@ -114,10 +113,10 @@ header{background:#ffffff;border-bottom:var(--bw) solid var(--rule);padding:0 32
   border-radius: 20px; background: var(--paper); transition: all 0.2s; margin-right: 0;
 }
 .ctrlbar.scrolled .cl.toggle-label:hover { border-color: var(--accent-m); color: var(--accent-m); background: var(--accent-l); }
-.ctrlbar.scrolled .cdiv { display: none; } /* Hide dividers when scrolled */
+.ctrlbar.scrolled .cdiv { display: none; } 
 
 .chip{
-  font-family:inherit; font-size:12px; padding:6px 16px; border-radius:9999px; /* Pill Shape */
+  font-family:inherit; font-size:12px; padding:6px 16px; border-radius:9999px; 
   border:var(--bw) solid var(--rule2) !important; background-color:#ffffff !important; color:var(--ink2) !important;
   cursor:pointer; transition:all .2s ease; white-space:nowrap; font-weight:600; outline:none;
 }
@@ -144,7 +143,7 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
 .sec-n{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
 .sec-r{flex:1;height:var(--bw);background:var(--rule)}
 
-/* FLAT CARDS */
+/* CARDS */
 .kcard, .card, .roi-hero, .funnel-wrap {
   background:#fff; border:var(--bw) solid var(--rule); border-radius:var(--r2); 
   box-shadow:0 1px 3px rgba(0,0,0,0.02); transition:all .2s ease;
@@ -153,7 +152,7 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
   border-color:var(--rule2); transform:translateY(-3px); box-shadow:0 12px 24px rgba(0,0,0,0.06);
 }
 
-/* --- ROI HERO (BASELINE ALIGNMENT) --- */
+/* --- ROI HERO --- */
 .roi-hero{padding:32px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:32px; flex-wrap:wrap;}
 .roi-hero-left{display:flex; align-items:baseline; gap:24px; flex-wrap:wrap;}
 .roi-big{font-size:72px; font-weight:300; letter-spacing:-2.5px; line-height:1;
@@ -165,14 +164,12 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
 .roi-meta span{font-size:12px; color:var(--ink3); font-weight:500;}
 .roi-meta strong{color:var(--accent); font-weight:700;}
 
-/* Right Side Baseline Alignment */
 .roi-right{display:flex; gap:40px; align-items:flex-end; flex-wrap:wrap;}
 .roi-mini{display:flex; flex-direction:column; justify-content:flex-end; gap:8px;}
 .roi-mini-label{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink4);}
 .roi-mini-val{font-size:28px; font-weight:300; letter-spacing:-1px; line-height:1; font-variant-numeric:tabular-nums;
   color:var(--ink); display:flex; align-items:center; gap:8px; white-space:nowrap;}
 
-/* AI INSIGHT BAR */
 .insight-bar { margin:-4px 0 24px; padding:16px 20px; background:#fff; border:var(--bw) solid var(--rule);
   border-left:4px solid var(--accent-m); border-radius:var(--r); font-size:13px; font-weight:500; color:var(--ink2); display:flex; align-items:center; gap:12px;}
 
@@ -190,25 +187,21 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
 .dn{color:var(--red); font-weight:600; font-size:13px;}
 .nt{color:var(--ink4); font-weight:600; font-size:13px;}
 
-/* KPI PROGRESS BAR */
 .kpi-prog-wrap { width:100%; height:6px; background:var(--paper3); border-radius:3px; margin-top:12px; overflow:hidden;}
 .kpi-prog-fill { height:100%; border-radius:3px; transition:width 0.8s ease;}
 .kpi-prog-text { font-size:11px; color:var(--ink3); margin-top:6px; display:flex; justify-content:space-between; align-items:center; font-weight:500;}
 
-/* --- HORIZONTAL VISUAL FUNNEL --- */
+/* --- FUNNEL --- */
 .funnel-wrap { display:flex; align-items:center; justify-content:space-between; padding:32px 48px; margin-bottom:24px; overflow-x:auto;}
 .funnel-step { display:flex; flex-direction:column; align-items:center; width:220px; position:relative; }
 .f-lbl { font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink4); margin-bottom:12px; text-align:center;}
 .f-val { font-size:48px; font-weight:300; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:16px; font-variant-numeric:tabular-nums; text-align:center;}
 .f-pill { font-size:11px; font-weight:700; color:var(--ink3); background:var(--paper); border:var(--bw) solid var(--rule); padding:6px 16px; border-radius:20px; text-align:center; white-space:nowrap;}
 .f-arr { font-size:24px; color:var(--rule2); font-weight:300; padding:0 16px; }
-
-/* Visual Bar underneath Funnel */
 .f-bar-track { width:100%; height:8px; background:var(--paper3); border-radius:4px; margin-bottom:16px; overflow:hidden;}
 .f-bar-fill { height:100%; background:var(--accent-m); border-radius:4px; transition:width 1s ease;}
 
-/* CHART CARDS */
-.row2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+/* CHART ELEMENTS */
 .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
 .card{padding:24px;}
 .ct{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
@@ -222,7 +215,7 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
 .leg-sq{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 .leg-line{width:20px;height:3px;border-radius:2px;flex-shrink:0}
 
-/* ROI BARS */
+/* ROI BARS & SUMMARIES */
 .roi-list{display:flex;flex-direction:column;gap:12px}
 .roi-row{display:grid;grid-template-columns:90px 1fr 65px;align-items:center;gap:12px}
 .roi-b{font-size:12px;color:var(--accent);font-weight:700;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;justify-content:flex-end;align-items:center;gap:4px;}
@@ -234,7 +227,7 @@ main{padding:32px;max-width:1440px;margin:0 auto;animation:fadeIn 0.5s ease-out;
 .sum-item{font-size:12px;color:var(--ink3);font-weight:500}
 .sum-item strong{color:var(--accent);font-weight:700}
 
-/* FLAT TABLE */
+/* TABLE */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink4);padding:14px 16px;border-bottom:var(--bw) solid var(--rule2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .2s;background:#fff;position:sticky;top:0;z-index:10;}
@@ -285,7 +278,7 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
 @media(max-width:1180px){
   .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)) }
   .grid-6 { grid-template-columns: repeat(3, minmax(0,1fr)) }
-  .row2, .row3{grid-template-columns:1fr}
+  .row3{grid-template-columns:1fr}
 }
 @media(max-width:768px){
   main, header, .ctrlbar, footer{padding-left:24px;padding-right:24px}
@@ -346,6 +339,18 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
   </div>
   
   <div class="cdiv"></div>
+
+  <!-- MEDIA FILTER -->
+  <div class="cg" id="cg-media">
+    <span class="cl toggle-label" onclick="toggleDropdown('media')">Media <span class="toggle-icon">▼</span></span>
+    <div class="chip-group" id="media-filters">
+      <button class="chip on" data-m="all" onclick="toggleMedia('all')">All</button>
+      <button class="chip" data-m="meta" onclick="toggleMedia('meta')">Meta</button>
+      <button class="chip" data-m="google" onclick="toggleMedia('google')">Google Ads</button>
+    </div>
+  </div>
+
+  <div class="cdiv"></div>
   
   <div class="cg" id="cg-compare">
     <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer;user-select:none;font-weight:600;margin-top:2px;">
@@ -391,11 +396,13 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
 <div class="roi-hero">
   <div class="roi-hero-left">
     <div>
-      <div class="roi-label" data-tip="Net Revenue ÷ Total Ad Spend. >5 = Good, 2–5 = Review, <2 = Stop">ROI</div>
+      <div class="roi-label" id="main-roi-label" data-tip="全渠道經營視角，以實收淨額計算">
+        <span id="roi-title-text">ROI</span> <span class="info-icon" id="roi-info-icon" style="font-size:11px; margin-left:4px; color:var(--ink4); cursor:help; transition:color 0.2s;">ⓘ</span>
+      </div>
       <div class="roi-big" id="roi-big">—</div>
     </div>
     <div class="roi-meta">
-      <span>Net Revenue <strong id="roi-net">—</strong></span>
+      <span><span id="roi-net-lbl">Net Revenue</span> <strong id="roi-net">—</strong></span>
       <span>Ad Spend <strong id="roi-sp">—</strong></span>
       <span id="roi-status-text" style="font-weight:700;margin-top:4px"></span>
     </div>
@@ -441,8 +448,8 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
 </div>
 <div class="grid-4">
   <div class="kcard">
-    <div class="kl" data-tip="Net sales after all discounts and returns">NET REVENUE (E)</div>
-    <div class="kv" style="color:var(--accent-m)" id="k-net">—</div>
+    <div class="kl" id="k-net-lbl" data-tip="Net sales after all discounts and returns">NET REVENUE (E)</div>
+    <div class="kv" style="color:var(--ok)" id="k-net">—</div>
     <div class="ks" id="k-net-s">After discounts &amp; returns</div>
     <div id="k-net-prog"></div>
   </div>
@@ -467,22 +474,22 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
 <div class="funnel-wrap">
   <div class="funnel-step">
     <span class="f-lbl">1. CLICKS (點擊)</span>
-    <div class="f-bar-track"><div class="f-bar-fill" id="fb-clk" style="width:100%"></div></div>
+    <div class="f-bar-track"><div class="f-bar-fill" id="fb-clk" style="width:100%;background:var(--accent-m)"></div></div>
     <span class="f-val" id="f-clk">—</span>
     <span class="f-pill" style="opacity:0">100%</span>
   </div>
   <div class="f-arr">➔</div>
   <div class="funnel-step">
     <span class="f-lbl">2. ADD TO CART</span>
-    <div class="f-bar-track"><div class="f-bar-fill" id="fb-atc" style="width:0%"></div></div>
+    <div class="f-bar-track"><div class="f-bar-fill" id="fb-atc" style="width:0%;background:var(--accent-m)"></div></div>
     <span class="f-val" id="f-atc">—</span>
     <span class="f-pill" id="f-atc-rate">—</span>
   </div>
   <div class="f-arr">➔</div>
   <div class="funnel-step">
     <span class="f-lbl">3. PURCHASES (購買)</span>
-    <div class="f-bar-track"><div class="f-bar-fill" id="fb-purch" style="width:0%"></div></div>
-    <span class="f-val" id="f-purch">—</span>
+    <div class="f-bar-track"><div class="f-bar-fill" id="fb-purch" style="width:0%;background:var(--ok)"></div></div>
+    <span class="f-val" style="color:var(--ok)" id="f-purch">—</span>
     <span class="f-pill" id="f-purch-rate">—</span>
   </div>
 </div>
@@ -509,59 +516,51 @@ footer{margin-top:40px;padding:32px;border-top:var(--bw) solid var(--rule);displ
     <div class="kv rd" id="k-ret">—</div>
     <div class="ks" id="k-ret-s"></div>
   </div>
+  <!-- DIAGNOSTIC METRICS -->
   <div class="kcard">
-    <div class="kl" data-tip="Total ad impressions">IMPRESSIONS</div>
-    <div class="kv" id="k-impr">—</div>
-    <div class="ks" id="k-impr-s">Meta + Google</div>
+    <div class="kl" data-tip="Spend ÷ Impressions × 1000">CPM</div>
+    <div class="kv" id="k-cpm">—</div>
+    <div class="ks" id="k-cpm-s">Spend ÷ Impr. × 1000</div>
   </div>
   <div class="kcard">
-    <div class="kl" data-tip="Meta vs Google ratio">CHANNEL SPLIT</div>
-    <div class="kv" id="k-split" style="font-size:22px">—</div>
-    <div class="ks" id="k-split-s">Meta / Google</div>
+    <div class="kl" data-tip="Add to Cart ÷ Clicks × 100%">ATC%</div>
+    <div class="kv" id="k-atc-rate" style="font-size:26px">—</div>
+    <div class="ks" id="k-atc-rate-s">Add to Cart Rate</div>
   </div>
 </div>
 
 <div class="sec"><span class="sec-n">TRENDS & DISTRIBUTIONS</span><div class="sec-r"></div></div>
 
+<!-- UNIFIED PERFORMANCE TRENDS CHART -->
 <div class="card" style="margin-bottom: 16px;">
   <div class="ct">
-    <span class="ct-n">NET REVENUE VS AD SPEND TREND</span>
-    <span class="ct-b g" id="rev-spend-badge">7 days</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="ct-n">PERFORMANCE TRENDS</span>
+      <div class="dim-toggle" style="margin-bottom:0">
+        <button class="dim-btn on" id="btn-trend-rev" onclick="setTrendMode('rev')">Revenue</button>
+        <button class="dim-btn" id="btn-trend-roi" onclick="setTrendMode('roi')">ROI</button>
+      </div>
+    </div>
+    <span class="ct-b g" id="trend-badge">7 days</span>
   </div>
-  <div class="legr">
-    <div class="leg"><div class="leg-sq" style="background-color:rgba(16, 185, 129, 0.8)"></div>Net Revenue (TWD)</div>
-    <div class="leg"><div class="leg-line" style="background-color:var(--accent-m)"></div>Ad Spend (TWD)</div>
-  </div>
-  <div class="cw" style="height:280px"><canvas id="revSpendC" role="img"></canvas></div>
+  <div class="legr" id="trend-legend-box"></div>
+  <div class="cw" style="height:320px"><canvas id="mainTrendC" role="img"></canvas></div>
 </div>
 
-<div class="row2">
-  <div class="card">
-    <div class="ct">
-      <span class="ct-n">SPEND &amp; ROI TREND</span>
-      <span class="ct-b g" id="trend-badge">7 days</span>
-    </div>
-    <div class="legr">
-      <div class="leg"><div class="leg-line" style="background-color:var(--accent-m)"></div>Spend (TWD)</div>
-      <div class="leg"><div class="leg-sq" style="background-color:var(--accent); border-radius:50%"></div>ROI</div>
-    </div>
-    <div class="cw" style="height:220px"><canvas id="trendC" role="img"></canvas></div>
-  </div>
-  
-  <div class="card">
-    <div class="ct">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span class="ct-n">PERFORMANCE BY BRAND</span>
-        <div class="dim-toggle" style="margin-bottom:0">
-          <button class="dim-btn on" id="btn-met-roi" onclick="setBrandMetric('roi')">ROI</button>
-          <button class="dim-btn" id="btn-met-roas" onclick="setBrandMetric('roas')">ROAS</button>
-        </div>
+<!-- PERFORMANCE BY BRAND -->
+<div class="card" style="margin-bottom: 16px;">
+  <div class="ct">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="ct-n">PERFORMANCE BY BRAND</span>
+      <div class="dim-toggle" style="margin-bottom:0">
+        <button class="dim-btn on" id="btn-met-roi" onclick="setBrandMetric('roi')">ROI</button>
+        <button class="dim-btn" id="btn-met-roas" onclick="setBrandMetric('roas')">ROAS</button>
       </div>
-      <span class="ct-b g" id="roi-brand-badge">7 days</span>
     </div>
-    <div class="roi-list" id="roi-bars"></div>
-    <div class="sum-row" id="roi-sum"></div>
+    <span class="ct-b g" id="roi-brand-badge">7 days</span>
   </div>
+  <div class="roi-list" id="roi-bars"></div>
+  <div class="sum-row" id="roi-sum"></div>
 </div>
 
 <div class="row3">
@@ -694,7 +693,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// --- Chart.js Tooltip Setup ---
 Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.95)';
 Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
 Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
@@ -704,7 +702,8 @@ Chart.defaults.plugins.tooltip.displayColors = true;
 
 const BRANDS=['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
 const KNOWN_COUNTRIES = ['TW', 'HK', 'SG', 'MY'];
-const BCOLORS=['#0f3a5e','#185a90','#2b7bc4','#3b82f6','#60a5fa','#93c5fd','#bae6fd','#e0f2fe'];
+// STRICT BLUE COLOR CONSTRAINT (Only Corporate Navy #0f3a5e and Vivid Blue #3b82f6)
+const BCOLORS=['#0f3a5e','#0f3a5e','#0f3a5e','#0f3a5e','#0f3a5e','#0f3a5e','#0f3a5e','#0f3a5e'];
 
 let CONFIG = {
   metaId: localStorage.getItem('emers_meta_id') || '16XYjr0e7MwAyCdJ-pXb-IxzUtU7hw0BCmAcNd0v1CPE',
@@ -730,9 +729,11 @@ let RAW={meta:[],gads:[],sales:[]};
 let brandToCountries={};
 let countryToBrands={};
 
-let F={brand:['all'],country:['all'],dateFrom:'',dateTo:'',comparePrev:false};
+let F={brand:['all'],country:['all'],media:'all',dateFrom:'',dateTo:'',comparePrev:false};
 let charts={},timer=null,sortKey='roi',sortDir=-1,dimMode='brand';
+
 window.brandMetric = 'roi'; 
+window.trendMode = 'rev'; // Simplified modes: 'rev', 'roi'
 
 const $=id=>document.getElementById(id);
 const getLocalD=(d)=>{const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,10);};
@@ -775,6 +776,14 @@ function updateChips() {
     if (F.brand.includes('all')) el.classList.toggle('on', val === 'all');
     else el.classList.toggle('on', F.brand.includes(val));
   });
+}
+
+function toggleMedia(m) {
+  F.media = m;
+  document.querySelectorAll('#media-filters .chip').forEach(el => {
+    el.classList.toggle('on', el.dataset.m === m);
+  });
+  if(RAW.meta.length) render();
 }
 
 function toggleB(b) {
@@ -850,6 +859,14 @@ function setBrandMetric(m){
   $('btn-met-roi').classList.remove('on');
   $('btn-met-roas').classList.remove('on');
   $('btn-met-'+m).classList.add('on');
+  if(RAW.meta.length)render();
+}
+
+function setTrendMode(m){
+  window.trendMode = m;
+  $('btn-trend-rev').classList.remove('on');
+  $('btn-trend-roi').classList.remove('on');
+  $('btn-trend-'+m).classList.add('on');
   if(RAW.meta.length)render();
 }
 
@@ -944,15 +961,25 @@ function aggData(dFrom, dTo){
   const inCg=r=>F.country.includes('all')||(r.countries?r.countries.some(c=>F.country.includes(c)):F.country.includes(r.country));
   const inCs=r=>F.country.includes('all')||(r.countries?r.countries.some(c=>F.country.includes(c)):F.country.includes(r.country));
 
-  const meta=RAW.meta.filter(r=>inD(r)&&inB(r)&&inCm(r));
-  const gads=RAW.gads.filter(r=>inD(r)&&inB(r)&&inCg(r));
-  const sales=RAW.sales.filter(r=>inD(r)&&inB(r)&&inCs(r));
+  let meta=RAW.meta.filter(r=>inD(r)&&inB(r)&&inCm(r));
+  let gads=RAW.gads.filter(r=>inD(r)&&inB(r)&&inCg(r));
+  let sales=RAW.sales.filter(r=>inD(r)&&inB(r)&&inCs(r));
+
+  // MEDIA FILTER PURIFICATION LOGIC
+  if (F.media === 'meta') { gads = []; }
+  if (F.media === 'google') { meta = []; }
+
   const targetBrands=F.brand.includes('all')?BRANDS:F.brand;
 
   let ms=meta.reduce((s,r)=>s+r.spend,0), gs=gads.reduce((s,r)=>s+r.spend,0), sp=ms+gs;
   let mr=meta.reduce((s,r)=>s+r.rev,0), gr=gads.reduce((s,r)=>s+r.rev,0);
-  let gross=sales.reduce((s,r)=>s+r.gross,0), disc=sales.reduce((s,r)=>s+r.disc,0);
-  let ret=sales.reduce((s,r)=>s+r.ret,0), net=sales.reduce((s,r)=>s+r.net,0);
+  
+  // DUAL-TRACK ATTRIBUTION LOGIC
+  let gross = F.media === 'all' ? sales.reduce((s,r)=>s+r.gross,0) : null; 
+  let disc = F.media === 'all' ? sales.reduce((s,r)=>s+r.disc,0) : null;
+  let ret = F.media === 'all' ? sales.reduce((s,r)=>s+r.ret,0) : null; 
+  let net = F.media === 'all' ? sales.reduce((s,r)=>s+r.net,0) : (F.media === 'meta' ? mr : gr);
+
   let clicks=meta.reduce((s,r)=>s+r.clicks,0)+gads.reduce((s,r)=>s+r.clicks,0);
   let purch=meta.reduce((s,r)=>s+r.purchases,0)+gads.reduce((s,r)=>s+r.purchases,0);
   let impr=meta.reduce((s,r)=>s+r.impr,0)+gads.reduce((s,r)=>s+r.impr,0);
@@ -966,31 +993,48 @@ function aggData(dFrom, dTo){
     const bm=meta.filter(r=>r.brand===bn), bg=gads.filter(r=>r.brand===bn), bs=sales.filter(r=>r.brand===bn);
     const bms=bm.reduce((s,r)=>s+r.spend,0),bgs=bg.reduce((s,r)=>s+r.spend,0),bsp=bms+bgs;
     const bmr=bm.reduce((s,r)=>s+r.rev,0),bgr=bg.reduce((s,r)=>s+r.rev,0);
-    const bg2=bs.reduce((s,r)=>s+r.gross,0),bd=bs.reduce((s,r)=>s+r.disc,0);
-    const br=bs.reduce((s,r)=>s+r.ret,0),bn2=bs.reduce((s,r)=>s+r.net,0);
+    
+    const bg2 = F.media === 'all' ? bs.reduce((s,r)=>s+r.gross,0) : null;
+    const bd = F.media === 'all' ? bs.reduce((s,r)=>s+r.disc,0) : null;
+    const br = F.media === 'all' ? bs.reduce((s,r)=>s+r.ret,0) : null;
+    const bn2 = F.media === 'all' ? bs.reduce((s,r)=>s+r.net,0) : (F.media === 'meta' ? bmr : bgr);
+
     const bclk=bm.reduce((s,r)=>s+r.clicks,0)+bg.reduce((s,r)=>s+r.clicks,0);
     const bpch=bm.reduce((s,r)=>s+r.purchases,0)+bg.reduce((s,r)=>s+r.purchases,0);
     const bimpr=bm.reduce((s,r)=>s+r.impr,0)+bg.reduce((s,r)=>s+r.impr,0);
-    const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...bs.map(r=>r.date)]);
+    const bdates=new Set([...bm.map(r=>r.date),...bg.map(r=>r.date),...(F.media==='all'?bs.map(r=>r.date):[])]);
+
+    let disc_pct = null, ret_pct = null;
+    if(F.media === 'all') {
+       disc_pct = bg2===0?0:Math.abs((bd/bg2)*100);
+       ret_pct = bg2===0?0:Math.abs((br/bg2)*100);
+    }
 
     return{brand:bn,days:bdates.size,ms:bms,gs:bgs,sp:bsp,gross:bg2,disc:bd,ret:br,net:bn2,
-      disc_pct:bg2===0?0:Math.abs((bd/bg2)*100), ret_pct:bg2===0?0:Math.abs((br/bg2)*100),
+      disc_pct:disc_pct, ret_pct:ret_pct,
       clicks:bclk, purchases:bpch, cpc:bclk>0?bsp/bclk:0, ctr:bimpr>0?bclk/bimpr*100:0,
       cvr:bclk>0?bpch/bclk*100:0, atc:bm.reduce((s,r)=>s+r.atc,0), impr:bimpr,
       roi:bsp>0?bn2/bsp:0, roas:bsp>0?(bmr+bgr)/bsp:0, cac:bpch>0?bsp/bpch:0, aov:bpch>0?bn2/bpch:0};
   });
 
   const dayMap={};
-  const allDates=new Set([...meta.map(r=>r.date),...gads.map(r=>r.date),...sales.map(r=>r.date)]);
+  const allDates=new Set([...meta.map(r=>r.date),...gads.map(r=>r.date),...(F.media==='all'?sales.map(r=>r.date):[])]);
   allDates.forEach(dt=>{
     const dm=meta.filter(r=>r.date===dt), dg=gads.filter(r=>r.date===dt), ds=sales.filter(r=>r.date===dt);
     const dms=dm.reduce((s,r)=>s+r.spend,0),dgs=dg.reduce((s,r)=>s+r.spend,0),dsp=dms+dgs;
     const dmr=dm.reduce((s,r)=>s+r.rev,0),dgr=dg.reduce((s,r)=>s+r.rev,0);
-    const dnet=ds.reduce((s,r)=>s+r.net,0), dclk=dm.reduce((s,r)=>s+r.clicks,0)+dg.reduce((s,r)=>s+r.clicks,0);
+    
+    const dgross = F.media === 'all' ? ds.reduce((s,r)=>s+r.gross,0) : null;
+    const ddisc = F.media === 'all' ? ds.reduce((s,r)=>s+r.disc,0) : null;
+    const dret = F.media === 'all' ? ds.reduce((s,r)=>s+r.ret,0) : null;
+    const dnet = F.media === 'all' ? ds.reduce((s,r)=>s+r.net,0) : (F.media === 'meta' ? dmr : dgr);
+
+    const dclk=dm.reduce((s,r)=>s+r.clicks,0)+dg.reduce((s,r)=>s+r.clicks,0);
     const dpch=dm.reduce((s,r)=>s+r.purchases,0)+dg.reduce((s,r)=>s+r.purchases,0);
     const dimpr=dm.reduce((s,r)=>s+r.impr,0)+dg.reduce((s,r)=>s+r.impr,0);
+    
     dayMap[dt]={date:dt,ms:dms,gs:dgs,sp:dsp,mr:dmr,gr:dgr,net:dnet,
-      gross:ds.reduce((s,r)=>s+r.gross,0),disc:ds.reduce((s,r)=>s+r.disc,0),ret:ds.reduce((s,r)=>s+r.ret,0),
+      gross:dgross,disc:ddisc,ret:dret,
       clicks:dclk,purchases:dpch,impr:dimpr,ctr:dimpr>0?dclk/dimpr*100:0,cvr:dclk>0?dpch/dclk*100:0,
       cpc:dclk>0?dsp/dclk:0,roi:dsp>0?dnet/dsp:0,roas:dsp>0?(dmr+dgr)/dsp:0,
       cac:dpch>0?dsp/dpch:0,aov:dpch>0?dnet/dpch:0};
@@ -1006,31 +1050,51 @@ function aggData(dFrom, dTo){
     d.setDate(d.getDate() - ((d.getDay()||7) - 1)); return getLocalD(d); 
   };
 
-  const processTS = (arr, isSales) => {
+  const processTS = (arr, isSales, isMeta) => {
     arr.forEach(r=>{
       const bk=getBucketKey(r.date);
-      if(!tsBuckets[bk]) tsBuckets[bk]={spend:0,net:0,ms:0,gs:0};
-      if(!bBuckets[r.brand][bk]) bBuckets[r.brand][bk]={spend:0,net:0,ms:0,gs:0};
+      if(!tsBuckets[bk]) tsBuckets[bk]={spend:0,net:0,ms:0,gs:0,mr:0,gr:0};
+      if(!bBuckets[r.brand][bk]) bBuckets[r.brand][bk]={spend:0,net:0,ms:0,gs:0,mr:0,gr:0};
       if(isSales){ tsBuckets[bk].net+=r.net; bBuckets[r.brand][bk].net+=r.net; } 
       else {
         const amt=r.spend; tsBuckets[bk].spend+=amt; bBuckets[r.brand][bk].spend+=amt;
-        if(r.media||r.atc!==undefined){tsBuckets[bk].ms+=amt;bBuckets[r.brand][bk].ms+=amt;}
-        else{tsBuckets[bk].gs+=amt;bBuckets[r.brand][bk].gs+=amt;}
+        if(isMeta){
+          tsBuckets[bk].ms+=amt;bBuckets[r.brand][bk].ms+=amt;
+          tsBuckets[bk].mr+=r.rev;bBuckets[r.brand][bk].mr+=r.rev;
+        } else {
+          tsBuckets[bk].gs+=amt;bBuckets[r.brand][bk].gs+=amt;
+          tsBuckets[bk].gr+=r.rev;bBuckets[r.brand][bk].gr+=r.rev;
+        }
       }
     });
   };
-  processTS(sales, true); processTS(meta, false); processTS(gads, false);
+  processTS(sales, true, false); processTS(meta, false, true); processTS(gads, false, false);
 
   const tsKeys=Object.keys(tsBuckets).sort();
-  const tsSeries=tsKeys.map(k=>({
-    label: dayCount<=31 ? k.slice(5).replace('-','/') : k.slice(5).replace('-','/') + '週',
-    spend: tsBuckets[k].spend, net: tsBuckets[k].net,
-    ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0?tsBuckets[k].net/tsBuckets[k].spend:0
-  }));
+  const tsSeries=tsKeys.map(k=>{
+    let bNet = F.media === 'all' ? tsBuckets[k].net : (F.media === 'meta' ? tsBuckets[k].mr : tsBuckets[k].gr);
+    return {
+      label: dayCount<=31 ? k.slice(5).replace('-','/') : k.slice(5).replace('-','/') + '週',
+      spend: tsBuckets[k].spend, net: bNet,
+      ms: tsBuckets[k].ms, gs: tsBuckets[k].gs, roi: tsBuckets[k].spend>0 ? bNet/tsBuckets[k].spend : 0
+    };
+  });
+  
   const bStack={}, heat=[];
   targetBrands.forEach(bn=>{
-    bStack[bn]=tsKeys.map(k=> bBuckets[bn][k]?Math.round(bBuckets[bn][k].net):0 );
-    heat.push({brand:bn, vals:tsKeys.map(k=> { const b=bBuckets[bn][k]; return (b&&b.spend>0)?b.net/b.spend:null; }) });
+    bStack[bn]=tsKeys.map(k=>{
+      if(!bBuckets[bn][k]) return 0;
+      let v = F.media === 'all' ? bBuckets[bn][k].net : (F.media === 'meta' ? bBuckets[bn][k].mr : bBuckets[bn][k].gr);
+      return Math.round(v);
+    });
+    heat.push({brand:bn, vals:tsKeys.map(k=> { 
+      const b=bBuckets[bn][k]; 
+      if(b&&b.spend>0){
+        let v = F.media === 'all' ? b.net : (F.media === 'meta' ? b.mr : b.gr);
+        return v/b.spend;
+      }
+      return null;
+    }) });
   });
   return{sp,ms,gs,roi,roas,gross,disc,ret,net,clicks,purch,cpc,ctr,cvr,impr,atc,cac,aov,
     brandRows,dayRows,tsSeries,tsKeys,bStack,heat,dayCount,targetBrands};
@@ -1051,9 +1115,7 @@ function renderVal(id, currV, prevV, fmtFn, colorMode=1){
       const diff = currV - prevV;
       if (Math.abs(diff) >= 0.0001) {
           const sign = diff > 0 ? '↑' : '↓';
-          let cls = 'nt';
-          if(colorMode === 1) cls = diff > 0 ? 'up' : 'dn';
-          else if(colorMode === -1) cls = diff > 0 ? 'dn' : 'up';
+          let cls = colorMode === 1 ? (diff > 0 ? 'up' : 'dn') : (colorMode === -1 ? (diff > 0 ? 'dn' : 'up') : 'nt');
           html += `<span class="${cls}" style="font-size:13px;margin-left:8px;">${sign} ${fmtFn(Math.abs(diff))}</span>`;
       } else { html += `<span class="nt" style="font-size:13px;margin-left:8px;">—</span>`; }
   }
@@ -1082,9 +1144,24 @@ function render(){
   $('trend-badge').textContent=pl; $('roi-brand-badge').textContent=pl; $('tbl-badge').textContent=pl;
   $('rev-period-badge').textContent=pl;
   $('spend-period-badge').textContent=d.dayCount<=31?'daily':'weekly';
-  $('rev-spend-badge').textContent=pl;
 
-  /* 1. L1 HERO */
+  if (F.media === 'all') {
+      $('roi-title-text').textContent = 'ROI';
+      $('main-roi-label').setAttribute('data-tip', '全渠道經營視角，以實收淨額計算');
+      $('roi-info-icon').style.color = 'var(--ink4)';
+      $('roi-net-lbl').textContent = 'Net Revenue';
+      $('k-net-lbl').textContent = 'NET REVENUE (E)';
+      $('k-net-s').textContent = 'After discounts & returns';
+  } else {
+      $('roi-title-text').textContent = 'ROAS';
+      $('main-roi-label').setAttribute('data-tip', '當前為平台歸因數據，各渠道加總可能不等於總營收，僅供投放效率參考');
+      $('roi-info-icon').style.color = 'var(--accent-m)';
+      $('roi-net-lbl').textContent = F.media === 'meta' ? 'Meta Revenue' : 'Google Revenue';
+      $('k-net-lbl').textContent = F.media === 'meta' ? 'META REVENUE' : 'GOOGLE REVENUE';
+      $('k-net-s').textContent = 'Platform Attributed';
+  }
+
+  /* L1 HERO */
   let roiHtml = (d.roi!==null && d.roi>0) ? d.roi.toFixed(2)+'×' : '—';
   if(p && d.roi!==null && p.roi!==null){
     const rDiff=d.roi-p.roi;
@@ -1094,9 +1171,8 @@ function render(){
     }
   }
   $('roi-big').innerHTML=roiHtml; $('roi-big').className='roi-big'+(d.roi>=5?'':d.roi>=2?' warn':' bad');
-  if (d.roi === null) {
-      $('roi-status-text').textContent = 'Cross-border Ad Only'; $('roi-status-text').style.color = 'var(--ink4)';
-  } else {
+  if (d.roi === null) { $('roi-status-text').textContent = 'Cross-border Ad Only'; $('roi-status-text').style.color = 'var(--ink4)'; } 
+  else {
       $('roi-status-text').textContent=d.roi>=5?'Healthy ROI':d.roi>=2?'Needs Review':d.roi>0?'Critical Action Required':'';
       $('roi-status-text').style.color=d.roi>=5?'var(--ok)':d.roi>=2?'var(--warn)':'var(--red)';
   }
@@ -1105,46 +1181,12 @@ function render(){
   renderVal('roi-sp', d.sp, p?.sp, fmtN, 0);
   renderVal('roas-mini', d.roas, p?.roas, fmtR, 1);
   renderVal('cvr-mini', d.cvr, p?.cvr, fmtP, 1);
-  
   const currRetP = d.gross>0 && d.gross!==null ? Math.abs((d.ret/d.gross)*100) : (d.gross===null ? null : 0);
-  const prevRetP = (p&&p.gross>0)?Math.abs((p.ret/p.gross)*100):null;
-  renderVal('ret-mini', currRetP, prevRetP, fmtP, -1);
-  
+  renderVal('ret-mini', currRetP, (p&&p.gross>0)?Math.abs((p.ret/p.gross)*100):null, fmtP, -1);
   const currDiscP = d.gross>0 && d.gross!==null ? Math.abs((d.disc/d.gross)*100) : (d.gross===null ? null : 0);
-  const prevDiscP = (p&&p.gross>0)?Math.abs((p.disc/p.gross)*100):null;
-  renderVal('disc-mini', currDiscP, prevDiscP, fmtP, -1);
+  renderVal('disc-mini', currDiscP, (p&&p.gross>0)?Math.abs((p.disc/p.gross)*100):null, fmtP, -1);
   
-  const getZheText = (pct) => {
-    if (!pct || isNaN(pct) || pct <= 0) return '';
-    const zhe = Math.round(100 - pct);
-    if (zhe >= 100) return ''; return zhe % 10 === 0 ? (zhe / 10) + '折' : zhe + '折';
-  };
-  const zheTxt = getZheText(currDiscP);
-  if (zheTxt) $('disc-mini').innerHTML += `<span style="font-size:14px;color:var(--ink3);font-weight:600;margin-left:6px">(約 ${zheTxt})</span>`;
-
-  // AI Anomaly Attribution
-  let insightHtml = '';
-  if (F.comparePrev && p && d.roi !== null && p.roi !== null) {
-      const rDiff = d.roi - p.roi;
-      if (Math.abs(rDiff) >= 0.05) {
-          let biggestMover = null; let maxDiff = 0;
-          d.brandRows.forEach(cb => {
-              const pb = p.brandRows.find(x => x.brand === cb.brand);
-              if (pb && cb.sp > 0 && pb.sp > 0) {
-                  const bDiff = cb.roi - pb.roi;
-                  if (Math.abs(bDiff) > Math.abs(maxDiff)) { maxDiff = bDiff; biggestMover = cb; }
-              }
-          });
-          if (biggestMover) {
-              const dir = rDiff > 0 ? '成長' : '下滑', bDir = maxDiff > 0 ? '提升' : '下跌', bColor = maxDiff > 0 ? 'var(--ok)' : 'var(--red)';
-              insightHtml = `<div class="insight-bar">💡 <span><strong>AI 異動歸因：</strong> 本期整體 ROI ${dir} <strong>${Math.abs(rDiff).toFixed(2)}×</strong>，主要受 <strong>${biggestMover.brand}</strong> 品牌 ROI <span style="color:${bColor};font-weight:700;">${bDir} ${Math.abs(maxDiff).toFixed(2)}×</span> 影響。</span></div>`;
-          }
-      } else { insightHtml = `<div class="insight-bar" style="border-left-color:var(--ink4);">💡 <span><strong>AI 異動歸因：</strong> 本期整體 ROI 與前期持平，無顯著異常波動。</span></div>`; }
-  }
-  const insightContainer = $('roi-insight');
-  if(insightContainer) insightContainer.innerHTML = insightHtml;
-
-  /* 2. L2/L3 METRICS */
+  /* L2/L3 METRICS */
   renderVal('k-net', d.net, p?.net, fmtN, 1);
   renderVal('k-gross', d.gross, p?.gross, fmtN, 1);
   renderVal('k-disc', d.disc!==null ? Math.abs(d.disc) : null, p&&p.disc!==null?Math.abs(p.disc):null, fmtN, -1);
@@ -1156,21 +1198,20 @@ function render(){
   renderVal('k-cvr', d.cvr, p?.cvr, fmtP, 1);
   renderVal('k-ctr', d.ctr, p?.ctr, fmtP, 1);
   renderVal('k-cpc', d.cpc, p?.cpc, v=>'$'+v.toFixed(1), -1);
-  renderVal('k-impr', d.impr, p?.impr, fmtI, 1);
-  const mp=d.sp>0?Math.round(d.ms/d.sp*100):0;
-  $('k-split').textContent=d.sp>0?`${mp}% / ${100-mp}%`:'—';
+  renderVal('k-cpm', d.impr > 0 ? (d.sp / d.impr) * 1000 : null, p && p.impr > 0 ? (p.sp / p.impr) * 1000 : null, v=>'$'+v.toFixed(2), -1);
+  if (F.media === 'google') { $('k-atc-rate').innerHTML = '—'; } else {
+      renderVal('k-atc-rate', d.clicks > 0 ? (d.atc / d.clicks) * 100 : null, p && p.clicks > 0 ? (p.atc / p.clicks) * 100 : null, fmtP, 1);
+  }
 
-  // Funnel
+  /* FUNNEL */
   $('f-clk').textContent = fmtI(d.clicks);
-  $('f-atc').textContent = fmtI(d.atc);
   $('f-purch').textContent = fmtI(d.purch);
-  $('f-atc-rate').textContent = d.clicks > 0 ? (d.atc / d.clicks * 100).toFixed(1) + '% (from Clicks)' : '—';
-  $('f-purch-rate').textContent = d.atc > 0 ? (d.purch / d.atc * 100).toFixed(1) + '% (from ATC)' : '—';
-  $('f-atc-rate').style.opacity = d.atc > 0 ? 1 : 0;
-  $('f-purch-rate').style.opacity = d.purch > 0 ? 1 : 0;
   $('fb-clk').style.width = '100%';
-  $('fb-atc').style.width = d.clicks > 0 ? Math.min(100, (d.atc / d.clicks * 100)) + '%' : '0%';
   $('fb-purch').style.width = d.clicks > 0 ? Math.min(100, (d.purch / d.clicks * 100)) + '%' : '0%';
+  if (F.media === 'google') { $('f-atc').textContent = '—'; $('f-atc-rate').textContent = '—'; $('f-atc-rate').style.opacity = 0; $('fb-atc').style.width = '0%'; } 
+  else { $('f-atc').textContent = fmtI(d.atc); $('f-atc-rate').textContent = d.clicks > 0 ? (d.atc / d.clicks * 100).toFixed(1) + '%' : '—'; $('f-atc-rate').style.opacity = d.atc > 0 ? 1 : 0; $('fb-atc').style.width = d.clicks > 0 ? Math.min(100, (d.atc / d.clicks * 100)) + '%' : '0%'; }
+  $('f-purch-rate').textContent = (d.atc > 0 && F.media !== 'google') ? (d.purch / d.atc * 100).toFixed(1) + '%' : '—';
+  $('f-purch-rate').style.opacity = d.purch > 0 ? 1 : 0;
 
   // KPI Progress
   const netProgWrap = $('k-net-prog');
@@ -1204,18 +1245,18 @@ function render(){
       <div class="kpi-prog-text"><span>KPI 差距: $${Math.max(0, gap).toLocaleString()} (${overallPct.toFixed(1)}%)</span>
       <span style="color:${barCol};font-weight:700">${trackStatus}</span></div>
     `;
-  } else if (d.net === null) { netProgWrap.innerHTML = `<span style="font-size:11px;color:var(--ink4);margin-top:6px;display:block;">跨境廣告無直接銷售比對</span>`; } 
+  } else if (d.net === null) { netProgWrap.innerHTML = `<span style="font-size:11px;color:var(--ink4);margin-top:6px;display:block;">無直接銷售比對</span>`; } 
   else { netProgWrap.innerHTML = ''; }
 
-  // ROI by Brand
+  /* ROI by Brand (Restored with strict blue color) */
   const metric = window.brandMetric; 
   const maxV = Math.max(...d.brandRows.map(b => b[metric] || 0), 0.1);
   $('roi-bars').innerHTML = [...d.brandRows].sort((a,b2) => (b2[metric]||0) - (a[metric]||0)).map(b => {
     const val = b[metric];
     if (val === null) return `<div class="roi-row"><span class="roi-b">${b.brand.length>9?b.brand.slice(0,9)+'…':b.brand}</span><div class="roi-track"><div class="roi-fill" style="width:0%;background:var(--paper3)"></div></div><span class="roi-v" style="color:var(--ink4)">—</span></div>`;
     const pct = Math.round((val / maxV) * 100);
-    const col = val >= 5 ? 'var(--ok)' : val >= 2 ? 'var(--warn)' : 'var(--red)';
-    const vc = val >= 5 ? 'color:var(--ok)' : val >= 2 ? 'color:var(--warn)' : 'color:var(--red)';
+    const col = '#3b82f6'; /* STRICT VIVID BLUE */
+    const vc = 'color:var(--accent)';
     let diffHtml = '';
     const pVal = p ? p.brandRows.find(x => x.brand === b.brand)?.[metric] : null;
     if (F.comparePrev && pVal !== null) {
@@ -1245,157 +1286,119 @@ function render(){
     <div class="sum-item">Avg ${metric.toUpperCase()} <strong>${avgVal>0?avgVal.toFixed(2)+'×':'—'}</strong></div>
   `;
   
-  renderRevSpend(d.tsSeries);
-  renderTrend(d.tsSeries); renderStack(d.brandRows, d.targetBrands);
+  renderMainTrend(d.tsSeries);
+  renderStack(d.brandRows, d.targetBrands);
   renderSpend(d.tsSeries); renderHeat(d.heat, d.tsKeys, d.dayCount);
   renderTable(d.brandRows, d.dayRows, isSingleMonth, monthDays, d.dayCount, currentMonthKpi);
 }
 
-/* Charts */
 const tc='#64748b',gc='#f1f5f9';
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 
-function renderRevSpend(series) {
-  dc('revSpend');
-  charts.revSpend = new Chart($('revSpendC'), {
-    data: {
-      labels: series.map(s => s.label),
-      datasets: [
-        {
-          type: 'bar',
-          label: 'Net Revenue',
-          data: series.map(s => Math.round(s.net)),
-          backgroundColor: 'rgba(16, 185, 129, 0.8)',
-          borderRadius: 4,
-          yAxisID: 'y'
-        },
-        {
-          type: 'line',
-          label: 'Ad Spend',
-          data: series.map(s => Math.round(s.spend)),
-          borderColor: '#3b82f6',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          tension: 0.3,
-          pointRadius: 3,
-          pointBackgroundColor: '#3b82f6',
-          yAxisID: 'y'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': $' + ctx.raw.toLocaleString() } }
+function renderMainTrend(series) {
+  dc('mainTrend');
+  const isRevMode = window.trendMode === 'rev';
+  const legBox = $('trend-legend-box');
+  
+  if (isRevMode) {
+    legBox.innerHTML = `
+      <div class="leg"><div class="leg-sq" style="background-color:#0f3a5e"></div>Net Revenue</div>
+      <div class="leg"><div class="leg-sq" style="background-color:#3b82f6"></div>Ad Spend</div>
+    `;
+    charts.mainTrend = new Chart($('mainTrendC'), {
+      type: 'bar',
+      data: {
+        labels: series.map(s => s.label),
+        datasets: [
+          { label: 'Net Revenue', data: series.map(s => Math.round(s.net)), backgroundColor: '#0f3a5e', stack: 's' },
+          { label: 'Ad Spend', data: series.map(s => Math.round(s.spend)), backgroundColor: '#3b82f6', stack: 's' }
+        ]
       },
-      scales: {
-        x: { ticks: { color: tc, font: { size: 10 } }, grid: { display: false } },
-        y: { ticks: { color: tc, font: { size: 10 }, callback: v => '$' + v.toLocaleString() }, grid: { color: gc }, beginAtZero: true }
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            mode: 'index', intersect: false,
+            callbacks: {
+              label: ctx => {
+                const val = ctx.raw;
+                const total = ctx.chart.data.datasets[0].data[ctx.dataIndex] + ctx.chart.data.datasets[1].data[ctx.dataIndex];
+                if (ctx.datasetIndex === 1) {
+                   const rev = ctx.chart.data.datasets[0].data[ctx.dataIndex];
+                   const pct = rev > 0 ? (val / rev * 100).toFixed(1) : 0;
+                   return ` Ad Spend: $${val.toLocaleString()} (${pct}% of Rev)`;
+                }
+                return ` Net Revenue: $${val.toLocaleString()}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { stacked: true, ticks: { color: tc, font: { size: 10 } }, grid: { display: false } },
+          y: { stacked: true, ticks: { color: tc, font: { size: 10 }, callback: v => '$' + v.toLocaleString() }, grid: { color: gc } }
+        }
       }
-    }
-  });
-}
-
-function renderTrend(series){
-  dc('trend');
-  charts.trend=new Chart($('trendC'),{
-    data:{labels:series.map(s=>s.label),datasets:[
-      {type:'bar',label:'Spend (TWD)',data:series.map(s=>Math.round(s.spend)),backgroundColor:'rgba(59,130,246,.15)',borderRadius:2,yAxisID:'y'},
-      {type:'line',label:'ROI',data:series.map(s=>s.roi!==null?Math.round(s.roi*10)/10:null),borderColor:'#0f3a5e',backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:3,pointBackgroundColor:'#0f3a5e',yAxisID:'y2',spanGaps:true}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===0)return' Spend: $'+ctx.raw.toLocaleString();return' ROI: '+ctx.raw.toFixed(1)+'×';}}}},
-      scales:{
-        y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc},position:'left'},
-        y2:{ticks:{color:'#0f3a5e',font:{size:10,weight:700},callback:v=>v.toFixed(1)+'×'},grid:{display:false},position:'right'}
-      }}
-  });
+    });
+  } else {
+    legBox.innerHTML = `
+      <div class="leg"><div class="leg-line" style="background-color:#3b82f6"></div>Ad Spend</div>
+      <div class="leg"><div class="leg-line" style="background-color:#0f3a5e"></div>ROI / ROAS</div>
+    `;
+    charts.mainTrend = new Chart($('mainTrendC'), {
+      type: 'line',
+      data: {
+        labels: series.map(s => s.label),
+        datasets: [
+          { label: 'Ad Spend', data: series.map(s => Math.round(s.spend)), borderColor: '#3b82f6', backgroundColor: 'transparent', yAxisID: 'y', tension: 0.3, pointRadius: 4 },
+          { label: 'ROI', data: series.map(s => s.roi !== null ? Math.round(s.roi * 10) / 10 : null), borderColor: '#0f3a5e', backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, pointRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: tc, font: { size: 10 } }, grid: { display: false } },
+          y: { type: 'linear', display: true, position: 'left', ticks: { color: '#3b82f6', callback: v => '$' + v.toLocaleString() }, grid: { color: gc } },
+          y2: { type: 'linear', display: true, position: 'right', ticks: { color: '#0f3a5e', callback: v => v.toFixed(1) + '×' }, grid: { display: false } }
+        }
+      }
+    });
+  }
 }
 
 function renderStack(brandRows, targetBrands){
   dc('stack');
-  const labels = targetBrands, data = targetBrands.map(bn => { const brand = brandRows.find(b => b.brand === bn); return brand && brand.net !== null ? Math.round(brand.net) : 0; });
-  charts.stack=new Chart($('stackC'),{type:'bar',data:{labels,datasets:[{label:'Net Revenue',data: data,backgroundColor: BCOLORS.slice(0, targetBrands.length),borderRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' Net Revenue: $'+ctx.raw.toLocaleString()}}},
-      scales:{x:{ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gc}}}}});
+  const labels = targetBrands, data = targetBrands.map(bn => { const b = brandRows.find(x => x.brand === bn); return b ? Math.round(b.net) : 0; });
+  charts.stack=new Chart($('stackC'),{type:'bar',data:{labels,datasets:[{label:'Net Revenue',data,backgroundColor:'#0f3a5e',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:gc},ticks:{callback:v=>'$'+v.toLocaleString()}}}}});
 }
 
 function renderSpend(series){
   dc('spend');
-  const labels=series.map(s=>s.label);
-  const totals = series.map(s => s.ms + s.gs);
-  charts.spend=new Chart($('spendC'),{
-    type:'bar',
-    data:{
-      labels,
-      datasets:[
-        { label:'Meta', data:series.map(s=>Math.round(s.ms)), backgroundColor:'#0f3a5e', borderRadius:3, stack:'s' }, 
-        { label:'Google', data:series.map(s=>Math.round(s.gs)), backgroundColor:'#3b82f6', borderRadius:3, stack:'s' }
-      ]
-    },
-    plugins: [ChartDataLabels],
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{ callbacks:{ label:ctx=>' '+ctx.dataset.label+': $'+ctx.raw.toLocaleString() } },
-        datalabels: {
-          color: '#ffffff', font: { weight: 'bold', size: 10 },
-          formatter: (value, context) => {
-            if (value === 0) return '';
-            const total = totals[context.dataIndex];
-            const percentage = Math.round((value / total) * 100);
-            if (percentage > 5) { return percentage + '%'; } else { return ''; }
-          },
-          anchor: 'center', align: 'center'
-        }
-      },
-      scales:{
-        x:{ stacked:true, ticks:{color:tc,font:{size:10}}, grid:{display:false} },
-        y:{ stacked:true, ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()}, grid:{color:gc} }
-      }
-    }
-  });
+  charts.spend=new Chart($('spendC'),{type:'bar',data:{labels:series.map(s=>s.label),datasets:[{label:'Meta',data:series.map(s=>Math.round(s.ms)),backgroundColor:'#0f3a5e',stack:'s'},{label:'Google',data:series.map(s=>Math.round(s.gs)),backgroundColor:'#3b82f6',stack:'s'}]},plugins:[ChartDataLabels],options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{color:'#fff',font:{weight:'bold'},formatter:(v,ctx)=>{const t=ctx.chart.data.datasets[0].data[ctx.dataIndex]+ctx.chart.data.datasets[1].data[ctx.dataIndex];return v>0&&v/t>0.05?Math.round(v/t*100)+'%':'';}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:gc},ticks:{callback:v=>'$'+v.toLocaleString()}}}}});
 }
 
 function renderHeat(hd, tsKeys, dayCount){
-  const hc=v=>{
-    if(v===null)return'background:#f8fafc;color:#94a3b8';
-    if(v>=10)return'background:rgba(5,150,105,.2);color:#065f46';
-    if(v>=6)return'background:rgba(5,150,105,.1);color:#059669';
-    if(v>=3)return'background:rgba(217,119,6,.15);color:#b45309';
-    if(v>=1)return'background:rgba(217,119,6,.06);color:#d97706';
-    return'background:rgba(220,38,38,.12);color:#b91c1c';
-  };
-  const th='padding:10px 12px;color:var(--ink3);text-align:center;border-bottom:var(--bw) solid var(--rule2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;min-width:50px';
-  let h=`<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="${th};text-align:left;position:sticky;left:0;background:#fff;z-index:10;">Brand</th>`;
-  tsKeys.forEach(k=>{ const lbl = dayCount <= 31 ? k.slice(5).replace('-','/') : k.slice(5).replace('-','/') + '週'; h+=`<th style="${th}">${lbl}</th>`; });
+  const hc=v=>{ if(v===null)return'background:#f8fafc;color:#94a3b8'; if(v>=10)return'background:rgba(5,150,105,.2);color:#065f46'; if(v>=6)return'background:rgba(5,150,105,.1);color:#059669'; if(v>=3)return'background:rgba(217,119,6,.15);color:#b45309'; return'background:rgba(220,38,38,.12);color:#b91c1c'; };
+  let h=`<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:10px;text-align:left;position:sticky;left:0;background:#fff;z-index:10;">Brand</th>`;
+  tsKeys.forEach(k=>{ h+=`<th style="padding:10px;text-align:center;">${dayCount<=31?k.slice(5):k.slice(5)+'週'}</th>`; });
   h+='</tr></thead><tbody>';
-  hd.forEach(row=>{
-    h+=`<tr><td style="padding:8px 12px;color:var(--ink);font-weight:600;font-size:11px;white-space:nowrap;position:sticky;left:0;background:#fff;border-right:var(--bw) solid var(--rule);z-index:5;">${row.brand}</td>`;
-    row.vals.forEach(v=>{h+=`<td style="padding:6px 6px;text-align:center;border-bottom:var(--bw) solid var(--rule)"><div style="border-radius:4px;${hc(v)};font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:4px 0">${v!==null?v.toFixed(1)+'×':'—'}</div></td>`;});
-    h+='</tr>';
-  });
+  hd.forEach(row=>{ h+=`<tr><td style="padding:8px 12px;font-weight:600;position:sticky;left:0;background:#fff;border-right:0.5px solid var(--rule);z-index:5;">${row.brand}</td>`; row.vals.forEach(v=>{h+=`<td style="padding:4px;"><div style="border-radius:4px;text-align:center;padding:4px;${hc(v)}">${v!==null?v.toFixed(1)+'×':'—'}</div></td>`;}); h+='</tr>'; });
   $('heat-table').innerHTML=h+'</tbody></table>';
-  
-  const allVals=hd.flatMap(r=>r.vals.filter(v=>v!==null)), avg=allVals.length?allVals.reduce((s,v)=>s+v,0)/allVals.length:0;
-  const best=hd.reduce((b,r)=>{const mx=Math.max(...r.vals.filter(v=>v!==null),-Infinity);return mx>b.val?{brand:r.brand,val:mx}:b;},{brand:'',val:-Infinity});
-  $('heat-sum').innerHTML=`<div class="sum-item">Avg period ROI <strong>${avg>0?avg.toFixed(1)+'×':'—'}</strong></div><div class="sum-item">Best period <strong>${best.val>-Infinity?best.brand+' '+best.val.toFixed(1)+'×':'—'}</strong></div>`;
 }
 
 function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, currentMonthKpi){
-  const isBrand=dimMode==='brand';
-  const head=$('tbl-head'), tbody=$('tbl-body'), tfoot=$('tbl-foot');
+  const isBrand=dimMode==='brand'; const head=$('tbl-head'), tbody=$('tbl-body'), tfoot=$('tbl-foot');
+  const revHeaderName = F.media === 'all' ? 'Net Rev (E)' : 'Platform Rev';
   if(isBrand){
     head.innerHTML=`<tr>
       <th onclick="srt('brand')">Brand</th><th onclick="srt('days')">Days</th><th onclick="srt('clicks')">Clicks</th>
       <th onclick="srt('cpc')">CPC</th><th onclick="srt('ctr')">CTR%</th><th onclick="srt('purchases')">Purchases</th>
       <th onclick="srt('cvr')">CVR%</th><th onclick="srt('ms')">Meta $</th><th onclick="srt('gs')">Google $</th>
       <th onclick="srt('sp')">Total Spend</th><th onclick="srt('cac')">CAC</th><th onclick="srt('aov')">AOV</th>
-      <th onclick="srt('roi')">ROI</th><th onclick="srt('roas')">ROAS</th>
-      <th onclick="srt('net')">Net Rev (E)</th><th onclick="srt('gross')">Gross (B)</th><th onclick="srt('disc')">Discount (C)</th>
-      <th onclick="srt('disc_pct')">Disc%</th><th onclick="srt('ret')">Returns (D)</th><th onclick="srt('ret_pct')">Ret%</th><th>Status</th>
+      <th onclick="srt('roi')">ROI/ROAS</th>
+      <th onclick="srt('net')">${revHeaderName}</th><th onclick="srt('gross')">Gross (B)</th><th>Status</th>
     </tr>`;
     const sorted=[...brandRows].sort((a,b2)=>{
         const vA = a[sortKey] === null ? -1 : a[sortKey]; const vB = b2[sortKey] === null ? -1 : b2[sortKey];
@@ -1404,8 +1407,8 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
     tbody.innerHTML=sorted.map(b=>{
       const rv=b.roi!==null ? (b.roi>=5?'var(--ok)':b.roi>=2?'var(--warn)':'var(--red)') : 'var(--ink4)';
       let statusHtml = '';
-      if (b.net === null) { statusHtml = `<span class="tag tg">跨境前端指標</span>`; } 
-      else if (isSingleMonth) {
+      if (b.net === null) { statusHtml = `<span class="tag tg">無對應營收</span>`; } 
+      else if (isSingleMonth && F.media === 'all') {
         const bKpi = currentMonthKpi[b.brand] || {rev:0, roi:0};
         if (bKpi.rev > 0 || bKpi.roi > 0) {
           const expectedPct = periodDays / monthDays, revOnTrack = (b.net / bKpi.rev) >= expectedPct, roiOnTrack = b.roi >= bKpi.roi;
@@ -1429,49 +1432,17 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
         <td class="num" style="font-weight:600;color:var(--accent)">${b.cac>0?'$'+b.cac.toFixed(1):'—'}</td>
         <td class="num" style="font-weight:600;color:var(--accent)">${b.aov>0?'$'+Math.round(b.aov).toLocaleString():'—'}</td>
         <td class="num" style="color:${rv};font-weight:700">${b.roi!==null&&b.roi>0?b.roi.toFixed(2)+'×':'—'}</td>
-        <td class="num">${b.roas!==null&&b.roas>0?b.roas.toFixed(2)+'×':'—'}</td>
         <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
         <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--warn)">${b.disc!==null?'$'+Math.round(Math.abs(b.disc)).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--warn)">${b.disc_pct!==null?b.disc_pct.toFixed(2)+'%':'—'}</td>
-        <td class="num" style="color:var(--red)">${b.ret!==null?'$'+Math.round(Math.abs(b.ret)).toLocaleString():'—'}</td>
-        <td class="num" style="color:var(--red)">${b.ret_pct!==null?b.ret_pct.toFixed(2)+'%':'—'}</td>
         <td>${statusHtml}</td></tr>`;
     }).join('');
-    
-    const totClicks = brandRows.reduce((s,b)=>s+b.clicks,0), totPurchases = brandRows.reduce((s,b)=>s+(b.purchases||0),0);
-    const totMs = brandRows.reduce((s,b)=>s+b.ms,0), totGs = brandRows.reduce((s,b)=>s+b.gs,0), totSp = brandRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = brandRows.reduce((s,b)=>s+(b.net||0),0), totGross = brandRows.reduce((s,b)=>s+(b.gross||0),0);
-    const totDisc = brandRows.reduce((s,b)=>s+(b.disc||0),0), totRet = brandRows.reduce((s,b)=>s+(b.ret||0),0);
-    const totImpr = brandRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
-    const avgCpc = totClicks>0 ? totSp/totClicks : 0, avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
-    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0, avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgCac = totPurchases>0 ? totSp/totPurchases : 0, avgAov = totPurchases>0 ? totNet/totPurchases : 0;
-    const totAdRevBrand = brandRows.reduce((s,b)=>s+((b.roas||0)*b.sp),0), avgRoas = totSp>0 ? totAdRevBrand/totSp : 0;
-    const avgDiscPct = totGross>0 ? (Math.abs(totDisc)/totGross)*100 : 0, avgRetPct = totGross>0 ? (Math.abs(totRet)/totGross)*100 : 0;
-    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
-    tfoot.innerHTML=`<tr>
-      <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
-      <td class="num">${brandRows.length}</td><td class="num">${Math.round(totClicks).toLocaleString()}</td>
-      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td><td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
-      <td class="num">${Math.round(totPurchases).toLocaleString()}</td><td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
-      <td class="num">$${Math.round(totMs).toLocaleString()}</td><td class="num">$${Math.round(totGs).toLocaleString()}</td>
-      <td class="num">$${Math.round(totSp).toLocaleString()}</td>
-      <td class="num">${avgCac>0?'$'+avgCac.toFixed(1):'—'}</td><td class="num">${avgAov>0?'$'+Math.round(avgAov).toLocaleString():'—'}</td>
-      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
-      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
-      <td class="num">$${Math.round(totNet).toLocaleString()}</td><td class="num">$${Math.round(totGross).toLocaleString()}</td>
-      <td class="num">$${Math.round(Math.abs(totDisc)).toLocaleString()}</td><td class="num">${avgDiscPct.toFixed(2)}%</td>
-      <td class="num">$${Math.round(Math.abs(totRet)).toLocaleString()}</td><td class="num">${avgRetPct.toFixed(2)}%</td><td></td>
-    </tr>`;
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total Net Rev <strong>$${Math.round(totNet).toLocaleString()}</strong></div><div class="sum-item">Total Spend <strong>$${Math.round(totSp).toLocaleString()}</strong></div>`;
   } else {
     head.innerHTML=`<tr>
-      <th onclick="srtD('date')">Date</th><th onclick="srtD('clicks')">Clicks</th><th onclick="srtD('cpc')">CPC</th>
-      <th onclick="srtD('ctr')">CTR%</th><th onclick="srtD('purchases')">Purchases</th><th onclick="srtD('cvr')">CVR%</th>
-      <th onclick="srtD('ms')">Meta $</th><th onclick="srtD('gs')">Google $</th><th onclick="srtD('sp')">Total Spend</th>
+      <th onclick="srtD('date')">DATE</th><th onclick="srtD('clicks')">CLICKS</th><th onclick="srtD('cpc')">CPC</th>
+      <th onclick="srtD('ctr')">CTR%</th><th onclick="srtD('purchases')">PURCHASES</th><th onclick="srtD('cvr')">CVR%</th>
+      <th onclick="srtD('ms')">META $</th><th onclick="srtD('gs')">GOOGLE $</th><th onclick="srtD('sp')">TOTAL SPEND</th>
       <th onclick="srtD('cac')">CAC</th><th onclick="srtD('aov')">AOV</th>
-      <th onclick="srtD('roi')">ROI</th><th onclick="srtD('roas')">ROAS</th><th onclick="srtD('net')">Net Rev (E)</th><th onclick="srtD('gross')">Gross (B)</th>
+      <th onclick="srtD('roi')">ROI</th><th onclick="srtD('roas')">ROAS</th><th onclick="srtD('net')">${revHeaderName.toUpperCase()}</th><th onclick="srtD('gross')">GROSS (B)</th>
     </tr>`;
     const sortedD=[...dayRows].sort((a,b2)=>{
         const vA = a[sortKey] === null ? -1 : a[sortKey]; const vB = b2[sortKey] === null ? -1 : b2[sortKey];
@@ -1493,111 +1464,42 @@ function renderTable(brandRows, dayRows, isSingleMonth, monthDays, periodDays, c
         <td class="num" style="font-weight:600;color:var(--accent)">${b.net!==null?'$'+Math.round(b.net).toLocaleString():'—'}</td>
         <td class="num">${b.gross!==null?'$'+Math.round(b.gross).toLocaleString():'—'}</td></tr>`;
     }).join('');
-    
-    const totClicks = dayRows.reduce((s,b)=>s+b.clicks,0), totPurchases = dayRows.reduce((s,b)=>s+(b.purchases||0),0);
-    const totMs = dayRows.reduce((s,b)=>s+b.ms,0), totGs = dayRows.reduce((s,b)=>s+b.gs,0), totSp = dayRows.reduce((s,b)=>s+b.sp,0);
-    const totNet = dayRows.reduce((s,b)=>s+(b.net||0),0), totGross = dayRows.reduce((s,b)=>s+(b.gross||0),0);
-    const totImpr = dayRows.reduce((s,b)=>s+(b.clicks/(b.ctr/100)),0);
-    const avgCpc = totClicks>0 ? totSp/totClicks : 0, avgCtr = totImpr>0 ? (totClicks/totImpr)*100 : 0;
-    const avgCvr = totClicks>0 ? (totPurchases/totClicks)*100 : 0, avgRoi = totSp>0 ? totNet/totSp : 0;
-    const avgCac = totPurchases>0 ? totSp/totPurchases : 0, avgAov = totPurchases>0 ? totNet/totPurchases : 0;
-    const totAdRevDay = dayRows.reduce((s,b)=>s+((b.roas||0)*b.sp),0), avgRoas = totSp>0 ? totAdRevDay/totSp : 0;
-    const totRv=avgRoi>=5?'var(--ok)':avgRoi>=2?'var(--warn)':'var(--red)';
-    
-    tfoot.innerHTML=`<tr>
-      <td style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.8px">TOTAL</td>
-      <td class="num">${Math.round(totClicks).toLocaleString()}</td>
-      <td class="num">${avgCpc>0?'$'+avgCpc.toFixed(1):'—'}</td><td class="num">${avgCtr>0?avgCtr.toFixed(2)+'%':'—'}</td>
-      <td class="num">${Math.round(totPurchases).toLocaleString()}</td><td class="num">${avgCvr>0?avgCvr.toFixed(2)+'%':'—'}</td>
-      <td class="num">$${Math.round(totMs).toLocaleString()}</td><td class="num">$${Math.round(totGs).toLocaleString()}</td>
-      <td class="num">$${Math.round(totSp).toLocaleString()}</td>
-      <td class="num">${avgCac>0?'$'+avgCac.toFixed(1):'—'}</td><td class="num">${avgAov>0?'$'+Math.round(avgAov).toLocaleString():'—'}</td>
-      <td class="num" style="color:${totRv};font-weight:700">${avgRoi>0?avgRoi.toFixed(2)+'×':'—'}</td>
-      <td class="num">${avgRoas>0?avgRoas.toFixed(2)+'×':'—'}</td>
-      <td class="num">$${Math.round(totNet).toLocaleString()}</td><td class="num">$${Math.round(totGross).toLocaleString()}</td>
-    </tr>`;
-    $('tbl-sum').innerHTML=`<div class="sum-item">Total days <strong>${dayRows.length}</strong></div><div class="sum-item">Total Net Rev <strong>$${Math.round(totNet).toLocaleString()}</strong></div>`;
   }
-  document.querySelectorAll('#main-table thead th').forEach(th=>th.classList.remove('sa','sd'));
 }
 
 function srt(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
 function srtD(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=-1;}render();}
 
-/* Modal Actions */
 function openSettings() { $('inp-meta').value = CONFIG.metaId; $('inp-gads').value = CONFIG.gadsId; $('inp-sales').value = CONFIG.salesId; $('settings-modal').classList.add('show'); }
 function closeSettings() { $('settings-modal').classList.remove('show'); }
-function saveSettings() {
-  CONFIG.metaId = $('inp-meta').value.trim(); CONFIG.gadsId = $('inp-gads').value.trim(); CONFIG.salesId = $('inp-sales').value.trim();
-  localStorage.setItem('emers_meta_id', CONFIG.metaId);
-  localStorage.setItem('emers_gads_id', CONFIG.gadsId); localStorage.setItem('emers_sales_id', CONFIG.salesId);
-  closeSettings(); loadData();
-}
-
-function openKpiSettings() {
-  const isSingleMonth = F.dateFrom && F.dateTo && (F.dateFrom.substring(0,7) === F.dateTo.substring(0,7));
-  const currentM = isSingleMonth ? F.dateFrom.substring(0,7) : new Date().toISOString().substring(0,7);
-  $('kpi-month-selector').value = currentM; renderKpiForm(currentM); $('kpi-modal').classList.add('show');
-}
+function saveSettings() { CONFIG.metaId = $('inp-meta').value.trim(); CONFIG.gadsId = $('inp-gads').value.trim(); CONFIG.salesId = $('inp-sales').value.trim(); localStorage.setItem('emers_meta_id', CONFIG.metaId); localStorage.setItem('emers_gads_id', CONFIG.gadsId); localStorage.setItem('emers_sales_id', CONFIG.salesId); closeSettings(); loadData(); }
+function openKpiSettings() { const currentM = F.dateFrom ? F.dateFrom.substring(0,7) : new Date().toISOString().substring(0,7); $('kpi-month-selector').value = currentM; renderKpiForm(currentM); $('kpi-modal').classList.add('show'); }
 function changeKpiMonth() { const m = $('kpi-month-selector').value; if (m) renderKpiForm(m); }
-function renderKpiForm(monthStr) {
-  const mKpi = getMonthKpi(monthStr);
-  let html = '';
-  BRANDS.forEach(b => {
-    const rev = mKpi[b]?.rev || 0, roi = mKpi[b]?.roi || 0;
-    html += `<div style="border-bottom:var(--bw) solid var(--rule); padding-bottom:12px; margin-bottom:12px;">
-        <label style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;display:block">${b}</label>
-        <div style="display:flex;gap:12px;">
-          <div class="form-group" style="flex:1"><label>Net Revenue KPI ($)</label><input type="number" id="kpi-rev-${b.replace(/[\/ ]/g,'_')}" value="${rev}"></div>
-          <div class="form-group" style="flex:1"><label>ROI KPI (×)</label><input type="number" step="0.1" id="kpi-roi-${b.replace(/[\/ ]/g,'_')}" value="${roi}"></div>
-        </div></div>`;
-  });
-  $('kpi-form-content').innerHTML = html;
-}
+function renderKpiForm(monthStr) { const mKpi = getMonthKpi(monthStr); let html = ''; BRANDS.forEach(b => { const rev = mKpi[b]?.rev || 0, roi = mKpi[b]?.roi || 0; html += `<div style="border-bottom:0.5px solid var(--rule); padding-bottom:12px; margin-bottom:12px;"><label style="font-size:13px;font-weight:700;color:var(--accent);">${b}</label><div style="display:flex;gap:12px;"><div class="form-group" style="flex:1"><label>Net Revenue KPI</label><input type="number" id="kpi-rev-${b.replace(/[\/ ]/g,'_')}" value="${rev}"></div><div class="form-group" style="flex:1"><label>ROI KPI</label><input type="number" step="0.1" id="kpi-roi-${b.replace(/[\/ ]/g,'_')}" value="${roi}"></div></div></div>`; }); $('kpi-form-content').innerHTML = html; }
 function closeKpiSettings() { $('kpi-modal').classList.remove('show'); }
-function saveKpiSettings() {
-  const m = $('kpi-month-selector').value; if (!m) return;
-  if (!KPI_DATA[m]) KPI_DATA[m] = {};
-  BRANDS.forEach(b => { KPI_DATA[m][b] = { rev: parseFloat($(`kpi-rev-${b.replace(/[\/ ]/g,'_')}`).value) || 0, roi: parseFloat($(`kpi-roi-${b.replace(/[\/ ]/g,'_')}`).value) || 0 }; });
-  localStorage.setItem('emers_kpis_v2', JSON.stringify(KPI_DATA));
-  closeKpiSettings(); if(RAW.meta.length) render();
-}
+function saveKpiSettings() { const m = $('kpi-month-selector').value; if (!m) return; if (!KPI_DATA[m]) KPI_DATA[m] = {}; BRANDS.forEach(b => { KPI_DATA[m][b] = { rev: parseFloat($(`kpi-rev-${b.replace(/[\/ ]/g,'_')}`).value) || 0, roi: parseFloat($(`kpi-roi-${b.replace(/[\/ ]/g,'_')}`).value) || 0 }; }); localStorage.setItem('emers_kpis_v2', JSON.stringify(KPI_DATA)); closeKpiSettings(); render(); }
 
 async function loadData(){
-  showStatus('loading','Syncing Meta, Google & Sales sheets simultaneously...');
+  showStatus('loading','Syncing Sheets...');
   const urlMeta = `https://docs.google.com/spreadsheets/d/${CONFIG.metaId}/gviz/tq?tqx=out:csv&sheet=metaads_by_brand_contry`;
   const urlGads = `https://docs.google.com/spreadsheets/d/${CONFIG.gadsId}/gviz/tq?tqx=out:csv&sheet=gads_by+brand_contry`;
   const urlSales = `https://docs.google.com/spreadsheets/d/${CONFIG.salesId}/gviz/tq?tqx=out:csv&sheet=all+brand+sale`;
-
   try{
     const [rM,rG,rS]=await Promise.all([csv(urlMeta),csv(urlGads),csv(urlSales)]);
-    RAW.meta=parseMeta(rM);RAW.gads=parseGads(rG);RAW.sales=parseSales(rS);
-    if(RAW.meta.length+RAW.gads.length+RAW.sales.length===0){ showStatus('error',`Parsed 0 records.`); return; }
-    
+    RAW.meta=parseMeta(rM); RAW.gads=parseGads(rG); RAW.sales=parseSales(rS);
     brandToCountries = {}; countryToBrands = {};
     [...RAW.meta, ...RAW.gads, ...RAW.sales].forEach(r => {
-      if (!r.brand || !r.country) return;
-      (r.countries || [r.country]).forEach(c => {
-        if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) {
-          if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set(); brandToCountries[r.brand].add(c);
-          if (!countryToBrands[c]) countryToBrands[c] = new Set(); countryToBrands[c].add(r.brand);
-        }
-      });
+      if (!r.brand || !r.country) return; (r.countries || [r.country]).forEach(c => { if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) { if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set(); brandToCountries[r.brand].add(c); if (!countryToBrands[c]) countryToBrands[c] = new Set(); countryToBrands[c].add(r.brand); } });
     });
     for(let b in brandToCountries) brandToCountries[b] = Array.from(brandToCountries[b]);
     for(let c in countryToBrands) countryToBrands[c] = Array.from(countryToBrands[c]);
-    
-    const now=new Date().toLocaleString('zh-TW');
-    $('last-upd').textContent=now;
-    $('footer-ts').textContent='Last sync  '+now;
-    showStatus('ok',`✅ 成功同步！ Meta表: ${RAW.meta.length} 筆 · Google表: ${RAW.gads.length} 筆 · Sales表: ${RAW.sales.length} 筆`);
-    
-    render();
-    if(timer)clearInterval(timer);timer=setInterval(loadData,5*60*1000);
+    const now=new Date().toLocaleString('zh-TW'); $('last-upd').textContent=now; $('footer-ts').textContent='Last sync '+now;
+    showStatus('ok',`✅ Synced: Meta(${RAW.meta.length}), Google(${RAW.gads.length}), Sales(${RAW.sales.length})`);
+    render(); if(timer)clearInterval(timer); timer=setInterval(loadData,5*60*1000);
   }catch(e){showStatus('error','Load failed: '+e.message);}
 }
 
-F.dateFrom=daysAgo(7);F.dateTo=daysAgo(1);
+F.dateFrom=daysAgo(7); F.dateTo=daysAgo(1);
 loadData();
 </script>
 </body>
