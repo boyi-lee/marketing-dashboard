@@ -700,27 +700,8 @@ Chart.defaults.plugins.tooltip.padding = 10;
 Chart.defaults.plugins.tooltip.cornerRadius = 6;
 Chart.defaults.plugins.tooltip.displayColors = true;
 
-// --- 權限控管邏輯開始 ---
-const params = new URLSearchParams(window.location.search);
-const viewToken = params.get('view');
-
-const ACCESS_CONFIG = {
-  '2xu_partner_2026': {
-    allowedBrands: ['2XU TW', '2XU HK'],
-    hideSettings: true
-  }
-};
-const currentAccess = ACCESS_CONFIG[viewToken];
-window.RESTRICTED_MODE = !!currentAccess;
-
-// 注意：將 const 改為 let，讓系統可以根據權限覆寫
-let BRANDS = ['Descente','ASH GOLF','G/FORE','Callaway','2XU HK','2XU TW','K-SWISS','Palladium'];
-
-// 如果有觸發 Token，強制複寫全域品牌清單
-if (window.RESTRICTED_MODE) {
-  BRANDS = currentAccess.allowedBrands;
-}
-// --- 權限控管邏輯結束 ---
+// 代理商專屬版本：強制鎖定僅支援 2XU
+const BRANDS = ['2XU HK', '2XU TW'];
 
 const KNOWN_COUNTRIES = ['TW', 'HK', 'SG', 'MY'];
 // STRICT BLUE COLOR CONSTRAINT (Only Corporate Navy #0f3a5e and Vivid Blue #3b82f6)
@@ -1506,8 +1487,13 @@ async function loadData(){
   const urlGads = `https://docs.google.com/spreadsheets/d/${CONFIG.gadsId}/gviz/tq?tqx=out:csv&sheet=gads_by+brand_contry`;
   const urlSales = `https://docs.google.com/spreadsheets/d/${CONFIG.salesId}/gviz/tq?tqx=out:csv&sheet=all+brand+sale`;
   try{
-    const [rM,rG,rS]=await Promise.all([csv(urlMeta),csv(urlGads),csv(urlSales)]);
-    RAW.meta=parseMeta(rM); RAW.gads=parseGads(rG); RAW.sales=parseSales(rS);
+ const [rM,rG,rS]=await Promise.all([csv(urlMeta),csv(urlGads),csv(urlSales)]);
+    
+    // 核心安全機制：資料一解析完，立刻在記憶體中刪除所有非 2XU 的數據
+    RAW.meta = parseMeta(rM).filter(r => BRANDS.includes(r.brand)); 
+    RAW.gads = parseGads(rG).filter(r => BRANDS.includes(r.brand)); 
+    RAW.sales = parseSales(rS).filter(r => BRANDS.includes(r.brand));
+    
     brandToCountries = {}; countryToBrands = {};
     [...RAW.meta, ...RAW.gads, ...RAW.sales].forEach(r => {
       if (!r.brand || !r.country) return; (r.countries || [r.country]).forEach(c => { if (KNOWN_COUNTRIES.includes(c) && BRANDS.includes(r.brand)) { if (!brandToCountries[r.brand]) brandToCountries[r.brand] = new Set(); brandToCountries[r.brand].add(c); if (!countryToBrands[c]) countryToBrands[c] = new Set(); countryToBrands[c].add(r.brand); } });
@@ -1520,31 +1506,20 @@ async function loadData(){
   }catch(e){showStatus('error','Load failed: '+e.message);}
 }
 
-// --- 權限 UI 隱藏函式 ---
-function applySecurityUI() {
-  if (window.RESTRICTED_MODE) {
-    // 隱藏品牌與市場篩選器 (防止點選)
-    if($('cg-brand')) $('cg-brand').style.display = 'none';
-    if($('cg-market')) $('cg-market').style.display = 'none';
-    
-    // 隱藏設定按鈕（防止代理商看到 Google Sheet ID 或修改 KPI）
-    const btns = document.querySelectorAll('header .btn');
-    btns.forEach(btn => {
-      if(btn.textContent.includes('Data Sources') || btn.textContent.includes('KPI Targets')) {
-        btn.style.display = 'none';
-      }
-    });
-    
-    // 強制設定初始篩選值為允許的品牌，防止被預設的 'all' 蓋掉
-    F.brand = currentAccess.allowedBrands;
-    F.country = ['all'];
+// --- 強制隱藏敏感 UI ---
+if($('cg-brand')) $('cg-brand').style.display = 'none';
+if($('cg-market')) $('cg-market').style.display = 'none';
+document.querySelectorAll('header .btn').forEach(btn => {
+  if(btn.textContent.includes('Data Sources') || btn.textContent.includes('KPI Targets')) {
+    btn.style.display = 'none';
   }
-}
+});
 
-F.dateFrom=daysAgo(7); F.dateTo=daysAgo(1);
-
-// 在載入資料前執行 UI 隱藏與參數強制覆寫
-applySecurityUI(); 
+// 強制綁定預設值
+F.brand = BRANDS;
+F.country = ['all'];
+F.dateFrom = daysAgo(7); 
+F.dateTo = daysAgo(1);
 
 loadData();
 </script>
